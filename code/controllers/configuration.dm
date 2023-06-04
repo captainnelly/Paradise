@@ -276,6 +276,9 @@
 	/// Webhook URLs for the admin webhook
 	var/list/discord_admin_webhook_urls = list()
 
+	/// Webhook URLs for the requests webhook
+	var/list/discord_requests_webhook_urls = list()
+
 	/// Webhook URLs for the mentor webhook
 	var/list/discord_mentor_webhook_urls = list()
 
@@ -839,6 +842,8 @@
 					discord_main_webhook_urls = splittext(value, "|")
 				if("discord_webhooks_admin_url")
 					discord_admin_webhook_urls = splittext(value, "|")
+				if("discord_webhooks_requests_url")
+					discord_requests_webhook_urls = splittext(value, "|")
 				if("discord_webhooks_mentor_url")
 					discord_mentor_webhook_urls = splittext(value, "|")
 				if("discord_forward_all_ahelps")
@@ -873,8 +878,11 @@
 				if("tts_token_silero")
 					tts_token_silero = value
 
+				if("tts_url_silero")
+					tts_url_silero = value
+
 				if("tts_enabled")
-					config.tts_enabled = tts_token_silero ? TRUE : FALSE
+					config.tts_enabled = tts_token_silero && tts_url_silero ? TRUE : FALSE
 
 				if("tts_cache")
 					config.tts_cache = TRUE
