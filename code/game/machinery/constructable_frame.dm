@@ -288,7 +288,6 @@ to destroy them and players will be able to make replacements.
 		/obj/machinery/vending/clothing/departament/science = "Departament Science ClothesMate",
 		/obj/machinery/vending/clothing/departament/cargo = "Departament Cargo ClothesMate",
 		/obj/machinery/vending/clothing/departament/law = "Departament Law ClothesMate",
-		/obj/machinery/vending/clothing/departament/service = "Service Departament ClothesMate",
 		/obj/machinery/vending/clothing/departament/service/botanical = "Service Departament ClothesMate Botanical",
 		/obj/machinery/vending/clothing/departament/service/chaplain = "Service Departament ClothesMate Chaplain")
 
@@ -321,6 +320,15 @@ to destroy them and players will be able to make replacements.
 							/obj/item/stack/cable_coil = 5,
 							/obj/item/stock_parts/cell = 5,
 							/obj/item/stock_parts/capacitor = 1)
+
+/obj/item/circuitboard/smes/vintage
+	name = "circuit board (SMES)"
+	build_path = /obj/machinery/power/smes/vintage
+	origin_tech = "programming=2;powerstorage=2;engineering=2"
+	req_components = list(
+							/obj/item/stack/cable_coil = 7,
+							/obj/item/stock_parts/cell = 7,
+							/obj/item/stock_parts/capacitor = 3)
 
 /obj/item/circuitboard/emitter
 	name = "circuit board (Emitter)"
