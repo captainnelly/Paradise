@@ -54,7 +54,7 @@
 		var/mob/living/carbon/human/H = user
 		H.update_head(src, forced = TRUE)
 		if(H.wear_mask == src)
-			H.wear_mask_update(src)
+			H.wear_mask_update(src, FALSE)
 	for(var/X in actions)
 		var/datum/action/A = X
 		A.UpdateButtonIcon()
@@ -423,6 +423,10 @@ BLIND     // can't see anything
 		var/datum/action/A = X
 		A.UpdateButtonIcon()
 
+// Changes the speech verb when wearing a mask if a value is returned
+/obj/item/clothing/mask/proc/change_speech_verb()
+    return
+
 //Shoes
 /obj/item/clothing/shoes
 	name = "shoes"
@@ -445,6 +449,9 @@ BLIND     // can't see anything
 	sprite_sheets = list(
 		"Vox" = 'icons/mob/species/vox/shoes.dmi',
 		"Unathi" = 'icons/mob/species/unathi/shoes.dmi',
+		"Ash Walker" = 'icons/mob/species/unathi/shoes.dmi',
+		"Ash Walker Shaman" = 'icons/mob/species/unathi/shoes.dmi',
+		"Draconid" = 'icons/mob/species/unathi/shoes.dmi',
 		"Drask" = 'icons/mob/species/drask/shoes.dmi',
 		"Monkey" = 'icons/mob/species/monkey/shoes.dmi',
 		"Farwa" = 'icons/mob/species/monkey/shoes.dmi',
@@ -708,6 +715,9 @@ BLIND     // can't see anything
 	sprite_sheets = list(
 		"Vox" = 'icons/mob/species/vox/uniform.dmi',
 		"Unathi" = 'icons/mob/species/unathi/uniform.dmi',
+		"Ash Walker" = 'icons/mob/species/unathi/uniform.dmi',
+		"Ash Walker Shaman" = 'icons/mob/species/unathi/uniform.dmi',
+		"Draconid" = 'icons/mob/species/unathi/uniform.dmi',
 		"Drask" = 'icons/mob/species/drask/uniform.dmi',
 		"Grey" = 'icons/mob/species/grey/uniform.dmi',
 		"Monkey" = 'icons/mob/species/monkey/uniform.dmi',

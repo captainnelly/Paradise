@@ -280,7 +280,7 @@
 	stop_pulling()
 
 //same as above
-/mob/living/pointed(atom/A as mob|obj|turf)
+/mob/living/pointed(atom/A as mob|obj|turf in view(client.maxview()))
 	if(incapacitated(ignore_lying = TRUE))
 		return FALSE
 	if(HAS_TRAIT(src, TRAIT_FAKEDEATH))
@@ -630,11 +630,11 @@
 				if(ishuman(pulling))
 					var/mob/living/carbon/human/H = pulling
 					if(!H.lying)
-						if(H.get_confusion() > 0 && prob(4))
+						if(H.get_confusion() > 0 && m_intent != MOVE_INTENT_WALK && prob(4))
 							H.Weaken(4 SECONDS)
 							pulling.stop_pulling()
 							visible_message(span_danger("Ноги [H] путаются и [genderize_ru(H.gender,"он","она","оно","они")] с грохотом падает на пол!"))
-						if(H.m_intent == MOVE_INTENT_WALK && prob(4))
+						if(H.m_intent == MOVE_INTENT_WALK && m_intent != MOVE_INTENT_WALK && prob(4))
 							H.Weaken(4 SECONDS)
 							visible_message(span_danger("[H] не поспевает за [src] и с грохотом падает на пол!"))
 			else
@@ -1206,6 +1206,11 @@
 			update_transform()
 		if("lighting_alpha")
 			sync_lighting_plane_alpha()
+
+
+/mob/living/throw_at(atom/target, range, speed, mob/thrower, spin, diagonals_first, datum/callback/callback, force)
+	stop_pulling()
+	return ..()
 
 
 GLOBAL_LIST_INIT(ventcrawl_machinery, list(/obj/machinery/atmospherics/unary/vent_pump, /obj/machinery/atmospherics/unary/vent_scrubber))

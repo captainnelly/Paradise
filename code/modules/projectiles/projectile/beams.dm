@@ -20,7 +20,7 @@
 /obj/item/projectile/beam/laser/heavylaser
 	name = "heavy laser"
 	icon_state = "heavylaser"
-	damage = 40
+	damage = 50
 	hitsound = 'sound/weapons/resonator_blast.ogg'
 
 /obj/item/projectile/beam/laser/slug
@@ -41,7 +41,7 @@
 	damage = 5
 
 /obj/item/projectile/beam/xray
-	name = "xray beam"
+	name = "x-ray beam"
 	icon_state = "xray"
 	damage = 10
 	hitsound = 'sound/weapons/plasma_cutter.ogg'

@@ -1,3 +1,12 @@
+#define THEFT_FLAG_HIGHRISK 	1
+#define THEFT_FLAG_UNIQUE 		2
+#define THEFT_FLAG_HARD 		3
+#define THEFT_FLAG_MEDIUM 		4
+#define THEFT_FLAG_STRUCTURE	5
+#define THEFT_FLAG_ANIMAL		6
+#define THEFT_FLAG_COLLECT 		7
+
+
 GLOBAL_LIST_EMPTY(all_objectives)
 
 /// Stores objective [names][/datum/objective/var/name] as list keys, and their corresponding typepaths as list values.
@@ -114,12 +123,9 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	for(var/datum/mind/possible_target in SSticker.minds)
 		if(is_invalid_target(possible_target) || (possible_target in target_blacklist))
 			continue
-		//possible_targets[possible_target.assigned_role] += list(possible_target)
-		possible_targets += possible_target
+		possible_targets |= possible_target
 
-	if(possible_targets.len > 0)
-		//var/target_role = pick(possible_targets)
-		//target = pick(possible_targets[target_role])
+	if(length(possible_targets))
 		target = pick(possible_targets)
 
 	SEND_SIGNAL(src, COMSIG_OBJECTIVE_TARGET_FOUND, target)
@@ -166,21 +172,6 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	if(check_silicon && issilicon(target_current))
 		return TRUE
 	return isbrain(target_current) || istype(target_current, /mob/living/simple_animal/spiderbot)
-
-
-/datum/objective/proc/remember_objective(datum/mind/remembering_one)
-	if(istype(src, /datum/objective/steal))
-		var/datum/objective/steal/steal_objective = src
-		if(!steal_objective.steal_target)
-			return
-
-		remembering_one.targets |= "[steal_objective.steal_target.name]"
-		return
-
-	if(!target?.current)
-		return
-
-	remembering_one.targets |= "[target]"
 
 
 /datum/objective/assassinate
@@ -343,6 +334,7 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 
 
 /datum/objective/protect //The opposite of killing a dude.
+	name = "Protect"
 	martyr_compatible = TRUE
 
 
@@ -520,23 +512,26 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 
 
 /datum/objective/escape/escape_with_identity
-	name = null
+	name = "Escape With Identity"
+	needs_target = TRUE
 	/// Stored because the target's `[mob/var/real_name]` can change over the course of the round.
 	var/target_real_name
 	/// If the objective has an special objective tied to it.
-	var/has_special_objective = FALSE
+	var/datum/objective/special_objective
 
 
-/datum/objective/escape/escape_with_identity/New(text, datum/team/team_to_join, datum/objective/special_objective)
+/datum/objective/escape/escape_with_identity/New(text, datum/team/team_to_join, datum/objective/_special_objective)
 	..()
-	if(!special_objective)
+	if(!_special_objective)
 		return
-	target = special_objective.target
-	target_real_name = special_objective.target.current.real_name
-	explanation_text = "Escape on the shuttle or an escape pod with the identity of [target_real_name], the [target.assigned_role] while wearing [target.p_their()] identification card."
-	has_special_objective = TRUE
+	special_objective = _special_objective
 	RegisterSignal(special_objective, COMSIG_OBJECTIVE_TARGET_FOUND, PROC_REF(special_objective_found_target))
 	RegisterSignal(special_objective, COMSIG_OBJECTIVE_CHECK_VALID_TARGET, PROC_REF(special_objective_checking_target))
+
+
+/datum/objective/escape/escape_with_identity/Destroy(force, ...)
+	special_objective = null
+	return ..()
 
 
 /datum/objective/escape/escape_with_identity/is_invalid_target(datum/mind/possible_target)
@@ -547,7 +542,11 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 
 
 /datum/objective/escape/escape_with_identity/find_target(list/target_blacklist)
-	..()
+	if(special_objective?.target)
+		target = special_objective.target
+	else
+		..()
+
 	if(target && target.current)
 		target_real_name = target.current.real_name
 		explanation_text = "Escape on the shuttle or an escape pod with the identity of [target_real_name], the [target.assigned_role] while wearing [target.p_their()] identification card."
@@ -565,22 +564,20 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 
 /datum/objective/escape/escape_with_identity/proc/special_objective_found_target(datum/source, datum/mind/new_target)
 	SIGNAL_HANDLER
-	if(new_target)
-		target_real_name = new_target.current.real_name
-		return
-	// The special objective was unable to find a new target after the old one cryo'd as was qdel'd. We're on our own.
+	if(!new_target)
+		// The special objective was unable to find a new target after the old one cryo'd as was qdel'd. We're on our own.
+		special_objective = null
 	find_target()
-	has_special_objective = FALSE
 
 
 /datum/objective/escape/escape_with_identity/on_target_cryo()
-	if(has_special_objective)
+	if(special_objective)
 		return // Our special objective will handle this.
 	..()
 
 
 /datum/objective/escape/escape_with_identity/post_target_cryo()
-	if(has_special_objective)
+	if(special_objective)
 		return // Our special objective will handle this.
 	..()
 
@@ -650,25 +647,27 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	name = "Steal Item"
 	var/datum/theft_objective/steal_target
 	martyr_compatible = FALSE
-	var/theft_area
-	var/type_theft_flag = 0
+	var/type_theft_flag = THEFT_FLAG_HIGHRISK
 
 
-/datum/objective/steal/proc/get_theft_extension_list_objectives()
-	return FALSE
-
-
-/datum/objective/steal/proc/get_location()
-	if(steal_target.location_override)
-		return steal_target.location_override
-
-	var/list/obj/item/steal_candidates = get_all_of_type(steal_target.typepath, subtypes = TRUE)
-	for(var/obj/item/candidate in steal_candidates)
-		if(!is_admin_level(candidate.loc.z))
-			theft_area = get_area(candidate.loc)
-			return "[theft_area]"
-
-	return "неизвестной зоне"
+/datum/objective/steal/proc/get_theft_list_objectives(type_theft_flag)
+	switch(type_theft_flag)
+		if(THEFT_FLAG_HIGHRISK)
+			return GLOB.potential_theft_objectives
+		if(THEFT_FLAG_HARD)
+			return GLOB.potential_theft_objectives_hard
+		if(THEFT_FLAG_MEDIUM)
+			return GLOB.potential_theft_objectives_medium
+		if(THEFT_FLAG_COLLECT)
+			return GLOB.potential_theft_objectives_collect
+		if(THEFT_FLAG_UNIQUE)
+			return subtypesof(/datum/theft_objective/unique)
+		if(THEFT_FLAG_STRUCTURE)
+			return GLOB.potential_theft_objectives_structure
+		if(THEFT_FLAG_ANIMAL)
+			return GLOB.potential_theft_objectives_animal
+		else
+			return GLOB.potential_theft_objectives
 
 
 /datum/objective/steal/find_target(list/target_blacklist)
@@ -680,7 +679,7 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 
 		var/has_invalid_owner = FALSE
 		for(var/datum/mind/player in get_owners())
-			if((player.assigned_role in new_theft_objective.protected_jobs) || (new_theft_objective in player.targets))
+			if((player.assigned_role in new_theft_objective.protected_jobs))
 				has_invalid_owner = TRUE
 				break
 
@@ -690,16 +689,11 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 		if(!new_theft_objective.check_objective_conditions())
 			continue
 
-		if((owner.assigned_role in new_theft_objective.protected_jobs))
-			continue
-
-		if(new_theft_objective in target_blacklist)
+		if(new_theft_objective.id in target_blacklist)
 			continue
 
 		steal_target = new_theft_objective
-		explanation_text = "Украсть [steal_target.name]. Последнее местоположение было в [get_location()]. "
-		if(length(new_theft_objective.protected_jobs) && new_theft_objective.job_possession)
-			explanation_text += "Оно также может находиться у [jointext(new_theft_objective.protected_jobs, ", ")]."
+		steal_target.generate_explanation_text(src)
 
 		if(steal_target.special_equipment)
 			give_kit(steal_target.special_equipment)
@@ -710,8 +704,16 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	return FALSE
 
 
+/datum/objective/steal/check_completion()
+	if(!steal_target)
+		return TRUE // Free Objective
+	return steal_target.check_completion(get_owners())
+
+
 /datum/objective/steal/proc/select_target()
-	var/list/possible_items_all = get_theft_list_objectives(type_theft_flag)+"custom"
+	var/list/possible_items_all = get_theft_list_objectives(type_theft_flag)
+	if(type_theft_flag == THEFT_FLAG_HIGHRISK)
+		possible_items_all |= "custom"
 	var/new_target = input("Select target:", "Objective target", null) as null|anything in possible_items_all
 	if(!new_target)
 		return FALSE
@@ -730,26 +732,11 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 		explanation_text = "Украсть [O.name]."
 	else
 		steal_target = new new_target
-		explanation_text = "Украсть [steal_target.name]."
+		steal_target.generate_explanation_text(src)
 		if(steal_target.special_equipment)
 			give_kit(steal_target.special_equipment)
 	if(steal_target)
 		return TRUE
-	return FALSE
-
-
-/datum/objective/steal/check_completion()
-	if(!steal_target)
-		return TRUE // Free Objective
-
-	for(var/datum/mind/player in get_owners())
-		if(!player.current)
-			continue
-
-		for(var/obj/item in player.current.GetAllContents())
-			if((istype(item, steal_target.typepath) || (item.type in steal_target.altitems)) && steal_target.check_special_completion(item))
-				return TRUE
-
 	return FALSE
 
 
@@ -772,6 +759,26 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 			to_chat(human_owner, span_userdanger("Unfortunately, you weren't able to get a stealing kit. This is very bad and you should adminhelp immediately (press F1)."))
 			message_admins("[ADMIN_LOOKUPFLW(human_owner)] Failed to spawn with their [item_path] theft kit.")
 			qdel(item)
+
+
+/datum/objective/steal/hard
+	type_theft_flag = THEFT_FLAG_HARD
+
+
+/datum/objective/steal/medium
+	type_theft_flag = THEFT_FLAG_MEDIUM
+
+
+/datum/objective/steal/structure
+	type_theft_flag = THEFT_FLAG_STRUCTURE
+
+
+/datum/objective/steal/animal
+	type_theft_flag = THEFT_FLAG_ANIMAL
+
+
+/datum/objective/steal/collect
+	type_theft_flag = THEFT_FLAG_COLLECT
 
 
 /datum/objective/steal/exchange
@@ -1345,7 +1352,7 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	for(var/mob/living/player in GLOB.alive_mob_list)
 		if(player.client && player.mind && player.stat != DEAD && player != target.current)
 			if((ishuman(player) && !player.mind.special_role) || (isAI(player) && !player.mind.special_role))
-				if(player.client && (ROLE_TRAITOR in player.client.prefs.be_special) && !jobban_isbanned(player, ROLE_TRAITOR) && !jobban_isbanned(player, "Syndicate"))
+				if(player.client && (ROLE_TRAITOR in player.client.prefs.be_special) && !jobban_isbanned(player, ROLE_TRAITOR) && !jobban_isbanned(player, ROLE_SYNDICATE))
 					possible_traitors += player.mind
 	for(var/datum/mind/player in possible_traitors)
 		if(player.current)
@@ -1364,7 +1371,7 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 			if(killer_maroon_objective)
 				killer_maroon_objective.target = target
 				killer_maroon_objective.check_cryo = FALSE
-				killer_maroon_objective.explanation_text = "Prevent from escaping alive or assassinate [target.current.real_name], the [target.assigned_role]."
+				killer_maroon_objective.explanation_text = "Prevent from escaping alive or free [target.current.real_name], the [target.assigned_role]."
 				killers_objectives += killer_maroon_objective
 			else if(killer_kill_objective)
 				killer_kill_objective.target = target
@@ -1378,6 +1385,7 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 				killer.assigned_targets = list()
 				//Подставная цель для трейтора
 				var/datum/objective/maroon/maroon_objective = killer.add_objective(/datum/objective/maroon, target_override = target)
+				maroon_objective.explanation_text = "Prevent from escaping alive or free [target.current.real_name], the [target.assigned_role]."
 				maroon_objective.check_cryo = FALSE
 				killers_objectives += maroon_objective
 				//Кража для трейтора
@@ -1543,7 +1551,7 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	for(var/mob/living/player in GLOB.alive_mob_list)
 		if(player.client && player.mind && player.stat != DEAD)
 			if((ishuman(player) && !player.mind.special_role))
-				if(player.client && (ROLE_CHANGELING in player.client.prefs.be_special) && !jobban_isbanned(player, ROLE_CHANGELING))
+				if(player.client && (ROLE_CHANGELING in player.client.prefs.be_special) && !jobban_isbanned(player, ROLE_CHANGELING) && !jobban_isbanned(player, ROLE_SYNDICATE))
 					possible_changelings += player.mind
 
 	for(var/datum/mind/player in possible_changelings)
@@ -1589,7 +1597,7 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	for(var/mob/living/player in GLOB.alive_mob_list)
 		if(player.client && player.mind && player.stat != DEAD)
 			if((ishuman(player) && !player.mind.special_role))
-				if(player.client && (ROLE_VAMPIRE in player.client.prefs.be_special) && !jobban_isbanned(player, ROLE_VAMPIRE))
+				if(player.client && (ROLE_VAMPIRE in player.client.prefs.be_special) && !jobban_isbanned(player, ROLE_VAMPIRE) && !jobban_isbanned(player, ROLE_SYNDICATE))
 					possible_vampires += player.mind
 	for(var/datum/mind/player in possible_vampires)
 		if(player.current)

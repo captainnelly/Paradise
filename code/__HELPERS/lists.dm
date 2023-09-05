@@ -903,3 +903,17 @@ proc/dd_sortedObjectList(list/incoming)
 	. = list()
 	for(var/thing in flat_list)
 		.[thing] = TRUE
+
+
+/proc/listclearduplicates(check, list/list)
+	if(!istype(list))
+		stack_trace("Wrong type of list passed.")
+		return
+	while(check in list)
+		list -= check
+
+
+///sort any value in a list
+/proc/sort_list(list/list_to_sort, cmp = /proc/cmp_text_asc)
+	return sortTim(list_to_sort.Copy(), cmp)
+
