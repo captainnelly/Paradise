@@ -57,6 +57,8 @@ GLOBAL_LIST_EMPTY(world_uplinks)
 /obj/item/uplink/proc/generate_item_lists(mob/user)
 	if(!job)
 		job = user.mind.assigned_role
+	if(!race)
+		race = user.dna.species.name
 
 	var/list/cats = list()
 
@@ -82,9 +84,11 @@ GLOBAL_LIST_EMPTY(world_uplinks)
 	var/list/random_items = list()
 
 	for(var/IR in uplink_items)
-		var/datum/uplink_item/UI = uplink_items[IR]
-		if(UI.cost <= uses && UI.limited_stock != 0)
-			random_items += UI
+		var/list/cat_items = uplink_items[IR]
+		for(var/uplink_item in cat_items)
+			var/datum/uplink_item/UI = uplink_item
+			if(UI.cost <= uses && UI.limited_stock != 0)
+				random_items += UI
 
 	return pick(random_items)
 
