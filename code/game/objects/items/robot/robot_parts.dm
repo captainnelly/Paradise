@@ -204,7 +204,7 @@
 		else
 			to_chat(user, "<span class='notice'>You need to attach a flash to it first!</span>")
 
-	if(istype(W, /obj/item/multitool))
+	if(W.tool_behaviour == TOOL_MULTITOOL)
 		if(check_completion())
 			Interact(user)
 		else
@@ -225,7 +225,7 @@
 				to_chat(user, "<span class='warning'>Sticking an empty [M] into the frame would sort of defeat the purpose.</span>")
 				return
 
-			if(jobban_isbanned(M.brainmob, "Cyborg") || jobban_isbanned(M.brainmob,"nonhumandept"))
+			if(jobban_isbanned(M.brainmob, JOB_TITLE_CYBORG) || jobban_isbanned(M.brainmob,"nonhumandept"))
 				to_chat(user, "<span class='warning'>This [W] is not fit to serve as a cyborg!</span>")
 				return
 
@@ -314,7 +314,7 @@
 				to_chat(O, "<span class='userdanger'>You have been robotized!</span>")
 				to_chat(O, "<span class='danger'>You must obey your silicon laws and master AI above all else. Your objectives will consider you to be dead.</span>")
 
-			O.job = "Cyborg"
+			O.job = JOB_TITLE_CYBORG
 
 			O.cell = chest.cell
 			chest.cell.forceMove(O)
@@ -366,7 +366,7 @@
 	if(living_user.lying || living_user.stat || living_user.IsStunned() || !Adjacent(living_user))
 		return
 	var/obj/item/item_in_hand = living_user.get_active_hand()
-	if(!istype(item_in_hand, /obj/item/multitool))
+	if(item_in_hand.tool_behaviour != TOOL_MULTITOOL)
 		to_chat(living_user, "<span class='warning'>You need a multitool!</span>")
 		return
 

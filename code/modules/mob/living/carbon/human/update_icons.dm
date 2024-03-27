@@ -107,7 +107,7 @@ Please contact me on #coderbus IRC. ~Carn x
 	var/list/overlays_standing[TOTAL_LAYERS]
 	var/previous_damage_appearance // store what the body last looked like, so we only have to update it if something changed
 	var/icon/skeleton
-	var/list/cached_standing_overlays = list() // List of everything currently in a human's actual overlays
+
 
 /mob/living/carbon/human/proc/apply_overlay(cache_index)
 	if((. = overlays_standing[cache_index]))
@@ -144,7 +144,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 
 	// blend the individual damage states with our icons
 	for(var/obj/item/organ/external/bodypart as anything in bodyparts)
-		bodypart.update_icon()
+		bodypart.update_state()
 		if(bodypart.damage_state == "00")
 			continue
 
@@ -165,7 +165,6 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 
 //BASE MOB SPRITE
 /mob/living/carbon/human/proc/update_body(rebuild_base = FALSE)
-	remove_overlay(BODY_LAYER)
 	remove_overlay(LIMBS_LAYER) // So we don't get the old species' sprite splatted on top of the new one's
 	remove_overlay(UNDERWEAR_LAYER)
 
@@ -283,8 +282,6 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 		overlays_standing[UNDERWEAR_LAYER] = mutable_appearance(underwear_standing, layer = -UNDERWEAR_LAYER)
 	apply_overlay(UNDERWEAR_LAYER)
 
-	overlays_standing[BODY_LAYER] = standing
-	apply_overlay(BODY_LAYER)
 	//wings
 	update_wing_layer()
 	//tail
@@ -433,7 +430,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 		return
 
 	//masks and helmets can obscure our facial hair, unless we're a synthetic
-	if((head && (head.flags & BLOCKHAIR)) || (wear_mask && (wear_mask.flags & BLOCKHAIR)))
+	if((head && (head.flags & BLOCKHAIR)) || (wear_mask && (wear_mask.flags & BLOCKHAIR)) || (wear_mask && (wear_mask.flags & BLOCKFACIALHAIR)))
 		return
 
 	//base icons
@@ -519,9 +516,9 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 /* --------------------------------------- */
 //For legacy support.
 /mob/living/carbon/human/regenerate_icons()
-	..()
 	if(notransform)
 		return
+	cut_overlays()
 	update_mutations()
 	update_body(TRUE) //Update the body and force limb icon regeneration.
 	update_hair()
@@ -551,11 +548,10 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 	force_update_limbs()
 	update_tail_layer()
 	update_wing_layer()
+	if(blocks_emissive)
+		add_overlay(get_emissive_block())
 	update_halo_layer()
-	overlays.Cut() // Force all overlays to regenerate
 	update_fire()
-	update_icons()
-	update_emissive_block()
 	update_hands_HUD()
 
 
@@ -704,6 +700,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 	remove_overlay(GLASSES_LAYER)
 	remove_overlay(GLASSES_OVER_LAYER)
 	remove_overlay(OVER_MASK_LAYER)
+	remove_overlay(OVER_HEAD_LAYER)
 
 	if(client && hud_used)
 		var/obj/screen/inventory/inv = hud_used.inv_slots[slot_glasses]
@@ -727,7 +724,11 @@ GLOBAL_LIST_EMPTY(damage_icon_parts)
 
 		var/datum/sprite_accessory/hair/hair_style = GLOB.hair_styles_full_list[head_organ.h_style]
 		var/obj/item/clothing/glasses/G = glasses
-		if(istype(G) && G.over_mask) //If the user's used the 'wear over mask' verb on the glasses.
+		if(head && !(head.flags_cover & HEADCOVERSEYES) && G.over_hat && istype(G))
+			new_glasses.layer = -OVER_HEAD_LAYER
+			overlays_standing[OVER_HEAD_LAYER] = new_glasses
+			apply_overlay(OVER_HEAD_LAYER)
+		else if(istype(G) && G.over_mask) //If the user's used the 'wear over mask' verb on the glasses.
 			new_glasses.layer = -OVER_MASK_LAYER
 			overlays_standing[OVER_MASK_LAYER] = new_glasses
 			apply_overlay(OVER_MASK_LAYER)

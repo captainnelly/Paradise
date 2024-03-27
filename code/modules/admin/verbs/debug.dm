@@ -341,6 +341,36 @@ GLOBAL_PROTECT(AdminProcCallSpamPrevention)
 	spawn(10)
 		M.Animalize()
 
+/client/proc/cmd_admin_gorillize(mob/M in GLOB.mob_list)
+	set category = "Event"
+	set name = "Make Gorilla"
+
+	if(!check_rights(R_SPAWN))
+		return
+
+	if(!SSticker)
+		alert("Wait until the game starts")
+		return
+
+	if(!M)
+		alert("That mob doesn't seem to exist, close the panel and try again.")
+		return
+
+	if(isnewplayer(M))
+		alert("The mob must not be a new_player.")
+		return
+
+	if(alert(usr, "Confirm make gorilla?",, "Yes", "No") != "Yes")
+		return
+
+	var/gorilla_type = alert(usr, "What kind of gorilla?", , "Normal", "Enraged", "Cargorilla")
+	if(!gorilla_type)
+		return
+
+	log_admin("[key_name(src)] has gorillized [M.key].")
+	addtimer(CALLBACK(M, TYPE_PROC_REF(/mob, gorillize), gorilla_type), 1 SECONDS)
+
+
 /client/proc/cmd_admin_super(var/mob/M in GLOB.mob_list)
 	set category = "Event"
 	set name = "Make Superhero"
@@ -414,7 +444,7 @@ GLOBAL_PROTECT(AdminProcCallSpamPrevention)
 			id.icon_state = "gold"
 			id.access = get_all_accesses()+get_all_centcom_access()+get_all_syndicate_access()
 			id.registered_name = H.real_name
-			id.assignment = "Captain"
+			id.assignment = JOB_TITLE_CAPTAIN
 			id.name = "[id.registered_name]'s ID Card ([id.assignment])"
 			H.equip_to_slot_or_del(id, slot_wear_id)
 			H.update_inv_wear_id()
@@ -661,7 +691,7 @@ GLOBAL_PROTECT(AdminProcCallSpamPrevention)
 			F.active = 1
 			F.state = 2
 			F.power = 250
-			F.anchored = 1
+			F.anchored = TRUE
 			F.warming_up = 3
 			F.start_fields()
 			F.update_icon()
@@ -973,3 +1003,12 @@ GLOBAL_PROTECT(AdminProcCallSpamPrevention)
 
 	msg += "</TABLE></BODY></HTML>"
 	src << browse(msg, "window=pingstat_report;size=1500x600")
+
+
+/client/proc/cmd_display_overlay_log()
+	set category = "Debug"
+	set name = "Display Overlay Log"
+	set desc = "Display SSoverlays log of everything that's passed through it."
+
+	render_stats(SSoverlays.stats, src)
+

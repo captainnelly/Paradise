@@ -3,6 +3,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	name = "item"
 	icon = 'icons/obj/items.dmi'
 	blocks_emissive = EMISSIVE_BLOCK_GENERIC
+	pass_flags_self = PASSITEM
 
 	move_resist = null // Set in the Initialise depending on the item size. Unless it's overriden by a specific item
 	var/discrete = 0 // used in item_attack.dm to make an item not show an attack message to viewers
@@ -267,7 +268,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 			msg += "<span class='danger'>No tech origins detected.</span><BR>"
 
 
-		if(materials.len)
+		if(length(materials))
 			msg += "<span class='notice'>Extractable materials:<BR>"
 			for(var/mat in materials)
 				msg += "[CallMaterialName(mat)]<BR>" //Capitize first word, remove the "$"
@@ -530,6 +531,12 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		if(src == user.glasses && (user.head.flags_inv & HIDEGLASSES))
 			return TRUE
 		if((src == user.l_ear || src == user.r_ear) && (user.head.flags_inv & HIDEHEADSETS))
+			return TRUE
+
+	if(user.wear_mask)
+		if(src == user.glasses && (user.wear_mask.flags_inv & HIDEGLASSES))
+			return TRUE
+		if((src == user.l_ear || src == user.r_ear) && (user.wear_mask.flags_inv & HIDEHEADSETS))
 			return TRUE
 
 	return FALSE
@@ -1153,12 +1160,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 
 /obj/item/update_atom_colour()
 	. = ..()
-	if(!is_equipped())
-		return
 	update_equipped_item()
-	for(var/action in actions)
-		var/datum/action/myaction = action
-		myaction.UpdateButtonIcon()
 
 
 /obj/item/proc/add_tape()

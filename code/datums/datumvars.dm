@@ -80,7 +80,7 @@
 
 	var/static/cookieoffset = rand(1, 9999) //to force cookies to reset after the round.
 
-	if(!is_admin(usr))
+	if(!check_rights(R_ADMIN|R_VIEWRUNTIMES))
 		to_chat(usr, "<span class='warning'>You need to be an administrator to access this.</span>")
 		return
 
@@ -522,8 +522,8 @@
 
 /client/proc/view_var_Topic(href, href_list, hsrc)
 	//This should all be moved over to datum/admins/Topic() or something ~Carn
-	if(!check_rights(R_ADMIN|R_MOD))
-		return
+	if(!check_rights(R_ADMIN|R_MOD, FALSE) && !((href_list["datumrefresh"] || href_list["Vars"] || href_list["VarsList"]) && check_rights(R_VIEWRUNTIMES, FALSE)))
+		return // clients with R_VIEWRUNTIMES can still refresh the window/view references/view lists. they cannot edit anything else however.
 
 	if(view_var_Topic_list(href, href_list, hsrc))  // done because you can't use UIDs with lists and I don't want to snowflake into the below check to supress warnings
 		return
@@ -1144,7 +1144,7 @@
 			to_chat(usr, "Mob doesn't exist anymore")
 			return
 
-		if(H.remove_language(rem_language.name))
+		if(H.remove_language(rem_language))
 			to_chat(usr, "Removed [rem_language] from [H].")
 			log_and_message_admins("has removed language [rem_language] from [key_name(H)]")
 		else

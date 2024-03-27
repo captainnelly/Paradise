@@ -764,11 +764,10 @@
 /datum/status_effect/transient/eye_blurry/calc_decay()
 	if(ishuman(owner))
 		var/mob/living/carbon/human/H = owner
+		var/obj/item/organ/vision = H.dna?.species?.get_vision_organ(H)
 
-		if(isnull(H.dna.species.vision_organ)) //species has no eyes
+		if(vision && vision == NO_VISION_ORGAN) //species has no eyes
 			return ..()
-
-		var/obj/item/organ/vision = H.get_int_organ(H.dna.species.vision_organ)
 
 		if(!vision || vision.is_bruised() || vision.is_traumatized()) // doesn't decay if you have damaged eyesight.
 			return 0
@@ -794,10 +793,10 @@
 		if((BLINDNESS in H.mutations))
 			return 0
 
-		if(isnull(H.dna.species.vision_organ)) // species that have no eyes
-			return ..()
+		var/obj/item/organ/vision = H.dna?.species?.get_vision_organ(H)
 
-		var/obj/item/organ/vision = H.get_int_organ(H.dna.species.vision_organ)
+		if(vision && vision == NO_VISION_ORGAN) // species that have no eyes
+			return ..()
 
 		if(!vision || vision.is_traumatized() || vision.is_bruised()) //got no eyes or broken eyes
 			return 0
@@ -840,7 +839,7 @@
 		if(prob(pukeprob))
 			carbon.AdjustConfused(9 SECONDS)
 			carbon.AdjustStuttering(3 SECONDS)
-			carbon.vomit(15, FALSE, TRUE, 0, FALSE)
+			carbon.vomit(15, FALSE, 8 SECONDS, 0, FALSE)
 		carbon.Dizzy(15 SECONDS)
 	if(strength >= DISGUST_LEVEL_DISGUSTED)
 		if(prob(25))

@@ -3,6 +3,7 @@
 	pressure_resistance = 8
 	max_integrity = 300
 	pull_push_speed_modifier = 1.2
+	pass_flags_self = PASSSTRUCTURE
 	var/climbable
 	/// Determines if a structure adds the TRAIT_TURF_COVERED to its turf.
 	var/creates_cover = FALSE
@@ -79,31 +80,36 @@
 
 	do_climb(usr)
 
-/obj/structure/MouseDrop_T(var/atom/movable/C, mob/user as mob)
-	if(..())
-		return
-	if(C == user)
+/obj/structure/MouseDrop_T(atom/movable/dropping, mob/user, params)
+	. = ..()
+	if(!. && dropping == user)
 		do_climb(user)
+		return TRUE
 
-/obj/structure/proc/density_check()
-	for(var/obj/O in orange(0, src))
-		if(O.density && !istype(O, /obj/machinery/door/window)) //Ignores windoors, as those already block climbing, otherwise a windoor on the opposite side of a table would prevent climbing.
-			return O
-	var/turf/T = get_turf(src)
-	if(T.density)
-		return T
+
+/obj/structure/proc/density_check(mob/living/user)
+	var/turf/source_turf = get_turf(src)
+	if(source_turf.density)
+		return source_turf
+	var/border_dir = get_dir(src, user)
+	for(var/obj/check in (source_turf.contents - src))
+		if(check.density)
+			if((check.flags & ON_BORDER) && user.loc != loc && border_dir != check.dir)
+				continue
+			return check
 	return null
 
-/obj/structure/proc/do_climb(var/mob/living/user)
+/obj/structure/proc/do_climb(mob/living/user)
 	if(!can_touch(user) || !climbable)
 		return FALSE
-	var/blocking_object = density_check()
+	var/blocking_object = density_check(user)
 	if(blocking_object)
 		to_chat(user, "<span class='warning'>You cannot climb [src], as it is blocked by \a [blocking_object]!</span>")
 		return FALSE
 
 	var/turf/T = src.loc
-	if(!T || !istype(T)) return FALSE
+	if(!T || !istype(T))
+		return FALSE
 
 	usr.visible_message("<span class='warning'>[user] starts climbing onto \the [src]!</span>")
 	climber = user
@@ -212,18 +218,18 @@
 
 /obj/structure/proc/can_touch(mob/living/user)
 	if(!istype(user))
-		return 0
+		return FALSE
 	if(!Adjacent(user))
-		return 0
+		return FALSE
 	if(user.restrained() || user.buckled)
-		to_chat(user, "<span class='notice'>You need your hands and legs free for this.</span>")
-		return 0
-	if(user.stat || user.IsParalyzed() || user.IsSleeping() || user.lying || user.IsWeakened())
-		return 0
+		to_chat(user, span_notice("You need your hands and legs free for this."))
+		return FALSE
+	if(user.incapacitated())
+		return FALSE
 	if(issilicon(user))
-		to_chat(user, "<span class='notice'>You need hands for this.</span>")
-		return 0
-	return 1
+		to_chat(user, span_notice("You need hands for this."))
+		return FALSE
+	return TRUE
 
 /obj/structure/examine(mob/user)
 	. = ..()
@@ -235,17 +241,19 @@
 		var/examine_status = examine_status(user)
 		if(examine_status)
 			. += examine_status
+	if(climbable)
+		. += "<span class='info'>You can <b>Click-Drag</b> someone to [src] to put them on the table after a short delay.</span>"
 
 /obj/structure/proc/examine_status(mob/user) //An overridable proc, mostly for falsewalls.
 	var/healthpercent = (obj_integrity/max_integrity) * 100
 	switch(healthpercent)
 		if(50 to 99)
-			return  "It looks slightly damaged."
+			. += "It looks slightly damaged."
 		if(25 to 50)
-			return  "It appears heavily damaged."
+			. += "It appears heavily damaged."
 		if(0 to 25)
 			if(!broken)
-				return  "<span class='warning'>It's falling apart!</span>"
+				. += "<span class='warning'>It's falling apart!</span>"
 
 /obj/structure/proc/prevents_buckled_mobs_attacking()
 	return FALSE
@@ -253,9 +261,7 @@
 
 /obj/structure/extinguish_light(force = FALSE)
 	if(light_range)
-		light_power = 0
-		light_range = 0
-		update_light()
+		set_light(0, 0)
 		name = "dimmed [name]"
 		desc = "Something shadowy moves to cover the object. Perhaps shining a light will force it to clear?"
 		extinguish_timer_id = addtimer(CALLBACK(src, PROC_REF(extinguish_light_check)), 2 SECONDS, TIMER_UNIQUE|TIMER_OVERRIDE|TIMER_LOOP|TIMER_DELETE_ME|TIMER_STOPPABLE)
@@ -275,9 +281,7 @@
 
 /obj/structure/proc/reset_light()
 	light_process = 0
-	light_power = initial(light_power)
-	light_range = initial(light_range)
-	update_light()
+	set_light(initial(light_range), initial(light_power))
 	name = initial(name)
 	desc = initial(desc)
 	deltimer(extinguish_timer_id)

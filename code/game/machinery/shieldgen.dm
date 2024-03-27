@@ -31,10 +31,6 @@
 	. = ..()
 	move_update_air(T)
 
-/obj/machinery/shield/CanPass(atom/movable/mover, turf/target, height)
-	if(!height)
-		return FALSE
-	return ..()
 
 /obj/machinery/shield/CanAtmosPass(turf/T)
 	return !density
@@ -90,7 +86,7 @@
 
 /obj/machinery/shield/cult/barrier/Initialize()
 	. = ..()
-	invisibility = INVISIBILITY_MAXIMUM
+	invisibility = INVISIBILITY_ABSTRACT
 
 /obj/machinery/shield/cult/barrier/Destroy()
 	if(parent_rune && !QDELETED(parent_rune))
@@ -121,7 +117,7 @@
 		visible = TRUE
 	else // Currently visible
 		density = FALSE // Turn invisible
-		invisibility = INVISIBILITY_MAXIMUM
+		invisibility = INVISIBILITY_ABSTRACT
 		visible = FALSE
 
 	air_update_turf(1)
@@ -134,7 +130,7 @@
 	icon_state = "shieldoff"
 	density = 1
 	opacity = FALSE
-	anchored = 0
+	anchored = FALSE
 	pressure_resistance = 2*ONE_ATMOSPHERE
 	req_access = list(ACCESS_ENGINE)
 	var/const/max_health = 100
@@ -312,8 +308,8 @@
 	desc = "A shield generator."
 	icon = 'icons/obj/stationobjs.dmi'
 	icon_state = "shieldgen"
-	anchored = 0
-	density = 1
+	anchored = FALSE
+	density = TRUE
 	req_access = list(ACCESS_TELEPORTER)
 	var/active = 0
 	var/power = 0
@@ -469,7 +465,7 @@
 
 
 /obj/machinery/shieldwallgen/attackby(obj/item/I, mob/user, params)
-	if(istype(I, /obj/item/wrench))
+	if(I.tool_behaviour == TOOL_WRENCH)
 		if(active)
 			to_chat(user, "Turn off the field generator first.")
 			return
@@ -479,7 +475,7 @@
 			state = 1
 			playsound(loc, I.usesound, 75, 1)
 			to_chat(user, "You secure the external reinforcing bolts to the floor.")
-			anchored = 1
+			anchored = TRUE
 			return
 
 		else if(state == 1)
@@ -487,7 +483,7 @@
 			state = 0
 			playsound(loc, I.usesound, 75, 1)
 			to_chat(user, "You undo the external reinforcing bolts.")
-			anchored = 0
+			anchored = FALSE
 			return
 
 	if(I.GetID() || ispda(I))
@@ -539,7 +535,7 @@
 	desc = "An energy shield."
 	icon = 'icons/effects/effects.dmi'
 	icon_state = "shieldwall"
-	anchored = 1
+	anchored = TRUE
 	density = 1
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
 	light_range = 3
@@ -619,17 +615,14 @@
 	return
 
 
-/obj/machinery/shieldwall/CanPass(atom/movable/mover, turf/target, height=0)
-	if(height == 0)
+/obj/machinery/shieldwall/CanAllowThrough(atom/movable/mover, border_dir)
+	. = ..()
+	if(checkpass(mover))
 		return TRUE
-
-	if(istype(mover) && mover.checkpass(PASSGLASS))
+	if(checkpass(mover, PASSGLASS))
 		return prob(20)
-	else
-		if(istype(mover, /obj/item/projectile))
-			return prob(10)
-		else
-			return !density
+	if(isprojectile(mover))
+		return prob(10)
 
 
 /obj/machinery/shieldwall/syndicate
@@ -637,14 +630,17 @@
 	desc = "A strange energy shield."
 	icon_state = "shield-red"
 
-/obj/machinery/shieldwall/syndicate/CanPass(atom/movable/mover, turf/target, height=0)
+
+/obj/machinery/shieldwall/syndicate/CanAllowThrough(atom/movable/mover, border_dir)
+	. = ..()
+	if(checkpass(mover))
+		return TRUE
 	if(isliving(mover))
-		var/mob/living/M = mover
-		if("syndicate" in M.faction)
-			return 1
-	if(istype(mover, /obj/item/projectile))
-		return 0
-	return ..(mover, target, height)
+		var/mob/living/living_mover = mover
+		if("syndicate" in living_mover.faction)
+			return TRUE
+	else if(isprojectile(mover))
+		return FALSE
 
 
 /obj/machinery/shieldwall/syndicate/CanPathfindPass(obj/item/card/id/ID, to_dir, caller, no_id = FALSE)

@@ -6,9 +6,9 @@
 #define FLYSWATTER_DAMAGE_MULTIPLIER 9
 
 /datum/species/moth
-	name = "Nian"
+	name = SPECIES_MOTH
 	name_plural = "Nianae"
-	language = "Tkachi"
+	language = LANGUAGE_MOTH
 	icobase = 'icons/mob/human_races/r_moth.dmi'
 	deform = 'icons/mob/human_races/r_moth.dmi'
 	inherent_factions = list("moth")
@@ -47,6 +47,8 @@
 		INTERNAL_ORGAN_EYES = /obj/item/organ/internal/eyes/nian,
 		INTERNAL_ORGAN_EARS = /obj/item/organ/internal/ears,
 	)
+
+	meat_type = /obj/item/reagent_containers/food/snacks/meat/humanoid/nian
 
 	has_limbs = list(
 		BODY_ZONE_CHEST = list("path" = /obj/item/organ/external/chest),

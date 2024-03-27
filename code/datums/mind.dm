@@ -2455,46 +2455,20 @@
 				log_and_message_admins("has opened [S]'s law manager.")
 			if("unemag")
 				var/mob/living/silicon/robot/R = current
-				if(istype(R))
-					R.emagged = 0
-					if(R.module)
-						if(R.activated(R.module.emag))
-							R.module_active = null
-						if(R.module_state_1 == R.module.emag)
-							R.module_state_1 = null
-							R.contents -= R.module.emag
-						else if(R.module_state_2 == R.module.emag)
-							R.module_state_2 = null
-							R.contents -= R.module.emag
-						else if(R.module_state_3 == R.module.emag)
-							R.module_state_3 = null
-							R.contents -= R.module.emag
-					R.clear_supplied_laws()
-					R.laws = new /datum/ai_laws/crewsimov
-					log_admin("[key_name(usr)] has un-emagged [key_name(current)]")
-					message_admins("[key_name_admin(usr)] has un-emagged [key_name_admin(current)]")
+				if(!istype(R))
+					return
+				R.unemag()
+				log_admin("[key_name(usr)] has un-emagged [key_name(current)]")
+				message_admins("[key_name_admin(usr)] has un-emagged [key_name_admin(current)]")
 
 			if("unemagcyborgs")
-				if(isAI(current))
-					var/mob/living/silicon/ai/ai = current
-					for(var/mob/living/silicon/robot/R in ai.connected_robots)
-						R.emagged = 0
-						if(R.module)
-							if(R.activated(R.module.emag))
-								R.module_active = null
-							if(R.module_state_1 == R.module.emag)
-								R.module_state_1 = null
-								R.contents -= R.module.emag
-							else if(R.module_state_2 == R.module.emag)
-								R.module_state_2 = null
-								R.contents -= R.module.emag
-							else if(R.module_state_3 == R.module.emag)
-								R.module_state_3 = null
-								R.contents -= R.module.emag
-						R.clear_supplied_laws()
-						R.laws = new /datum/ai_laws/crewsimov
-					log_admin("[key_name(usr)] has unemagged [key_name(ai)]'s cyborgs")
-					message_admins("[key_name_admin(usr)] has unemagged [key_name_admin(ai)]'s cyborgs")
+				if(!isAI(current))
+					return
+				var/mob/living/silicon/ai/ai = current
+				for(var/mob/living/silicon/robot/R in ai.connected_robots)
+					R.unemag()
+				log_admin("[key_name(usr)] has unemagged [key_name(ai)]'s cyborgs")
+				message_admins("[key_name_admin(usr)] has unemagged [key_name_admin(ai)]'s cyborgs")
 
 	else if(href_list["common"])
 		switch(href_list["common"])
@@ -2758,7 +2732,7 @@
 		SSticker.mode.shadows -= src
 		special_role = null
 		current.spellremove(current)
-		current.remove_language("Shadowling Hivemind")
+		current.remove_language(LANGUAGE_HIVE_SHADOWLING)
 	else if(src in SSticker.mode.shadowling_thralls)
 		SSticker.mode.remove_thrall(src,0)
 
@@ -3114,7 +3088,7 @@
 /mob/living/carbon/human/mind_initialize()
 	..()
 	if(!mind.assigned_role)
-		mind.assigned_role = "Civilian"	//defualt
+		mind.assigned_role = JOB_TITLE_CIVILIAN	//defualt
 
 /mob/proc/sync_mind()
 	mind_initialize()  //updates the mind (or creates and initializes one if one doesn't exist)
@@ -3153,12 +3127,12 @@
 //AI
 /mob/living/silicon/ai/mind_initialize()
 	..()
-	mind.assigned_role = "AI"
+	mind.assigned_role = JOB_TITLE_AI
 
 //BORG
 /mob/living/silicon/robot/mind_initialize()
 	..()
-	mind.assigned_role = "Cyborg"
+	mind.assigned_role = JOB_TITLE_CYBORG
 	if(is_taipan(z))
 		give_taipan_hud()
 		GLOB.taipan_players_active += mind

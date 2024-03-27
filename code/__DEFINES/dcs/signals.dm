@@ -132,8 +132,6 @@
 ///from obj/machinery/bsa/full/proc/fire(): ()
 #define COMSIG_ATOM_BSA_BEAM "atom_bsa_beam_pass"
 	#define COMSIG_ATOM_BLOCKS_BSA_BEAM (1<<0)
-///from base of atom/set_light(): (l_range, l_power, l_color)
-#define COMSIG_ATOM_SET_LIGHT "atom_set_light"
 ///from base of atom/setDir(): (old_dir, new_dir)
 #define COMSIG_ATOM_DIR_CHANGE "atom_dir_change"
 ///from base of atom/handle_atom_del(): (atom/deleted)
@@ -195,6 +193,10 @@
 ///called on /living when someone starts pulling it (atom/movable/puller, state, force)
 #define COMSIG_LIVING_START_PULL "living_start_pull"
 
+/// called on /atom when something attempts to pass through it (atom/movable/source, atom/movable/passing, dir)
+#define COMSIG_ATOM_TRIED_PASS "atom_tried_pass"
+	#define COMSIG_COMPONENT_PERMIT_PASSAGE (1 << 0)
+
 /////////////////
 
 ///from base of area/Entered(): (/area)
@@ -226,6 +228,10 @@
 #define COMSIG_AREA_ENTERED "area_entered"
 ///from base of area/Exited(): (atom/movable/M)
 #define COMSIG_AREA_EXITED "area_exited"
+///from base of area/Entered(): (atom/movable/M)
+#define COMSIG_ATOM_ENTERED_AREA "atom_entered_area"
+///from base of area/Exited(): (atom/movable/M)
+#define COMSIG_ATOM_EXITED_AREA "atom_exited_area"
 
 // /turf signals
 
@@ -271,6 +277,8 @@
 	#define COMPONENT_CANCEL_THROW (1<<0)
 ///from base of atom/movable/throw_at(): (datum/thrownthing, spin)
 #define COMSIG_MOVABLE_POST_THROW "movable_post_throw"
+///from base of datum/thrownthing/finalize(): (obj/thrown_object, datum/thrownthing) used for when a throw is finished
+#define COMSIG_MOVABLE_THROW_LANDED "movable_throw_landed"
 ///from base of atom/movable/onTransitZ(): (old_z, new_z)
 #define COMSIG_MOVABLE_Z_CHANGED "movable_ztransit"
 ///called when the movable is placed in an unaccessible area, used for stationloving: ()
@@ -383,6 +391,9 @@
 /// From /datum/emote/select_param(): (target, key, intentional)
 #define COMSIG_MOB_EMOTE_AT "mob_emote_at"
 	#define COMPONENT_BLOCK_EMOTE_ACTION (1<<2)
+
+///from base of /mob/verb/pointed: (atom/A)
+#define COMSIG_MOB_POINTED "mob_pointed"
 
 ///from base of mob/swap_hand(): (obj/item/currently_held_item)
 #define COMSIG_MOB_SWAPPING_HANDS "mob_swapping_hands"
@@ -566,6 +577,19 @@
 #define COMSIG_ITEM_DISABLE_EMBED "item_disable_embed"
 ///from [/obj/effect/mine/proc/triggermine]:
 #define COMSIG_MINE_TRIGGERED "minegoboom"
+
+/// Defib-specific signals
+
+/// Called when a defibrillator is first applied to someone. (mob/living/user, mob/living/target, harmful)
+#define COMSIG_DEFIB_PADDLES_APPLIED "defib_paddles_applied"
+	/// Defib is out of power.
+	#define COMPONENT_BLOCK_DEFIB_DEAD (1<<0)
+	/// Something else: we won't have a custom message for this and should let the defib handle it.
+	#define COMPONENT_BLOCK_DEFIB_MISC (1<<1)
+/// Called when a defib has been successfully used, and a shock has been applied. (mob/living/user, mob/living/target, harmful, successful)
+#define COMSIG_DEFIB_SHOCK_APPLIED "defib_zap"
+/// Called when a defib's cooldown has run its course and it is once again ready. ()
+#define COMSIG_DEFIB_READY "defib_ready"
 
 // /obj/item signals for economy
 ///called when an item is sold by the exports subsystem
@@ -857,3 +881,43 @@
 	#define COMPONENT_SCANNED_CRITICAL (1<<2)
 	/// There are no servers available
 	#define COMPONENT_SCANNED_NO_SERVERS (1<<3)
+
+// /datum/component/overlay_lighting signals, (for-future-backporting)
+///from base of atom/CheckParts(): (atom/movable/new_craft) - The atom has just been used in a crafting recipe and has been moved inside new_craft.
+#define COMSIG_ATOM_USED_IN_CRAFT "atom_used_in_craft"
+
+// Lighting:
+///from base of [atom/proc/set_light]: (l_range, l_power, l_color, l_on)
+#define COMSIG_ATOM_SET_LIGHT "atom_set_light"
+	/// Blocks [/atom/proc/set_light], [/atom/proc/set_light_power], [/atom/proc/set_light_range], [/atom/proc/set_light_color], [/atom/proc/set_light_on], and [/atom/proc/set_light_flags].
+	#define COMPONENT_BLOCK_LIGHT_UPDATE (1<<0)
+///Called right before the atom changes the value of light_power to a different one, from base [atom/proc/set_light_power]: (new_power)
+#define COMSIG_ATOM_SET_LIGHT_POWER "atom_set_light_power"
+///Called right after the atom changes the value of light_power to a different one, from base of [/atom/proc/set_light_power]: (old_power)
+#define COMSIG_ATOM_UPDATE_LIGHT_POWER "atom_update_light_power"
+///Called right before the atom changes the value of light_range to a different one, from base [atom/proc/set_light_range]: (new_range)
+#define COMSIG_ATOM_SET_LIGHT_RANGE "atom_set_light_range"
+///Called right after the atom changes the value of light_range to a different one, from base of [/atom/proc/set_light_range]: (old_range)
+#define COMSIG_ATOM_UPDATE_LIGHT_RANGE "atom_update_light_range"
+///Called right before the atom changes the value of light_color to a different one, from base [atom/proc/set_light_color]: (new_color)
+#define COMSIG_ATOM_SET_LIGHT_COLOR "atom_set_light_color"
+///Called right after the atom changes the value of light_color to a different one, from base of [/atom/proc/set_light_color]: (old_color)
+#define COMSIG_ATOM_UPDATE_LIGHT_COLOR "atom_update_light_color"
+///Called right before the atom changes the value of light_on to a different one, from base [atom/proc/set_light_on]: (new_value)
+#define COMSIG_ATOM_SET_LIGHT_ON "atom_set_light_on"
+///Called right after the atom changes the value of light_on to a different one, from base of [/atom/proc/set_light_on]: (old_value)
+#define COMSIG_ATOM_UPDATE_LIGHT_ON "atom_update_light_on"
+///Called right before the atom changes the value of light_flags to a different one, from base [atom/proc/set_light_flags]: (new_flags)
+#define COMSIG_ATOM_SET_LIGHT_FLAGS "atom_set_light_flags"
+///Called right after the atom changes the value of light_flags to a different one, from base of [/atom/proc/set_light_flags]: (old_flags)
+#define COMSIG_ATOM_UPDATE_LIGHT_FLAGS "atom_update_light_flags"
+
+// /datum/element/light_eater
+///from base of [/datum/element/light_eater/proc/table_buffet]: (list/light_queue, datum/light_eater)
+#define COMSIG_LIGHT_EATER_QUEUE "light_eater_queue"
+///from base of [/datum/element/light_eater/proc/devour]: (datum/light_eater)
+#define COMSIG_LIGHT_EATER_ACT "light_eater_act"
+	///Prevents the default light eater behavior from running in case of immunity or custom behavior
+	#define COMPONENT_BLOCK_LIGHT_EATER (1<<0)
+///from base of [/datum/element/light_eater/proc/devour]: (atom/eaten_light)
+#define COMSIG_LIGHT_EATER_DEVOUR "light_eater_devour"

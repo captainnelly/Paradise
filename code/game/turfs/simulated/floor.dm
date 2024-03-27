@@ -51,11 +51,6 @@ GLOBAL_LIST_INIT(icons_to_ignore_at_floor_init, list("damaged1","damaged2","dama
 		icon_regular_floor = icon_state
 		floor_regular_dir = dir
 
-//turf/simulated/floor/CanPass(atom/movable/mover, turf/target, height=0)
-//	if((istype(mover, /obj/machinery/vehicle) && !(src.burnt)))
-//		if(!( locate(/obj/machinery/mass_driver, src) ))
-//			return 0
-//	return ..()
 
 /// Returns a list of every turf state considered "broken".
 /// Will be randomly chosen if a turf breaks at runtime.
@@ -125,12 +120,11 @@ GLOBAL_LIST_INIT(icons_to_ignore_at_floor_init, list("damaged1","damaged2","dama
 /turf/simulated/floor/blob_act(obj/structure/blob/B)
 	return
 
-/turf/simulated/floor/update_icon()
+/turf/simulated/floor/update_overlays()
+	. = ..()
 	update_visuals()
-	overlays -= current_overlay
 	if(current_overlay)
-		overlays.Add(current_overlay)
-	return 1
+		. += current_overlay
 
 /turf/simulated/floor/proc/break_tile_to_plating()
 	var/turf/simulated/floor/plating/T = make_plating(FALSE)

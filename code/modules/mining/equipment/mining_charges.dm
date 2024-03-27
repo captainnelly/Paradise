@@ -5,7 +5,7 @@
 	icon = 'icons/obj/mining.dmi'
 	icon_state = "mining-charge-2"
 	item_state = "charge_indust"
-	det_time = 5
+	det_time = 5 SECONDS
 	notify_admins = FALSE // no need to make adminlogs on lavaland, while they are "safe" to use
 	var/timer_off = FALSE
 	var/installed = FALSE
@@ -48,7 +48,7 @@
 					message_admins("[ADMIN_LOOKUPFLW(user)] planted [src.name] on [target.name] at [ADMIN_COORDJMP(target)]")
 					add_game_logs("planted [name] on [target.name] at [COORD(target)]", user)
 				installed = TRUE
-				target.overlays += image_overlay
+				target.add_overlay(image_overlay)
 			return
 		..()
 
@@ -106,7 +106,7 @@
 				location = get_turf(target)
 			else
 				location = get_atom_on_turf(target)
-			target.overlays -= image_overlay
+			target.cut_overlay(image_overlay)
 	else
 		location = get_atom_on_turf(src)
 	if(location)
@@ -192,12 +192,12 @@
 			. += "<span class='notice'>[bicon(charge)] [charge]. Current status: [charge.installed ? "ready to detonate" : "ready to deploy"]."
 
 
-/obj/item/detonator/update_icon()
-	. = ..()
-	if(bombs.len)
+/obj/item/detonator/update_icon_state()
+	if(length(bombs))
 		icon_state = "Detonator-1"
 	else
 		icon_state = initial(icon_state)
+
 
 /obj/item/detonator/attack_self(mob/user)
 	playsound(src, 'sound/items/detonator.ogg', 40)
@@ -213,5 +213,5 @@
 				charge.detonate()
 	else
 		to_chat(user, span_warning("There is no charges linked to a detonator!"))
-	update_icon()
+	update_icon(UPDATE_ICON_STATE)
 	. = ..()
