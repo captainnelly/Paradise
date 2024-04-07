@@ -5,7 +5,8 @@
 
 	var/intact = TRUE
 	var/turf/baseturf = /turf/space
-	var/slowdown = 0 //negative for faster, positive for slower
+	/// negative for faster, positive for slower
+	var/slowdown = 0
 	var/transparent_floor = FALSE //used to check if pipes should be visible under the turf or not
 
 	/// Set if the turf should appear on a different layer while in-game and map editing, otherwise use normal layer.
@@ -55,6 +56,9 @@
 	/// How pathing algorithm will check if this turf is passable by itself (not including content checks). By default it's just density check.
 	/// WARNING: Currently to use a density shortcircuiting this does not support dense turfs with special allow through function
 	var/pathing_pass_method = TURF_PATHING_PASS_DENSITY
+
+	///whether or not this turf forces movables on it to have no gravity (unless they themselves have forced gravity)
+	var/force_no_gravity = FALSE
 
 
 /turf/Initialize(mapload)
@@ -489,8 +493,8 @@
 /turf/proc/acid_melt()
 	return
 
-/turf/handle_fall(mob/faller, forced)
-	faller.lying = pick(90, 270)
+/turf/handle_fall(mob/living/faller, forced)
+	faller.lying_angle = pick(90, 270)
 	if(!forced)
 		return
 	if(has_gravity(src))

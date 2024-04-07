@@ -53,7 +53,7 @@
 		return
 
 	var/mob/living/LM = parent
-	if(!T.footstep || LM.lying || !LM.canmove || LM.resting || LM.buckled || LM.throwing || LM.flying || istype(LM.loc, /obj/machinery/atmospherics))
+	if(!T.footstep || LM.lying_angle || !LM.canmove || LM.resting || LM.buckled || LM.throwing || (LM.movement_type & MOVETYPES_NOT_TOUCHING_GROUND) || istype(LM.loc, /obj/machinery/atmospherics))
 		return
 
 	if(ishuman(LM))
@@ -70,7 +70,7 @@
 	if(steps % 2)
 		return
 
-	if(steps != 0 && !has_gravity(LM, T)) // don't need to step as often when you hop around
+	if(steps != 0 && !LM.has_gravity(T)) // don't need to step as often when you hop around
 		return
 	return T
 
