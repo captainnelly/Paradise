@@ -1,6 +1,6 @@
 /mob/living/carbon/human/Moved(atom/OldLoc, Dir, Forced = FALSE)
 	. = ..()
-	if(!OldLoc.has_gravity() && has_gravity())
+	if((!OldLoc || !OldLoc.has_gravity()) && has_gravity())
 		thunk()
 
 
@@ -57,7 +57,7 @@
 				if(dna.species.fragile_bones_chance && prob(30))
 					playsound(src, "bonebreak", 10, TRUE)
 
-	if(!has_gravity(loc))
+	if(!has_gravity())
 		return
 
 	var/obj/item/clothing/shoes/S = shoes
@@ -161,7 +161,7 @@
 
 /// Proc used to weaken the user when moving from no gravity to positive gravity.
 /mob/living/carbon/human/proc/thunk()
-	if(buckled || mob_negates_gravity())
+	if(buckled || mob_negates_gravity() || incorporeal_move)
 		return
 
 	if(dna?.species.spec_thunk(src)) //Species level thunk overrides
@@ -170,6 +170,6 @@
 	if(m_intent != MOVE_INTENT_RUN)
 		return
 
-	Weaken(10 SECONDS)
+	Weaken(4 SECONDS)
 	to_chat(src, "Gravity!")
 

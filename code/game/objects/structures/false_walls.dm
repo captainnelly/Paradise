@@ -20,6 +20,7 @@
 	var/opening = FALSE
 
 	density = TRUE
+	obj_flags = BLOCK_Z_IN_DOWN | BLOCK_Z_IN_UP// just in case in up. But falsewall should be on the floor.
 	opacity = TRUE
 	max_integrity = 100
 
@@ -64,7 +65,7 @@
 	air_update_turf(1)
 	return ..()
 
-/obj/structure/falsewall/CanAtmosPass(turf/T)
+/obj/structure/falsewall/CanAtmosPass(turf/T, vertical)
 	return !density
 
 /obj/structure/falsewall/attack_ghost(mob/user)
@@ -85,6 +86,7 @@
 		do_the_flick()
 		sleep(0.4 SECONDS)
 		density = FALSE
+		obj_flags &= ~BLOCK_Z_IN_DOWN
 		set_opacity(FALSE)
 	else
 		var/srcturf = get_turf(src)
@@ -94,6 +96,7 @@
 		add_fingerprint(user)
 		do_the_flick()
 		density = TRUE
+		obj_flags |= BLOCK_Z_IN_DOWN
 		sleep(0.4 SECONDS)
 		set_opacity(TRUE)
 	air_update_turf(TRUE)
@@ -137,7 +140,7 @@
 			to_chat(user, "<span class='warning'>[src] is blocked!</span>")
 			return
 		if(W.tool_behaviour == TOOL_SCREWDRIVER)
-			if(!istype(T, /turf/simulated/floor))
+			if(!isfloorturf(T))
 				to_chat(user, "<span class='warning'>[src] bolts must be tightened on the floor!</span>")
 				return
 			user.visible_message("<span class='notice'>[user] tightens some bolts on the wall.</span>", "<span class='warning'>You tighten the bolts on the wall.</span>")

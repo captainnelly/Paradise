@@ -49,8 +49,8 @@
 		return
 	flip(user)
 
-/obj/item/clothing/neck/poncho/dropped(mob/user, silent = FALSE)
-	..()
+/obj/item/clothing/neck/poncho/dropped(mob/user, slot, silent = FALSE)
+	. = ..()
 	if(flipped)
 		flipped = FALSE
 		update_icon(UPDATE_ICON_STATE)
@@ -128,8 +128,13 @@
 	desc = "Forced to live on your shameful acting as a fake Mexican, you and your poncho have grown inseperable. Literally."
 	icon_state = "shameponcho"
 	item_color = "shame"
-	flags = NODROP
 	dyeable = FALSE
+
+
+/obj/item/clothing/neck/poncho/ponchoshame/Initialize(mapload)
+	. = ..()
+	ADD_TRAIT(src, TRAIT_NODROP, INNATE_TRAIT)
+
 
 /obj/item/clothing/neck/poncho/security
 	name = "corporate poncho"

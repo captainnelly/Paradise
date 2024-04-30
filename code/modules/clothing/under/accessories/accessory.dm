@@ -5,7 +5,7 @@
 	icon_state = "bluetie"
 	item_state = ""	//no inhands
 	item_color = "bluetie"
-	slot_flags = SLOT_FLAG_TIE
+	slot_flags = ITEM_SLOT_ACCESSORY
 	w_class = WEIGHT_CLASS_SMALL
 	pickup_sound = 'sound/items/handling/accessory_pickup.ogg'
 	drop_sound = 'sound/items/handling/accessory_drop.ogg'
@@ -52,7 +52,7 @@
 		to_chat(user, "<span class='notice'>You attach [src] to [has_suit].</span>")
 	src.add_fingerprint(user)
 
-/obj/item/clothing/accessory/proc/on_removed(mob/user)
+/obj/item/clothing/accessory/proc/on_removed(mob/user, silent = FALSE)
 	if(!has_suit)
 		return
 	has_suit.cut_overlay(inv_overlay)
@@ -68,8 +68,9 @@
 
 	has_suit = null
 	if(user)
-		user.put_in_hands(src)
-		add_fingerprint(user)
+		forceMove_turf()
+		user.put_in_hands(src, ignore_anim = !silent, silent = silent)
+
 
 /obj/item/clothing/accessory/attack(mob/living/carbon/human/H, mob/living/user)
 	// This code lets you put accessories on other people by attacking their sprite with the accessory
@@ -358,7 +359,7 @@
 	desc = "This glowing blue badge marks the holder as THE LAW."
 	icon_state = "holobadge"
 	item_color = "holobadge"
-	slot_flags = SLOT_FLAG_BELT | SLOT_FLAG_TIE
+	slot_flags = ITEM_SLOT_BELT|ITEM_SLOT_ACCESSORY
 	actions_types = list(/datum/action/item_action/accessory/holobadge)
 
 	var/emagged = FALSE //Emagging removes Sec check.
@@ -413,7 +414,7 @@
 	. = ..()
 	has_suit.verbs += /obj/item/clothing/accessory/holobadge/verb/holobadge_verb
 
-/obj/item/clothing/accessory/holobadge/on_removed(mob/user as mob)
+/obj/item/clothing/accessory/holobadge/on_removed(mob/user, silent = FALSE)
 	has_suit.verbs -= /obj/item/clothing/accessory/holobadge/verb/holobadge_verb
 	. = ..()
 
@@ -422,7 +423,7 @@
 	set name = "Holobadge"
 	set category = "Object"
 	set src in usr
-	if(!istype(usr, /mob/living))
+	if(!isliving(usr))
 		return
 	if(usr.stat)
 		return
@@ -537,7 +538,6 @@
 	icon_state = "necklace"
 	item_state = "necklace"
 	item_color = "necklace"
-	slot_flags = SLOT_FLAG_TIE
 
 /obj/item/clothing/accessory/necklace/dope
 	name = "gold necklace"
@@ -570,7 +570,6 @@
 	icon_state = "locket"
 	item_state = "locket"
 	item_color = "locket"
-	slot_flags = SLOT_FLAG_TIE
 	var/base_icon
 	var/open
 	var/obj/item/held //Item inside locket.
@@ -848,7 +847,7 @@
 	remove_id(user)
 
 /obj/item/clothing/accessory/petcollar/attackby(obj/item/I, mob/user, params)
-	if(istype(I, /obj/item/pen))
+	if(is_pen(I))
 		if(istype(loc, /obj/item/clothing/under))
 			return ..()
 		var/t = input(user, "Would you like to change the name on the tag?", "Name your new pet", tagname ? tagname : "Spot") as null|text
@@ -877,13 +876,13 @@
 	if(access_id)
 		. += "<span class='notice'>There is [bicon(access_id)] \a [access_id] clipped onto it.</span>"
 
-/obj/item/clothing/accessory/petcollar/equipped(mob/living/simple_animal/user)
+/obj/item/clothing/accessory/petcollar/equipped(mob/living/simple_animal/user, slot, initial = FALSE)
 	. = ..()
 
 	if(istype(user))
 		START_PROCESSING(SSobj, src)
 
-/obj/item/clothing/accessory/petcollar/dropped(mob/living/simple_animal/user, silent = FALSE)
+/obj/item/clothing/accessory/petcollar/dropped(mob/living/simple_animal/user, slot, silent = FALSE)
 	STOP_PROCESSING(SSobj, src)
 	. = ..()
 
@@ -958,7 +957,7 @@
 		cached_bubble_icon = M.bubble_icon
 		M.bubble_icon = strip_bubble_icon
 
-/obj/item/clothing/accessory/head_strip/on_removed(mob/user)
+/obj/item/clothing/accessory/head_strip/on_removed(mob/user, silent = FALSE)
 	if(has_suit && ismob(has_suit.loc))
 		var/mob/M = has_suit.loc
 		M.bubble_icon = cached_bubble_icon
@@ -979,6 +978,14 @@
 	item_state = "cestrip"
 	item_color = "cestrip"
 	strip_bubble_icon = "CE"
+
+/obj/item/clothing/accessory/head_strip/t4ce
+	name = "Grand Chief Engineer's strip"
+	desc = "Плотно сшитая круглая нашивка из серого бархата, по центру красуется логотип корпорации Nanotrasen прошитый желтыми металлическими нитями. Если присмотреться, можно заметить проходящее по нитям электричество и небольшие искорки."
+	icon_state = "t4cestrip"
+	item_state = "t4cestrip"
+	item_color = "t4cestrip"
+	strip_bubble_icon = "T4CE"
 
 /obj/item/clothing/accessory/head_strip/cmo
 	name = "Chief Medical Officer's strip"
@@ -1012,6 +1019,22 @@
 	item_color = "qmstrip"
 	strip_bubble_icon = "QM"
 
+/obj/item/clothing/accessory/head_strip/bs
+	name = "Blueshield's strip"
+	desc = "Плотно сшитая круглая нашивка из синего бархата с темно-синей окантовкой, по центру красуется логотип корпорации Nanotrasen прошитый белыми металлическими нитями. Награда выданная центральным командованием за выдающиеся успехи при службе на корпорацию."
+	icon_state = "bsstrip"
+	item_state = "bsstrip"
+	item_color = "bsstrip"
+	strip_bubble_icon = "BS"
+
+/obj/item/clothing/accessory/head_strip/ntr
+	name = "NanoTrasen Representative's strip"
+	desc = "Плотно сшитая круглая нашивка из чёрного бархата с золотистой окантовкой, по центру красуется логотип корпорации Nanotrasen прошитый белыми металлическими нитями. Награда выданная центральным командованием за выдающиеся заслуги при службе на корпорацию."
+	icon_state = "ntrstrip"
+	item_state = "ntrstrip"
+	item_color = "ntrstrip"
+	strip_bubble_icon = "NTR"
+
 /obj/item/clothing/accessory/head_strip/lawyers_badge
 	name = "attorney's badge"
 	desc = "Fills you with the conviction of JUSTICE. Lawyers tend to want to show it to everyone they meet."
@@ -1037,6 +1060,14 @@
 	..()
 	if(prob(1))
 		user.say("CHEE-EE-EE-EE-EE-EESE!")
+
+/obj/item/clothing/accessory/head_strip/clown
+	name = "clown's strip"
+	desc = "Плотно сшитая круглая нашивка с изображением клоуна. Идеально подойдет для совершения военных преступлений, ведь это не военное преступление, если тебе было весело!"
+	icon_state = "clownstrip"
+	item_state = "clownstrip"
+	item_color = "clownstrip"
+	strip_bubble_icon = "clown"
 
 /obj/item/clothing/accessory/medal/smile
 	name = "smiling pin"

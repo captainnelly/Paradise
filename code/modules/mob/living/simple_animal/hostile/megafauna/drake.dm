@@ -464,7 +464,7 @@ Difficulty: Medium
 		M.take_damage(45, BRUTE, "melee", 1)
 
 	// changes turf to lava temporarily
-	if(!T.density && !istype(T, /turf/simulated/floor/plating/lava))
+	if(!T.density && !islava(T))
 		var/lava_turf = /turf/simulated/floor/plating/lava/smooth
 		var/reset_turf = T.type
 		T.ChangeTurf(lava_turf)
@@ -482,7 +482,7 @@ Difficulty: Medium
 	duration = 82
 	color = COLOR_DARK_ORANGE
 
-/obj/effect/temp_visual/drakewall/CanAtmosPass()
+/obj/effect/temp_visual/drakewall/CanAtmosPass(turf/T, vertical)
 	return !density
 
 /obj/effect/temp_visual/lava_safe

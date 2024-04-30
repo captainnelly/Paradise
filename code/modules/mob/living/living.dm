@@ -83,6 +83,67 @@
 /mob/living/proc/OpenCraftingMenu()
 	return
 
+/mob/living/onZImpact(turf/impacted_turf, levels, impact_flags = NONE)
+	if(!isopenspaceturf(impacted_turf))
+		impact_flags |= ZImpactDamage(impacted_turf, levels)
+
+	return ..()
+
+/mob/living/proc/ZImpactDamage(turf/impacted_turf, levels)
+	. = SEND_SIGNAL(src, COMSIG_LIVING_Z_IMPACT, levels, impacted_turf)
+	if(. & ZIMPACT_CANCEL_DAMAGE)
+		return .
+
+	// If you are incapped, you probably can't brace yourself
+	var/can_help_themselves = !incapacitated(ignore_restraints = TRUE)
+	if(levels <= 1 && can_help_themselves)
+		var/obj/item/organ/external/wing/bodypart_wing = get_organ(BODY_ZONE_WING)
+		if(bodypart_wing && !bodypart_wing.has_fracture()) // wings can soften
+			visible_message(
+				span_notice("[src] makes a hard landing on [impacted_turf] but remains unharmed from the fall."),
+				span_notice("You brace for the fall. You make a hard landing on [impacted_turf], but remain unharmed."),
+			)
+			AdjustWeakened((levels * 4 SECONDS))
+			return . | ZIMPACT_NO_MESSAGE
+	var/incoming_damage = (levels * 5) ** 1.5
+	var/cat = iscat(src)
+	var/functional_legs = TRUE
+	var/skip_weaken = FALSE
+	for(var/zone in list(BODY_ZONE_L_LEG, BODY_ZONE_R_LEG, BODY_ZONE_PRECISE_L_FOOT, BODY_ZONE_PRECISE_R_FOOT))
+		var/obj/item/organ/external/leg = get_organ(zone)
+		if(leg.has_fracture())
+			functional_legs = FALSE
+			break
+	if(((istajaran(src) && functional_legs) || cat) && !(lying_angle || resting) && can_help_themselves)
+		. |= ZIMPACT_NO_MESSAGE|ZIMPACT_NO_SPIN
+		skip_weaken = TRUE
+		if(cat || (DWARF in mutations)) // lil' bounce kittens
+			visible_message(
+				span_notice("[src] makes a hard landing on [impacted_turf], but lands safely on [p_their()] feet!"),
+				span_notice("You make a hard landing on [impacted_turf], but land safely on your feet!"),
+			)
+			return .
+		incoming_damage *= 1.2 // at least no stuns
+		visible_message(
+			span_danger("[src] makes a hard landing on [impacted_turf], landing on [p_their()] feet painfully!"),
+			span_userdanger("You make a hard landing on [impacted_turf], and instinctively land on your feet - still painfully!"),
+		)
+
+	if(!lying_angle && !resting)
+		var/damage_for_each_leg = round(incoming_damage / 4)
+		apply_damage(damage_for_each_leg, BRUTE, BODY_ZONE_L_LEG)
+		apply_damage(damage_for_each_leg, BRUTE, BODY_ZONE_R_LEG)
+		apply_damage(damage_for_each_leg, BRUTE, BODY_ZONE_PRECISE_L_FOOT)
+		apply_damage(damage_for_each_leg, BRUTE, BODY_ZONE_PRECISE_R_FOOT)
+
+	else
+		apply_damage(incoming_damage, BRUTE)
+
+	if(!skip_weaken)
+		AdjustWeakened(levels * 5 SECONDS)
+	return .
+
+
 //Generic Bump(). Override MobBump() and ObjBump() instead of this.
 /mob/living/Bump(atom/A, yes)
 	if(..()) //we are thrown onto something
@@ -183,9 +244,9 @@
 	if(!(M.status_flags & CANPUSH))
 		return TRUE
 	//anti-riot equipment is also anti-push
-	if(M.r_hand && (prob(M.r_hand.block_chance * 2)) && !istype(M.r_hand, /obj/item/clothing))
+	if(M.r_hand && (prob(M.r_hand.block_chance * 2)) && !isclothing(M.r_hand))
 		return TRUE
-	if(M.l_hand && (prob(M.l_hand.block_chance * 2)) && !istype(M.l_hand, /obj/item/clothing))
+	if(M.l_hand && (prob(M.l_hand.block_chance * 2)) && !isclothing(M.l_hand))
 		return TRUE
 
 //Called when we bump into an obj
@@ -344,7 +405,7 @@
 		var/atom/inside = target.loc
 		pointed_object += " внутри [inside.declent_ru(GENITIVE)]"
 
-	if(istype(hand_item, /obj/item/gun) && target != hand_item)
+	if(isgun(hand_item) && target != hand_item)
 		if(a_intent == INTENT_HELP || !ismob(target))
 			visible_message("<b>[declent_ru(NOMINATIVE)]</b> указыва[pluralize_ru(gender,"ет","ют")] [hand_item.declent_ru(INSTRUMENTAL)] на [pointed_object].")
 			return TRUE
@@ -445,7 +506,7 @@
 		temperature -= change
 		if(actual < desired)
 			temperature = desired
-//	if(istype(src, /mob/living/carbon/human))
+//	if(ishuman(src))
 //		to_chat(world, "[src] ~ [bodytemperature] ~ [temperature]")
 	return temperature
 
@@ -466,12 +527,12 @@
 
 		for(var/obj/item/gift/G in Storage.return_inv()) //Check for gift-wrapped items
 			L += G.gift
-			if(istype(G.gift, /obj/item/storage))
+			if(isstorage(G.gift))
 				L += get_contents(G.gift)
 
 		for(var/obj/item/smallDelivery/D in Storage.return_inv()) //Check for package wrapped items
 			L += D.wrapped
-			if(istype(D.wrapped, /obj/item/storage)) //this should never happen
+			if(isstorage(D.wrapped)) //this should never happen
 				L += get_contents(D.wrapped)
 		return L
 
@@ -488,12 +549,12 @@
 			L += I.get_contents()
 		for(var/obj/item/gift/G in contents) //Check for gift-wrapped items
 			L += G.gift
-			if(istype(G.gift, /obj/item/storage))
+			if(isstorage(G.gift))
 				L += get_contents(G.gift)
 
 		for(var/obj/item/smallDelivery/D in contents) //Check for package wrapped items
 			L += D.wrapped
-			if(istype(D.wrapped, /obj/item/storage)) //this should never happen
+			if(isstorage(D.wrapped)) //this should never happen
 				L += get_contents(D.wrapped)
 		for(var/obj/item/folder/F in contents)
 			L += F.contents //Folders can't store any storage items.
@@ -657,13 +718,12 @@
 		if(!buckled.anchored)
 			return buckled.Move(newloc, direct)
 		else
-			return 0
+			return FALSE
 
-	var/atom/movable/pullee = pulling
-	if(pullee && get_dist(src, pullee) > 1)
+	if(pulling && get_dist(src, pulling) > 1)
 		stop_pulling()
-	if(pullee && !isturf(pullee.loc) && pullee.loc != loc)
-		log_debug("[src]'s pull on [pullee] was broken despite [pullee] being in [pullee.loc]. Pull stopped manually.")
+	if(pulling && !isturf(pulling.loc) && pulling.loc != loc)
+		log_debug("[src]'s pull on [pulling] was broken despite [pulling] being in [pulling.loc]. Pull stopped manually.")
 		stop_pulling()
 	if(restrained())
 		stop_pulling()
@@ -672,7 +732,7 @@
 	. = ..()
 	if(.)
 		step_count++
-		pull_pulled(old_loc, pullee, movetime)
+		pull_pulled(old_loc, pulling, movetime)
 		if(!currently_grab_pulled)
 			pull_grabbed(old_loc, direct, movetime)
 
@@ -699,6 +759,10 @@
 		var/pull_dir = get_dir(src, pulling)
 		pulling.glide_size = glide_size
 		if(get_dist(src, pulling) > 1 || (moving_diagonally != SECOND_DIAG_STEP && ((pull_dir - 1) & pull_dir))) // puller and pullee more than one tile away or in diagonal position
+			// This sucks.
+			// Pulling things up/down & into other z-levels. Conga line lives.
+			if(pulling.z != z && can_z_move(null, pulling, dest))
+				dest = get_step_multiz(pulling, get_dir(pulling, dest))
 			if(isliving(pulling))
 				var/mob/living/M = pulling
 				if(M.lying_angle && !M.buckled && (prob(M.getBruteLoss() * 200 / M.maxHealth)))
@@ -1103,7 +1167,7 @@
 // The src mob is trying to strip an item from someone
 // Override if a certain type of mob should be behave differently when stripping items (can't, for example)
 /mob/living/stripPanelUnequip(obj/item/what, mob/who, where, silent = FALSE)
-	if(what.flags & NODROP)
+	if(HAS_TRAIT(what, TRAIT_NODROP))
 		to_chat(src, "<span class='warning'>You can't remove \the [what.name], it appears to be stuck!</span>")
 		return
 	if(!silent)
@@ -1114,7 +1178,7 @@
 		if(what && what == who.get_item_by_slot(where) && Adjacent(who))
 			if(!who.drop_item_ground(what, silent = silent))
 				return
-			if(silent)
+			if(silent && !QDELETED(what) && isturf(what.loc))
 				put_in_hands(what, silent = TRUE)
 			add_attack_logs(src, who, "Stripped of [what]")
 
@@ -1122,7 +1186,7 @@
 // Override if a certain mob should be behave differently when placing items (can't, for example)
 /mob/living/stripPanelEquip(obj/item/what, mob/who, where, silent = FALSE)
 	what = get_active_hand()
-	if(what && (what.flags & NODROP))
+	if(what && HAS_TRAIT(what, TRAIT_NODROP))
 		to_chat(src, "<span class='warning'>You can't put \the [what.name] on [who], it's stuck to your hand!</span>")
 		return
 	if(what)
@@ -1132,7 +1196,7 @@
 		if(!silent)
 			visible_message("<span class='notice'>[src] tries to put [what] on [who].</span>")
 		if(do_mob(src, who, what.put_on_delay))
-			if(what && Adjacent(who) && !(what.flags & NODROP))
+			if(what && Adjacent(who) && !HAS_TRAIT(what, TRAIT_NODROP))
 				drop_item_ground(what, silent = silent)
 				who.equip_to_slot_if_possible(what, where, disable_warning = TRUE, initial = silent)
 				add_attack_logs(src, who, "Equipped [what]")
@@ -1206,13 +1270,13 @@
 /mob/living/proc/get_temperature(datum/gas_mixture/environment)
 	if(istype(loc, /obj/structure/closet/critter))
 		return environment.temperature
-	if(istype(loc, /obj/mecha))
+	if(ismecha(loc))
 		var/obj/mecha/M = loc
 		return  M.return_temperature()
 	if(isvampirecoffin(loc))
 		var/obj/structure/closet/coffin/vampire/coffin = loc
 		return coffin.return_temperature()
-	if(istype(loc, /obj/spacepod))
+	if(isspacepod(loc))
 		var/obj/spacepod/S = loc
 		return S.return_temperature()
 	if(istype(loc, /obj/structure/transit_tube_pod))

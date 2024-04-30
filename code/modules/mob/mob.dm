@@ -235,19 +235,30 @@
 	return validtargets
 
 // If you're looking for `reset_perspective`, that's a synonym for this proc.
-/mob/proc/reset_perspective(atom/A)
-	if(client)
-		if(istype(A, /atom/movable))
+/mob/proc/reset_perspective(atom/new_eye)
+	if(!client)
+		return
+	if(ismovable(new_eye))
+		if(new_eye != src)
 			client.perspective = EYE_PERSPECTIVE
-			client.eye = A
+			client.set_eye(new_eye)
 		else
-			if(isturf(loc))
-				client.eye = client.mob
-				client.perspective = MOB_PERSPECTIVE
-			else
-				client.perspective = EYE_PERSPECTIVE
-				client.eye = loc
-		return 1
+			client.set_eye(client.mob)
+			client.perspective = MOB_PERSPECTIVE
+	else if(isturf(new_eye))
+		if(new_eye != loc)
+			client.perspective = EYE_PERSPECTIVE
+			client.set_eye(new_eye)
+		else
+			client.set_eye(client.mob)
+			client.perspective = MOB_PERSPECTIVE
+	else if(isturf(loc))
+		client.set_eye(client.mob)
+		client.perspective = MOB_PERSPECTIVE
+	else
+		client.perspective = EYE_PERSPECTIVE
+		client.set_eye(loc)
+	return TRUE
 
 /mob/living/reset_perspective(atom/A)
 	. = ..()
@@ -272,8 +283,8 @@
 /mob/proc/show_inv(mob/user)
 	user.set_machine(src)
 	var/dat = {"<meta charset="UTF-8"><table>
-	<tr><td><B>Left Hand:</B></td><td><A href='?src=[UID()];item=[SLOT_HUD_LEFT_HAND]'>[(l_hand && !(l_hand.flags&ABSTRACT)) ? l_hand : "<font color=grey>Empty</font>"]</A></td></tr>
-	<tr><td><B>Right Hand:</B></td><td><A href='?src=[UID()];item=[SLOT_HUD_RIGHT_HAND]'>[(r_hand && !(r_hand.flags&ABSTRACT)) ? r_hand : "<font color=grey>Empty</font>"]</A></td></tr>
+	<tr><td><B>Left Hand:</B></td><td><A href='?src=[UID()];item=[ITEM_SLOT_HAND_LEFT]'>[(l_hand && !(l_hand.flags&ABSTRACT)) ? l_hand : "<font color=grey>Empty</font>"]</A></td></tr>
+	<tr><td><B>Right Hand:</B></td><td><A href='?src=[UID()];item=[ITEM_SLOT_HAND_RIGHT]'>[(r_hand && !(r_hand.flags&ABSTRACT)) ? r_hand : "<font color=grey>Empty</font>"]</A></td></tr>
 	<tr><td>&nbsp;</td></tr>"}
 	dat += {"</table>
 	<A href='?src=[user.UID()];mach_close=mob\ref[src]'>Close</A>
@@ -567,7 +578,7 @@
 	set category = "OOC"
 	reset_perspective(null)
 	unset_machine()
-	if(istype(src, /mob/living))
+	if(isliving(src))
 		if(src:cameraFollow)
 			src:cameraFollow = null
 
@@ -933,7 +944,7 @@
 	if(stat==DEAD)
 		return
 	var/turf/location = loc
-	if(istype(location, /turf/simulated))
+	if(issimulatedturf(location))
 		if(green)
 			if(!no_text)
 				visible_message("<span class='warning'>[src.name] вырвало зелёной липкой массой!</span>","<span class='warning'>Вас вырвало зелёной липкой массой!</span>")
