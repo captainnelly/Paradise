@@ -1,17 +1,4 @@
-#define SPELL_TARGET_CLOSEST 1
-#define SPELL_TARGET_RANDOM 2
-
-#define SPELL_SELECTION_RANGE "range"
-#define SPELL_SELECTION_VIEW "view"
-
-#define SMOKE_NONE		0
-#define SMOKE_HARMLESS	1
-#define SMOKE_COUGHING	2
-#define SMOKE_SLEEPING	3
-
-
 /obj/effect/proc_holder
-	var/panel = "Debug"//What panel the proc holder needs to go on.
 	var/active = FALSE //Used by toggle based abilities.
 	var/ranged_mousepointer
 	var/mob/ranged_ability_user
@@ -100,7 +87,6 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell))
 	name = "Spell"
 	desc = "A wizard spell"
 	/// What panel the proc holder needs to go on.
-	panel = "Spells"
 	density = FALSE
 	opacity = FALSE
 
@@ -704,3 +690,6 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell))
 		if(!step_turf.density)
 			target_mob.Move(step_turf)
 
+/// Called when a spell is added
+/obj/effect/proc_holder/spell/proc/on_spell_gain(mob/user = usr)
+	return
