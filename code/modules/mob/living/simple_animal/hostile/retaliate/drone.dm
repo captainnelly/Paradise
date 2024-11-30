@@ -26,7 +26,6 @@
 	projectiletype = /obj/item/projectile/beam/immolator/weak
 	projectilesound = 'sound/weapons/laser3.ogg'
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_tox" = 0, "max_tox" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
-	minbodytemp = 0
 	faction = list("malf_drone")
 	deathmessage = "suddenly breaks apart."
 	del_on_death = 1
@@ -40,6 +39,11 @@
 	ion_trail.set_up(src)
 	ion_trail.start()
 
+/mob/living/simple_animal/hostile/malf_drone/ComponentInitialize()
+	AddComponent( \
+		/datum/component/animal_temperature, \
+		minbodytemp = 0, \
+	)
 
 /mob/living/simple_animal/hostile/malf_drone/Destroy()
 	QDEL_NULL(ion_trail)
@@ -257,9 +261,9 @@
 	desc = "Большой дрон. Кажется, неактивен."
 	w_class = WEIGHT_CLASS_GIGANTIC
 	item_flags = NOPICKUP
-	icon_state = "unactive_drone"
+	icon_state = "inactive_drone"
 
-/obj/item/unactive_drone/attackby(obj/item/I, mob/user, params)
+/obj/item/inactive_drone/attackby(obj/item/I, mob/user, params)
 	if(istype(I, /obj/item/drone_modules/drone_BCM))
 		to_chat(user, span_notice("Вы установили модуль в слот."))
 		new /mob/living/simple_animal/bot/ed209/combat_drone(get_turf(src))

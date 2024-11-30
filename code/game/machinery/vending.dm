@@ -1250,13 +1250,15 @@
 			"[user] begins to right [src].",
 			"You begin to right [src]."
 		)
-		if(!do_after(user, 7 SECONDS, src))
+		if(!do_after(user, 7 SECONDS, src, max_interact_count = 1, cancel_on_max = TRUE))
 			return
 		user.visible_message(
 			span_notice("[user] rights [src]."),
 			span_notice("You right [src]."),
 			span_notice(">You hear a loud clang.")
 		)
+	if(!tilted) //Sanity check
+		return
 
 	unbuckle_all_mobs(TRUE)
 
@@ -1823,10 +1825,10 @@
 	req_access = list(ACCESS_SECURITY)
 	products = list(/obj/item/restraints/handcuffs = 8,/obj/item/restraints/handcuffs/cable/zipties = 8,/obj/item/grenade/flashbang = 4,/obj/item/flash = 5,
 					/obj/item/reagent_containers/food/snacks/donut = 12,/obj/item/storage/box/evidence = 6,/obj/item/flashlight/seclite = 4,/obj/item/restraints/legcuffs/bola/energy = 7,
-					/obj/item/clothing/mask/muzzle/safety = 4, /obj/item/storage/box/swabs = 6, /obj/item/storage/box/fingerprints = 6, /obj/item/eftpos/sec = 4, /obj/item/storage/belt/security/webbing = 2, /obj/item/grenade/smokebomb = 8,
+					/obj/item/clothing/mask/muzzle/safety = 4, /obj/item/storage/box/swabs = 6, /obj/item/storage/box/fingerprints = 6, /obj/item/eftpos/sec = 4, /obj/item/storage/belt/security/webbing = 2, /obj/item/flashlight/sectaclight = 2, /obj/item/grenade/smokebomb = 8,
 					)
 	contraband = list(/obj/item/clothing/glasses/sunglasses = 2,/obj/item/storage/fancy/donut_box = 2,/obj/item/hailer = 5)
-	prices = list(/obj/item/storage/belt/security/webbing = 2000,/obj/item/grenade/smokebomb = 250)
+	prices = list(/obj/item/storage/belt/security/webbing = 2000, /obj/item/flashlight/sectaclight = 300, /obj/item/grenade/smokebomb = 250)
 	refill_canister = /obj/item/vending_refill/security
 
 /obj/machinery/vending/security/training
@@ -2131,6 +2133,8 @@
 					/obj/item/clothing/head/rockso = 1,
 					/obj/item/clothing/mask/gas/clown_hat/rockso = 1,
 					/obj/item/clothing/under/rockso = 1,
+					/obj/item/clothing/mask/gas/clown_hat/sweettooth = 1,
+					/obj/item/clothing/under/sweettooth = 1,
 					/obj/item/clothing/under/pants/camo = 1,
 					/obj/item/clothing/mask/bandana = 1,
 					/obj/item/clothing/mask/bandana/black = 1,
@@ -2417,7 +2421,8 @@
 					/obj/item/clothing/head/fedora = 10,
 					/obj/item/clothing/head/fez = 10,
 					/obj/item/clothing/head/beret = 10)
-	contraband = list(/obj/item/clothing/head/bearpelt = 5)
+	contraband = list(/obj/item/clothing/head/bearpelt = 5,
+					/obj/item/clothing/head/helmet/biker = 3)
 	premium = list(/obj/item/clothing/head/soft/rainbow = 1)
 	refill_canister = /obj/item/vending_refill/hatdispenser
 

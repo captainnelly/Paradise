@@ -15,7 +15,6 @@
 	see_invisible = SEE_INVISIBLE_HIDDEN_RUNES
 	attack_sound = 'sound/weapons/punch1.ogg'
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_tox" = 0, "max_tox" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
-	minbodytemp = 0
 	faction = list("cult")
 	pressure_resistance = 100
 	universal_speak = TRUE
@@ -48,12 +47,18 @@
 	for(var/spell in construct_spells)
 		AddSpell(new spell(null))
 
-	set_light(2, 3, l_color = SSticker.cultdat ? SSticker.cultdat.construct_glow : LIGHT_COLOR_BLOOD_MAGIC)
+	set_light_range_power_color(2, 3, SSticker.cultdat ? SSticker.cultdat.construct_glow : LIGHT_COLOR_BLOOD_MAGIC)
 
 /mob/living/simple_animal/hostile/construct/Initialize(mapload)
 	. = ..()
 	add_traits(list(TRAIT_HEALS_FROM_CULT_PYLONS, TRAIT_HEALS_FROM_HOLY_PYLONS, TRAIT_NO_FLOATING_ANIM), INNATE_TRAIT)
 	AddElement(/datum/element/simple_flying)
+
+/mob/living/simple_animal/hostile/construct/ComponentInitialize()
+	AddComponent( \
+		/datum/component/animal_temperature, \
+		minbodytemp = 223, \
+	)
 
 /mob/living/simple_animal/hostile/construct/death(gibbed)
 	. = ..()
