@@ -88,6 +88,15 @@
 
 	for (file in scripts)
 		head_content += "<script type='text/javascript' src='[SSassets.transport.get_asset_url(file)]'></script>"
+	var/client/client = isclient(user)? user : user.client
+	if(client?.window_scaling && client?.window_scaling != 1 && !(client?.prefs.toggles3 & PREFTOGGLE_3_UI_SCALE) && width && height)
+		head_content += {"
+			<style>
+				body {
+					zoom: [100 / client?.window_scaling]%;
+				}
+			</style>
+			"}
 
 	return {"<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -122,8 +131,14 @@
 		to_chat(user, span_userdanger("The [title] browser you tried to open failed a sanity check! Please report this on GitHub!"))
 		return
 	var/window_size = ""
+	var/client/client = isclient(user)? user : user.client
 	if (width && height)
-		window_size = "size=[width]x[height];"
+		window_size = ""
+		if(width && height && client.window_scaling &&(client?.prefs.toggles3 & PREFTOGGLE_3_UI_SCALE))
+			var/scaling = client.window_scaling
+			window_size = "size=[width * scaling]x[height * scaling];"
+		else
+			window_size = "size=[width]x[height];"
 	if(include_default_stylesheet)
 		var/datum/asset/simple/namespaced/common/common_asset = get_asset_datum(/datum/asset/simple/namespaced/common)
 		common_asset.send(user)
@@ -151,7 +166,7 @@
 
 /datum/browser/proc/close()
 	if(!isnull(window_id))//null check because this can potentially nuke goonchat
-		user << browse(null, "window=[window_id]")
+		close_window(user, window_id)
 	else
 		WARNING("Browser [title] tried to close with a null ID")
 
@@ -358,11 +373,11 @@
 		var/setting = settings["mainsettings"][name]
 		if (setting["type"] == "datum")
 			if (setting["subtypesonly"])
-				dat += "<b>[setting["desc"]]:</b> <a href='byond://?src=[src.UID()];setting=[name];task=input;subtypesonly=1;type=datum;path=[setting["path"]]'>[setting["value"]]</a><BR>"
+				dat += "<b>[setting["desc"]]:</b> <a href='byond://?src=[src.UID()];setting=[name];task=input;subtypesonly=1;type=datum;path=[setting["path"]]'>[setting["value"]]</a><br>"
 			else
-				dat += "<b>[setting["desc"]]:</b> <a href='byond://?src=[src.UID()];setting=[name];task=input;type=datum;path=[setting["path"]]'>[setting["value"]]</a><BR>"
+				dat += "<b>[setting["desc"]]:</b> <a href='byond://?src=[src.UID()];setting=[name];task=input;type=datum;path=[setting["path"]]'>[setting["value"]]</a><br>"
 		else
-			dat += "<b>[setting["desc"]]:</b> <a href='byond://?src=[src.UID()];setting=[name];task=input;type=[setting["type"]]'>[setting["value"]]</a><BR>"
+			dat += "<b>[setting["desc"]]:</b> <a href='byond://?src=[src.UID()];setting=[name];task=input;type=[setting["type"]]'>[setting["value"]]</a><br>"
 
 	if (preview_icon)
 		dat += "<td valign='center'>"
