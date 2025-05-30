@@ -21,7 +21,7 @@ GLOBAL_LIST_INIT(metal_recipes, list(
 	new /datum/stack_recipe("Barstool", /obj/structure/chair/stool/bar, one_per_turf = TRUE, on_floor = TRUE),
 	new /datum/stack_recipe("Chair", /obj/structure/chair, one_per_turf = TRUE, on_floor = TRUE),
 	new /datum/stack_recipe("Barber chair", /obj/structure/chair/barber, one_per_turf = TRUE, on_floor = TRUE),
-	new /datum/stack_recipe("Wheelchair", /obj/structure/chair/wheelchair, 15, one_per_turf = TRUE, on_floor = TRUE),
+	new /datum/stack_recipe("Wheelchair", /obj/vehicle/ridden/wheelchair, 15, one_per_turf = TRUE, on_floor = TRUE),
 	new /datum/stack_recipe("Bed", /obj/structure/bed, 2, one_per_turf = TRUE, on_floor = TRUE),
 	new /datum/stack_recipe("Psychiatrist bed", /obj/structure/bed/psych, 5, one_per_turf = TRUE, on_floor = TRUE),
 	null,
@@ -468,7 +468,6 @@ GLOBAL_LIST_INIT(cult_fake_recipes, list(
 	item_state = "sheet-runed"
 	sheettype = "runed"
 	merge_type = /obj/item/stack/sheet/runed_metal
-	recipe_width = 700
 
 /obj/item/stack/sheet/runed_metal_fake
 	name = "runed metal"
