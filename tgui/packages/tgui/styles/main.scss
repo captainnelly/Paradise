@@ -38,6 +38,7 @@
 @include meta.load-css('./components/NumberInput.scss');
 @include meta.load-css('./components/ProgressBar.scss');
 @include meta.load-css('./components/RoundGauge.scss');
+@include meta.load-css('./components/RestrictedInput.scss');
 @include meta.load-css('./components/Section.scss');
 @include meta.load-css('./components/Slider.scss');
 @include meta.load-css('./components/Stack.scss');
@@ -53,6 +54,7 @@
 @include meta.load-css('./interfaces/BrigCells.scss');
 @include meta.load-css('./interfaces/CameraConsole.scss');
 @include meta.load-css('./interfaces/Changelog.scss');
+@include meta.load-css('./interfaces/CodexGigax.scss');
 @include meta.load-css('./interfaces/ColorPicker.scss');
 @include meta.load-css('./interfaces/Contractor.scss');
 @include meta.load-css('./interfaces/CrewMonitor.scss');
