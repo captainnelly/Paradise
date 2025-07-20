@@ -29,7 +29,7 @@
 
 
 /obj/item/sord
-	name = "\improper SORD"
+	name = "SORD"
 	desc = "This thing is so unspeakably shitty you are having a hard time even holding it."
 	icon_state = "sord"
 	item_state = "sord"
@@ -437,7 +437,15 @@
 
 /obj/item/melee/claymore/bone
 	name = "bone sword"
-	desc = "Jagged pieces of bone are tied to what looks like a goliath's femur."
+	desc = "Зубчатые костяные обломки привязаны к тому, что выглядит как бедренная кость голиафа."
+	ru_names = list(
+		NOMINATIVE = "костяной меч",
+		GENITIVE = "костяного меча",
+		DATIVE = "костяному мечу",
+		ACCUSATIVE = "костяной меч",
+		INSTRUMENTAL = "костяным мечом",
+		PREPOSITIONAL = "костяном мече"
+	)
 	icon_state = "bone_sword"
 	item_state = "bone_sword"
 	slot_flags = ITEM_SLOT_BELT|ITEM_SLOT_BACK
