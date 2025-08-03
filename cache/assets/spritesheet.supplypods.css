@@ -1,0 +1,15 @@
+.supplypods64x64{display:inline-block;width:64px;height:64px;background:url('%supplypods_64x64.png%') no-repeat;}
+.supplypods64x64.pod_assetstandard{background-position:-0px -0px;}
+.supplypods64x64.pod_assetbluespace{background-position:-64px -0px;}
+.supplypods64x64.pod_assetcentcom{background-position:-128px -0px;}
+.supplypods64x64.pod_assetsyndicate{background-position:-192px -0px;}
+.supplypods64x64.pod_assetdeathsquad{background-position:-0px -64px;}
+.supplypods64x64.pod_assetcultist{background-position:-64px -64px;}
+.supplypods64x64.pod_assetmissile{background-position:-128px -64px;}
+.supplypods64x64.pod_assetsyndie_missile{background-position:-192px -64px;}
+.supplypods64x64.pod_assetsupply_box{background-position:-0px -128px;}
+.supplypods64x64.pod_assetclown{background-position:-64px -128px;}
+.supplypods64x64.pod_assetorange{background-position:-128px -128px;}
+.supplypods64x64.pod_assetinvisible{background-position:-192px -128px;}
+.supplypods64x64.pod_assetgondola{background-position:-0px -192px;}
+.supplypods64x64.pod_assetseethrough{background-position:-64px -192px;}
