@@ -328,7 +328,7 @@
 /datum/crafting_recipe/explosion_shell
 	name = "Improvised explosive shell"
 	result = /obj/item/ammo_casing/a40mm/improvised/exp_shell
-	reqs = list(/datum/reagent/blackpowder = 20
+	reqs = list(/datum/reagent/blackpowder = 20,
 				/obj/item/grenade/iedcasing = 1,
 				/obj/item/grenade/chem_grenade = 1,
 				/obj/item/stack/cable_coil = 5,
