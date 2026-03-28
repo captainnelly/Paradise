@@ -33,8 +33,6 @@
 	attack_sound = 'sound/effects/hit_punch.ogg'
 	throw_message = "не наносит вреда"
 	speed = 0.5 //Since it is mainly melee, this *should* be right
-	move_to_delay = 3
-	mouse_opacity = MOUSE_OPACITY_ICON
 	death_sound = 'sound/hallucinations/wail.ogg'
 	deathmessage = "протягивает руки перед тем, как рассыпаться безжизненной грудой костей."
 	sight = SEE_MOBS // So it can see through smoke / charge through walls like the kool aid man.
@@ -42,10 +40,12 @@
 	loot_drop = /obj/item/crusher_trophy/legionnaire_spine
 	tts_seed = "Volibear"
 
-	attack_action_types = list(/datum/action/innate/elite_attack/legionnaire_charge,
-								/datum/action/innate/elite_attack/head_detach,
-								/datum/action/innate/elite_attack/bonfire_teleport,
-								/datum/action/innate/elite_attack/throw_bone)
+	attack_action_types = list(
+		/datum/action/innate/elite_attack/legionnaire_charge,
+		/datum/action/innate/elite_attack/head_detach,
+		/datum/action/innate/elite_attack/bonfire_teleport,
+		/datum/action/innate/elite_attack/throw_bone,
+	)
 
 	var/mob/living/simple_animal/hostile/asteroid/elite/legionnairehead/myhead = null
 	var/obj/structure/legionnaire_bonfire/mypile = null
@@ -62,7 +62,7 @@
 		DATIVE = "легионеру",
 		ACCUSATIVE = "легионера",
 		INSTRUMENTAL = "легионером",
-		PREPOSITIONAL = "легионере"
+		PREPOSITIONAL = "легионере",
 	)
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnaire/scale_stats(list/activators)
@@ -72,26 +72,26 @@
 /datum/action/innate/elite_attack/legionnaire_charge
 	name = "Рывок"
 	button_icon_state = "legionnaire_charge"
-	chosen_message = span_boldwarning("Вы попытаетесь схватить противника и отбросить его.")
+	chosen_message = span_boldwarning_alt("Вы попытаетесь схватить противника и отбросить его.")
 	chosen_attack_num = LEGIONNAIRE_CHARGE
 
 /datum/action/innate/elite_attack/head_detach
 	name = "Освободить череп"
 	button_icon_state = "head_detach"
-	chosen_message = span_boldwarning("Вы теперь можете отделить свою голову или уничтожить её, если она уже отделена.")
+	chosen_message = span_boldwarning_alt("Вы теперь можете отделить свою голову или уничтожить её, если она уже отделена.")
 	chosen_attack_num = HEAD_DETACH
 
 /datum/action/innate/elite_attack/bonfire_teleport
 	name = "Костяное кострище"
 	button_icon_state = "bonfire_teleport"
-	chosen_message = span_boldwarning("Вы оставите костёр. Повторное использование позволит бесконечно меняться с ним местами. Использование на той же клетке, что и активный костёр, уберёт его.")
+	chosen_message = span_boldwarning_alt("Вы оставите костёр. Повторное использование позволит бесконечно меняться с ним местами. Использование на той же клетке, что и активный костёр, уберёт его.")
 	chosen_attack_num = BONFIRE_TELEPORT
 
 /datum/action/innate/elite_attack/throw_bone
 	name = "Бросок кости"
-	icon_icon = 'icons/obj/mining.dmi'
+	button_icon = 'icons/obj/mining.dmi'
 	button_icon_state = "bone"
-	chosen_message = span_boldwarning("Вы бросаете тяжёлую кость.")
+	chosen_message = span_boldwarning_alt("Вы бросаете тяжёлую кость.")
 	chosen_attack_num = THROW_BONE
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnaire/Destroy()
@@ -145,7 +145,7 @@
 		new /obj/effect/temp_visual/dragon_swoop/legionnaire(T)
 		T = get_step(T, dir_to_target)
 	playsound(src, 'sound/misc/demon_attack1.ogg', 200, TRUE)
-	visible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] готовится к рывку!"))
+	visible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] готовится к рывку!"))
 	addtimer(CALLBACK(src, PROC_REF(legionnaire_charge_to), dir_to_target, 0), 2)
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnaire/proc/legionnaire_charge_to(move_dir, times_ran, list/hit_targets = list())
@@ -178,8 +178,8 @@
 	for(var/mob/living/L in T.contents - src)
 		if(faction_check_mob(L))
 			return
-		visible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] топчет и пинает [L.declent_ru(ACCUSATIVE)]!"))
-		to_chat(L, span_userdanger("[capitalize(declent_ru(NOMINATIVE))] топчет вас и отбрасывает пинком!"))
+		visible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] топчет и пинает [L.declent_ru(ACCUSATIVE)]!"))
+		to_chat(L, span_userdanger("[DECLENT_RU_CAP(src, NOMINATIVE)] топчет вас и отбрасывает пинком!"))
 		if(L in hit_targets)
 			L.adjustBruteLoss(charge_damage)
 		else
@@ -234,7 +234,7 @@
 		mypile = newpile
 		mypile.myowner = src
 		playsound(get_turf(src),'sound/items/fultext_deploy.ogg', 200, TRUE)
-		visible_message(span_warning("[capitalize(declent_ru(NOMINATIVE))] призывает костёр на [get_turf(src)]!"))
+		visible_message(span_warning("[DECLENT_RU_CAP(src, NOMINATIVE)] призывает костёр на [get_turf(src)]!"))
 		return
 	else
 		var/turf/legionturf = get_turf(src)
@@ -244,9 +244,9 @@
 			return
 		playsound(pileturf,'sound/items/fultext_deploy.ogg', 200, TRUE)
 		playsound(legionturf,'sound/items/fultext_deploy.ogg', 200, TRUE)
-		visible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] распадается на горящую груду костей!"))
+		visible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] распадается на горящую груду костей!"))
 		forceMove(pileturf)
-		visible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] формируется из костра!"))
+		visible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] формируется из костра!"))
 		mypile.forceMove(legionturf)
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnaire/proc/throw_bone()
@@ -257,7 +257,7 @@
 //The legionnaire's head.  Basically the same as any legion head, but we have to tell our creator when we die so they can generate another head.
 /mob/living/simple_animal/hostile/asteroid/elite/legionnairehead
 	name = "legionnaire head"
-	desc = "Отделившаяся голова Легионера. Не стоит подходить слишком близко, хотя если она вас увидела – выбора у вас уже нет."
+	desc = "Отделившаяся голова Легионера. Не стоит подходить слишком близко, хотя если она вас увидела — выбора у вас уже нет."
 	icon_state = "legionnaire_head"
 	icon_living = "legionnaire_head"
 	icon_aggro = "legionnaire_head"
@@ -272,7 +272,6 @@
 	throw_message = "пролетает мимо"
 	speed = 0
 	move_to_delay = 2
-	aggro_vision_range = 18
 	del_on_death = 1
 	deathmessage = "рассыпается в прах!"
 	faction = list()
@@ -286,7 +285,7 @@
 		DATIVE = "голове легионера",
 		ACCUSATIVE = "голову легионера",
 		INSTRUMENTAL = "головой легионера",
-		PREPOSITIONAL = "голове легионера"
+		PREPOSITIONAL = "голове легионера",
 	)
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnairehead/death(gibbed)
@@ -303,7 +302,6 @@
 	max_integrity = 100
 	move_resist = MOVE_FORCE_EXTREMELY_STRONG
 	anchored = TRUE
-	density = FALSE
 	light_range = 4
 	light_color = COLOR_SOFT_RED
 	var/mob/living/simple_animal/hostile/asteroid/elite/legionnaire/myowner = null
@@ -315,7 +313,7 @@
 		DATIVE = "груде костей",
 		ACCUSATIVE = "груду костей",
 		INSTRUMENTAL = "грудой костей",
-		PREPOSITIONAL = "груде костей"
+		PREPOSITIONAL = "груде костей",
 	)
 
 /obj/structure/legionnaire_bonfire/Initialize(mapload)
@@ -325,11 +323,9 @@
 	)
 	AddElement(/datum/element/connect_loc, loc_connections)
 
-
 /obj/structure/legionnaire_bonfire/Destroy()
 	myowner?.mypile = null
 	return ..()
-
 
 /obj/structure/legionnaire_bonfire/proc/on_entered(datum/source, atom/movable/arrived, atom/old_loc, list/atom/old_locs)
 	SIGNAL_HANDLER
@@ -341,7 +337,6 @@
 		var/mob/living/fire_walker = arrived
 		fire_walker.adjust_fire_stacks(5)
 		fire_walker.IgniteMob()
-
 
 /obj/projectile/legionnaire
 	name = "bone"
@@ -358,7 +353,7 @@
 		DATIVE = "кости",
 		ACCUSATIVE = "кость",
 		INSTRUMENTAL = "костью",
-		PREPOSITIONAL = "кости"
+		PREPOSITIONAL = "кости",
 	)
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnaire/proc/shoot_projectile(turf/marker)
@@ -373,7 +368,6 @@
 
 //The visual effect which appears in front of legionnaire when he goes to charge.
 /obj/effect/temp_visual/dragon_swoop/legionnaire
-	duration = 10
 
 /obj/effect/temp_visual/dragon_swoop/legionnaire/Initialize(mapload)
 	. = ..()
@@ -399,7 +393,7 @@
 		DATIVE = "позвоночнику легионера",
 		ACCUSATIVE = "позвоночник легионера",
 		INSTRUMENTAL = "позвоночником легионера",
-		PREPOSITIONAL = "позвоночнике легионера"
+		PREPOSITIONAL = "позвоночнике легионера",
 	)
 
 /mob/living/simple_animal/hostile/asteroid/hivelordbrood/legion/legionnaire
@@ -424,10 +418,10 @@
 		return
 	var/mob/living/LivingUser = user
 	if(next_use_time > world.time)
-		LivingUser.visible_message(span_warning("[LivingUser] тряс[pluralize_ru(LivingUser.gender,"ёт","ут")] <b>[declent_ru(ACCUSATIVE)]</b>. Ничего не произошло..."))
+		LivingUser.visible_message(span_warning("[LivingUser] тряс[PLUR_YOT_UT(LivingUser)] <b>[declent_ru(ACCUSATIVE)]</b>. Ничего не произошло..."))
 		balloon_alert(LivingUser, "перезарядка")
 		return
-	LivingUser.visible_message(span_warning("[LivingUser] тряс[pluralize_ru(LivingUser.gender,"ёт","ут")] <b>[declent_ru(ACCUSATIVE)]</b> и призывает череп легиона!"))
+	LivingUser.visible_message(span_warning("[LivingUser] тряс[PLUR_YOT_UT(LivingUser)] <b>[declent_ru(ACCUSATIVE)]</b> и призывает череп легиона!"))
 	var/mob/living/simple_animal/hostile/asteroid/hivelordbrood/legion/legionnaire/LegionSkull = new(LivingUser.loc)
 	LegionSkull.friends += LivingUser
 	LegionSkull.faction = LivingUser.faction.Copy()

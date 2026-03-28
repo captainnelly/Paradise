@@ -142,6 +142,7 @@
 		TRUE,
 		TRUE
 	)
+	human.cure_radiation()
 
 	apply_status_effects(human, regen_amount)
 	apply_cure(human, devil)
@@ -154,7 +155,7 @@
 		organ.unnecrotize()
 		organ.heal_internal_damage(regen_amount, robo_repair = organ.is_robotic())
 
-	for(var/datum/reagent/reagent as anything in human.reagents.reagent_list)
+	for(var/datum/reagent/reagent as anything in human.reagents?.reagent_list)
 		if(reagent.devil_regen_ignored)
 			continue
 		human.reagents.remove_reagent(reagent, min(reagent.volume, regen_amount))
@@ -175,11 +176,11 @@
 		mob.dna.struc_enzymes = mob.dna.struc_enzymes_original
 		for(var/obj/item/organ/external/organ as anything in mob.bodyparts)
 			organ.stop_internal_bleeding()
+			organ.stop_arterial_bleeding()
+			organ.stop_bleeding()
 			organ.mend_fracture()
 			organ.open = ORGAN_CLOSED
 			organ.germ_level = 0
-
-
 
 	playsound(get_turf(human), pick(sounds), 50, FALSE, 1)
 	regen_cycles_count += DEVIL_REGEN_BOOST
@@ -189,7 +190,6 @@
 	human.CureAllDiseases(FALSE)
 	human.surgeries.Cut()
 	human.set_bodytemperature(human.dna ? human.dna.species.body_temperature : BODYTEMP_NORMAL)
-	human.radiation = 0
 	human.CureBlind()
 	human.CureNearsighted()
 	human.CureMute()
@@ -232,13 +232,11 @@
 		mob.update_eyes()
 		mob.update_dna()
 
-
 /datum/action/innate/remove_hand
 	name = "Оторвать себе руку"
 	check_flags = AB_CHECK_CONSCIOUS
-	icon_icon = 'icons/mob/human_races/r_human.dmi'
+	button_icon = 'icons/mob/human_races/r_human.dmi'
 	button_icon_state = "l_arm"
-
 
 /datum/action/innate/remove_hand/Grant(mob/user)
 	if(!ishuman(user))
@@ -250,8 +248,7 @@
 		return
 	. = ..()
 
-
-/datum/action/innate/remove_hand/IsAvailable()
+/datum/action/innate/remove_hand/IsAvailable(feedback = FALSE)
 	. = ..()
 	if(!ishuman(owner))
 		return FALSE

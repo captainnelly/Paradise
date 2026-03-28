@@ -10,6 +10,7 @@ SUBSYSTEM_DEF(machines)
 	offline_implications = "Machinery will no longer process. Shuttle call recommended."
 	cpu_display = SS_CPUDISPLAY_HIGH
 	ss_id = "machines"
+	wait = 2 SECONDS
 
 	/// Associative list of all machines that exist.
 	VAR_PRIVATE/list/machines_by_type = list()
@@ -24,7 +25,6 @@ SUBSYSTEM_DEF(machines)
 	var/list/deferred_powernet_rebuilds = list()
 
 	var/currentpart = SSMACHINES_DEFERREDPOWERNETS
-
 
 /datum/controller/subsystem/machines/Initialize()
 	makepowernets()
@@ -62,6 +62,12 @@ SUBSYSTEM_DEF(machines)
 		if(found_machines)
 			. |= found_machines
 
+/datum/controller/subsystem/machines/get_metrics()
+	. = ..()
+	var/list/custom_data = list()
+	custom_data["processing"] = length(processing)
+	.["custom"] = custom_data
+
 /datum/controller/subsystem/machines/proc/makepowernets()
 	for(var/datum/powernet/PN in powernets)
 		qdel(PN)
@@ -73,18 +79,16 @@ SUBSYSTEM_DEF(machines)
 			NewPN.add_cable(PC)
 			propagate_network(PC,PC.powernet)
 
-
 /datum/controller/subsystem/machines/get_stat_details()
 	return "Machines: [length(all_machines)] | Powernets: [length(powernets)] | Deferred: [length(deferred_powernet_rebuilds)]"
-
 
 /datum/controller/subsystem/machines/proc/process_defered_powernets(resumed = 0)
 	if(!resumed)
 		src.currentrun = deferred_powernet_rebuilds.Copy()
 	//cache for sanid speed (lists are references anyways)
 	var/list/currentrun = src.currentrun
-	while(currentrun.len)
-		var/obj/O = currentrun[currentrun.len]
+	while(length(currentrun))
+		var/obj/O = currentrun[length(currentrun)]
 		currentrun.len--
 		if(O && !QDELETED(O))
 			var/datum/powernet/newPN = new() // create a new powernet...
@@ -99,8 +103,8 @@ SUBSYSTEM_DEF(machines)
 		src.currentrun = powernets.Copy()
 	//cache for sanid speed (lists are references anyways)
 	var/list/currentrun = src.currentrun
-	while(currentrun.len)
-		var/datum/powernet/P = currentrun[currentrun.len]
+	while(length(currentrun))
+		var/datum/powernet/P = currentrun[length(currentrun)]
 		currentrun.len--
 		if(P)
 			P.reset() // reset the power state
@@ -115,8 +119,8 @@ SUBSYSTEM_DEF(machines)
 		src.currentrun = processing.Copy()
 	//cache for sanic speed (lists are references anyways)
 	var/list/currentrun = src.currentrun
-	while(currentrun.len)
-		var/obj/machinery/thing = currentrun[currentrun.len]
+	while(length(currentrun))
+		var/obj/machinery/thing = currentrun[length(currentrun)]
 		currentrun.len--
 		if(!QDELETED(thing) && thing.process(seconds) != PROCESS_KILL)
 			if(thing.use_power)
@@ -149,7 +153,6 @@ SUBSYSTEM_DEF(machines)
 			return
 		resumed = 0
 	currentpart = SSMACHINES_DEFERREDPOWERNETS
-
 
 /datum/controller/subsystem/machines/proc/setup_template_powernets(list/cables)
 	for(var/A in cables)

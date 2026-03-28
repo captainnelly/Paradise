@@ -44,7 +44,7 @@
 	default_hair_colour = "#614f19" //R: 97, G: 79, B: 25
 	butt_sprite = "vox"
 
-	reagent_tag = PROCESS_ORG | PROCESS_SYN
+	reagent_tag = ORGANIC | SYNTHETIC
 	scream_verb = "скрип%(ит,ят)%"
 	male_scream_sound = list('sound/voice/shriek1.ogg')
 	female_scream_sound = list('sound/voice/shriek1.ogg')
@@ -97,7 +97,7 @@
 		"задерживает дыхание!",
 		"глубоко вдыхает кислород!")
 
-	speciesbox = /obj/item/storage/box/survival_vox
+	speciesbox = /obj/item/storage/box/survival/species/vox
 
 	toxic_food = NONE
 	disliked_food = NONE //According to lore voxes does not care about food. Food is food.
@@ -111,6 +111,13 @@
 		JOB_MIN_AGE_COMMAND = 10,
 	)
 
+	autohiss_basic_map = list(
+		"ch" = list("ch", "chch", "chich"),
+		"k" = list("k", "kk", "kik"),
+		"ч" = list("ч", "чч", "чич"),
+		"к" = list("к", "кк", "кик"),
+	)
+	autohiss_exempt = list("Вокс-пиджин")
 
 /datum/species/vox/handle_death(gibbed, mob/living/carbon/human/H)
 	H.stop_tail_wagging()
@@ -121,10 +128,8 @@
 	add_verb(H, /mob/living/carbon/human/proc/emote_swag)
 	add_verb(H, /mob/living/carbon/human/proc/emote_quill)
 
-
 /datum/species/vox/gain_muscles(mob/living/target, default, max_level, can_become_stronger)
 	..(target, default, STRENGTH_LEVEL_STRONG, can_become_stronger)
-
 
 /datum/species/vox/on_species_loss(mob/living/carbon/human/H)
 	. = ..()
@@ -149,7 +154,7 @@
 			H.equip_or_collect(internal_tank, ITEM_SLOT_HAND_LEFT)
 			to_chat(H, span_boldannounceooc("Could not find an empty slot for internals! Please report this as a bug!"))
 	H.internal = internal_tank
-	to_chat(H, "<span class='notice'>Теперь вы живете на азоте из [internal_tank]. Кислород токсичен для вашего вида, поэтому вы должны дышать только азотом.</span>")
+	to_chat(H, span_notice("Теперь вы живете на азоте из [internal_tank]. Кислород токсичен для вашего вида, поэтому вы должны дышать только азотом."))
 	H.update_action_buttons_icon()
 
 /datum/species/vox/on_species_gain(mob/living/carbon/human/H)
@@ -196,10 +201,8 @@
 
 	return ..()
 
-
 /datum/species/vox/get_emote_pitch(mob/living/carbon/human/H, tolerance)
 	return 1 + (0.01*rand(-tolerance,tolerance))
-
 
 /datum/species/vox/armalis
 	name = SPECIES_VOX_ARMALIS
@@ -209,7 +212,6 @@
 	unarmed_type = /datum/unarmed_attack/claws/armalis
 	blacklisted = TRUE
 
-	warning_low_pressure = 50
 	hazard_low_pressure = 0
 
 	cold_level_1 = 80
@@ -236,10 +238,7 @@
 	bodyflags = HAS_TAIL
 	dies_at_threshold = TRUE
 
-	blood_color = "#2299FC"
-	flesh_color = "#808D11"
-
-	reagent_tag = PROCESS_ORG
+	reagent_tag = ORGANIC
 
 	tail = "armalis_tail"
 	icon_template = 'icons/mob/human_races/r_armalis.dmi'
@@ -275,3 +274,6 @@
 	. = ..()
 	if(/mob/living/carbon/human/proc/emote_quill in H.verbs)
 		remove_verb(H, /mob/living/carbon/human/proc/emote_quill)
+
+/datum/species/vox/compressor_grind(location)
+	new /obj/item/reagent_containers/food/snacks/fried_vox(location)

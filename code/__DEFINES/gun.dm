@@ -5,6 +5,8 @@
 #define ATTACHMENT_SLOT_RAIL "rail"
 /// Under slot identifier
 #define ATTACHMENT_SLOT_UNDER "under"
+/// Sibyl slot identifier
+#define ATTACHMENT_SLOT_SIBYL "sibyl"
 
 #define GUN_MODULE_CLASS_NONE 0
 // Rail slot types flags
@@ -25,11 +27,13 @@
 #define GUN_MODULE_CLASS_SHOTGUN_UNDER (1<<9)
 #define GUN_MODULE_CLASS_RIFLE_UNDER (1<<10)
 #define GUN_MODULE_CLASS_SNIPER_UNDER (1<<11)
+#define GUN_MODULE_CLASS_ENERGY_WEAPON (1 << 12)
 
 GLOBAL_LIST_INIT(gun_module_slot_ru_name, list(
 	ATTACHMENT_SLOT_MUZZLE = "ствол",
 	ATTACHMENT_SLOT_RAIL = "верхняя планка",
-	ATTACHMENT_SLOT_UNDER = "цевьё"
+	ATTACHMENT_SLOT_UNDER = "цевьё",
+	ATTACHMENT_SLOT_SIBYL = "курок"
 ))
 
 /// Single shot firemode
@@ -45,10 +49,10 @@ GLOBAL_LIST_INIT(gun_module_slot_ru_name, list(
 
 //Calibers
 #define CALIBER_9MM "9mm"
-#define CALIBER_9MM_TE "9mm TE"
 #define CALIBER_DOT_357 ".357"
 #define CALIBER_DOT_257 ".257"
 #define CALIBER_40NR "40nr"
+#define CALIBER_45NR "45nr"
 #define CALIBER_7_DOT_62X54MM "7.62x54mm"
 #define CALIBER_7_DOT_62X51MM "7.62x51mm"
 #define CALIBER_7_DOT_62X25MM "7.62x25mm"
@@ -62,6 +66,7 @@ GLOBAL_LIST_INIT(gun_module_slot_ru_name, list(
 #define CALIBER_10MM "10mm"
 #define CALIBER_4_DOT_6X30MM "4.6x30mm"
 #define CALIBER_DOT_45 ".45"
+#define CALIBER_DOT_45_COLT ".45colt"
 #define CALIBER_SPEAR "spear"
 #define CALIBER_84MM "84mm"
 #define CALIBER_12X70 "12х70"
@@ -109,3 +114,15 @@ GLOBAL_LIST_INIT(gun_module_slot_ru_name, list(
 #define GUN_ACCURACY_RIFLE_UPLINK new /datum/gun_accuracy/rifle/uplink()
 /// Sniper rifle accuracy (100% hit)
 #define GUN_ACCURACY_SNIPER new /datum/gun_accuracy/sniper()
+
+// Bullet type overlays
+#define BULLET_TYPE_PLAIN "plain_bullet"
+#define BULLET_TYPE_RUBBER "rubber"
+#define BULLET_TYPE_ARMOR_PIERCING "armor_piercing"
+#define BULLET_TYPE_EXPANSIVE "expansive"
+#define BULLET_TYPE_FIRE "fire"
+#define BULLET_TYPE_LASER "laser"
+#define BULLET_TYPE_DISABLER "disabler"
+
+/// Magazine reload duration
+#define GUN_MAGAZINE_RELOAD_DURATION (1 SECONDS)

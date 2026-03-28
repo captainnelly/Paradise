@@ -59,7 +59,6 @@
 		if(player_ghosted % 150 == 0)
 			force_cryo_human(src)
 
-
 /mob/living/carbon/human/handle_SSD(seconds_per_tick)
 	. = ..()
 	if(!. || !job || istype(loc, /obj/machinery/cryopod) || !CONFIG_GET(number/auto_cryo_ssd_mins))
@@ -77,25 +76,20 @@
 	if(our_area.fast_despawn)
 		force_cryo_human(src)
 
-
 /mob/living/carbon/human/calculate_affecting_pressure(pressure)
-	var/pressure_difference = abs( pressure - ONE_ATMOSPHERE )
-
-	// Determines how much the clothing you are wearing protects you in percent.
-	var/pressure_adjustment_coefficient = 1
 	if(isclothing(wear_suit) && isclothing(head))
 		var/obj/item/clothing/suit = wear_suit
 		var/obj/item/clothing/helmet = head
 		// Complete set of pressure-proof suit worn, assume fully sealed.
 		if((suit.clothing_flags & STOPSPRESSUREDMAGE) && (helmet.clothing_flags & STOPSPRESSUREDMAGE))
-			pressure_adjustment_coefficient = 0
-	pressure_adjustment_coefficient = max(pressure_adjustment_coefficient,0) //So it isn't less than 0
-	pressure_difference = pressure_difference * pressure_adjustment_coefficient
-	if(pressure > ONE_ATMOSPHERE)
-		return ONE_ATMOSPHERE + pressure_difference
-	else
-		return ONE_ATMOSPHERE - pressure_difference
+			return ONE_ATMOSPHERE
 
+	if(ismovable(loc))
+		/// If we're in a space with 0.5 content pressure protection, it averages the values, for example.
+		var/atom/movable/occupied_space = loc
+		return (occupied_space.contents_pressure_protection * ONE_ATMOSPHERE + (1 - occupied_space.contents_pressure_protection) * pressure)
+
+	return pressure
 
 /mob/living/carbon/human/handle_disabilities()
 	//Vision //god knows why this is here
@@ -108,50 +102,54 @@
 
 	if(getBrainLoss() >= 60 && stat != DEAD)
 		if(prob(3))
-			var/list/s1 = list("Я [pick("ПОНИ","ЯЩЕР","ТАЯРА","КОТЁНОК","ВУЛЬП","ДРАСК","ПТИЧКА","ВОКСИК","МАШИНА","БОЕВОЙ МЕХ","РАКЕТА")] [pick("НЬЕЕЕЕЕЕЕЕЕЕ","СКРЭЭЭЭЭЭЭЭЭ","МЯУ","НЯ~","РАВР","ГАВ-ГАВ","ХИССССС","ВРУУУМ-ВРУУУУМ","ПИУ-ПИУ","ЧУ-ЧУ")]!",
-							   "Без кислорода блоб не распространяется?",
-							   "КАПИТАН - КОМДОН",
-							   "[pick("", "Этот чёртов маньяк,")] [pick("Жордж", "Джордж", "Горж", "Грудж")] [pick("Меленс", "Мэлонс", "Мвырлнс")] убивает меня ПАМА;ГИТЕ!!!",
-							   "Можишь пж дать [pick("теликенез","халга","эпелепсию")]?",
-							   "ООООО МОЯ ОБОРОНА",
-							   "Джонни, эти синдикатовцы даже в СБ!",
-							   "Блоп в турбине",
-							   "не бей пж!11!",
-							   "АХАХААХАХАХАХАХАХХАХХАХАХ!",
-							   "ПАМАГИТЕ ЩЕТКУРИТИ",
-							   "ВОКсЫ нЕ мОГут ЛюБИТь",
-							   "Мой папа владеет этой станцией",
-							   "Повар добавил [pick("ПРОТЕИН", "туолетную воду", "муравьёв", "энзимы","акулу","виТамины","РеАктивный МутАген","ТеСлиум","сКрэКтониум")] в [pick("мой суп","мою шОверму","мой рЭйнбургер","мой зеЛёный Сольент","мои СушИ","мой борш")]!",
-							   "У ОБЕЗЬЯН ТАЗЕРЫ!",
-							   "кМ потраТел мои ;поенты на [pick("бОевые дробавики","ризИновые перЧатке","кУчу херни!")]",
-							   "EI'NATH!",
-							   "ПОДЪЁМ ХРЮШКИ!",
-							   "эта [pick("был мой младшей брат!!","была мая невеста","был мой осТавшЕйся друк","был Мой деДдом","былА мая люБов","была моя жена","был мой муж","маИ малЕнькие ДеТи","МаЯ разУмнАя коШка","быЛ мой косЯк")]!!!")
+			var/list/s1 = list(
+				"Я [pick("ПОНИ","ЯЩЕР","ТАЯРА","КОТЁНОК","ВУЛЬП","ДРАСК","ПТИЧКА","ВОКСИК","МАШИНА","БОЕВОЙ МЕХ","РАКЕТА")] [pick("НЬЕЕЕЕЕЕЕЕЕЕ","СКРЭЭЭЭЭЭЭЭЭ","МЯУ","НЯ~","РАВР","ГАВ-ГАВ","ХИССССС","ВРУУУМ-ВРУУУУМ","ПИУ-ПИУ","ЧУ-ЧУ")]!",
+				"Без кислорода блоб не распространяется?",
+				"КАПИТАН — КОМДОН",
+				"[pick("", "Этот чёртов маньяк,")] [pick("Жордж", "Джордж", "Горж", "Грудж")] [pick("Меленс", "Мэлонс", "Мвырлнс")] убивает меня ПАМА;ГИТЕ!!!",
+				"Можишь пж дать [pick("теликенез","халга","эпелепсию")]?",
+				"ООООО МОЯ ОБОРОНА",
+				"Джонни, эти синдикатовцы даже в СБ!",
+				"Блоп в турбине",
+				"не бей пж!11!",
+				"АХАХААХАХАХАХАХАХХАХХАХАХ!",
+				"ПАМАГИТЕ ЩЕТКУРИТИ",
+				"ВОКсЫ нЕ мОГут ЛюБИТь",
+				"Мой папа владеет этой станцией",
+				"Повар добавил [pick("ПРОТЕИН", "туолетную воду", "муравьёв", "энзимы","акулу","виТамины","РеАктивный МутАген","ТеСлиум","сКрэКтониум")] в [pick("мой суп","мою шОверму","мой рЭйнбургер","мой зеЛёный Сольент","мои СушИ","мой борш")]!",
+				"У ОБЕЗЬЯН ТАЗЕРЫ!",
+				"кМ потраТел мои ;поенты на [pick("бОевые дробавики","ризИновые перЧатке","кУчу херни!")]",
+				"EI'NATH!",
+				"ПОДЪЁМ ХРЮШКИ!",
+				"эта [pick("был мой младшей брат!!","была мая невеста","был мой осТавшЕйся друк","был Мой деДдом","былА мая люБов","была моя жена","был мой муж","маИ малЕнькие ДеТи","МаЯ разУмнАя коШка","быЛ мой косЯк")]!!!"
+			)
 
-			var/list/s2 = list("ФУС РО ДА",
-							   "Гребаные мандарины!!!",
-							   "Праверь меня",
-							   "Моё лицо!",
-							   "СПОКОЙНО БЛЯТЬ!",
-							   "ВАААААААААГХ!!!",
-							   "Папробуй догани!",
-							   "ЗА ИМПЕРАТОРА!",
-							   "У кЛоунА лиМитка!",
-							   "это всё дварфы, чел, всё дварфы",
-							   "СПЕЙС МАРИНЫ",
-							   "Мввыы ссдееллалии этво вво имя хаосса",
-							   "Фотареалистичные тикстуры",
-							   "Любоф цвятёт",
-							   "ПАКЕТЫ!!!",
-							   "[pick("ГДЕ МОЙ","МНЕ НУЖЕН","ДАЙ МНЕ МОЙ","ОКУНИ МЕНЯ В")] [pick("ДЕРМАЛИН","АЛКИЗИН","ДИЛОВИН","ИНАПРОВАЛИН","БИКАРДИН","ГИПЕРЗИН","КЕЛОТАН","ЛЕПОРАЗИН","СОЛЬ","МАННИТОЛ","КРИОКСАДОН","СПЕЙС ЛУБ","КАППУЛЕТИУМ","ЛСД")]!",
-							   "ВоИмЯФлАфИ",
-							   "У меНя еСтЬ Лююди на Цк!!!",
-							   "П-п-помогите т-т-теха",
-							   "Ани идут, ани ИДУТ! АНИ ИДУТ!!!",
-							   "КОНЕЦ БЛИЗОК!",
-							   "Помогите [pick("маг","убийца","генокрад","культ","морф","демон","нюка","вампир!","воксы!","клоун!")] [pick("в турбине","на мостике","на ЦК","в медбее","в бриге","в инженерке","на базе синдиката","на спутнике ИИ","в моей голове","в дормах")]!",
-							   "Я ГОТОВ УМЕРЕТЬ ВО ИМЯ [pick("РИТУАЛА","СВОБОДЫ","ЗАРПЛАТЫ","ОЧКОВ","ТЕХНОЛОГИЙ","СОБАКИ","СИРОПА","ПУШИСТЫХ ДРУЗЕЙ","ЛУТА ИЗ ГЕЙТА")]",
-							   "УБИЙ ИХ, [pick("ПЕТУХ","КИРА-КЛОЙН","КЛУВНИ","МИМАНЬЯК","БОМБЯЩИЯ ТАЯРА","ОФЕЦЕР","МОРФЛЕНГ","НАС-РИ")]!")
+			var/list/s2 = list(
+				"ФУС РО ДА",
+				"Гребаные мандарины!!!",
+				"Праверь меня",
+				"Моё лицо!",
+				"СПОКОЙНО БЛЯТЬ!",
+				"ВАААААААААГХ!!!",
+				"Папробуй догани!",
+				"ЗА ИМПЕРАТОРА!",
+				"У кЛоунА лиМитка!",
+				"это всё дварфы, чел, всё дварфы",
+				"СПЕЙС МАРИНЫ",
+				"Мввыы ссдееллалии этво вво имя хаосса",
+				"Фотареалистичные тикстуры",
+				"Любоф цвятёт",
+				"ПАКЕТЫ!!!",
+				"[pick("ГДЕ МОЙ","МНЕ НУЖЕН","ДАЙ МНЕ МОЙ","ОКУНИ МЕНЯ В")] [pick("ДЕРМАЛИН","АЛКИЗИН","ДИЛОВИН","ИНАПРОВАЛИН","БИКАРДИН","ГИПЕРЗИН","КЕЛОТАН","ЛЕПОРАЗИН","СОЛЬ","МАННИТОЛ","КРИОКСАДОН","СПЕЙС ЛУБ","КАППУЛЕТИУМ","ЛСД")]!",
+				"ВоИмЯФлАфИ",
+				"У меНя еСтЬ Лююди на Цк!!!",
+				"П-п-помогите т-т-теха",
+				"Ани идут, ани ИДУТ! АНИ ИДУТ!!!",
+				"КОНЕЦ БЛИЗОК!",
+				"Помогите [pick("маг","убийца","генокрад","культ","морф","демон","нюка","вампир!","воксы!","клоун!")] [pick("в турбине","на мостике","на ЦК","в медбее","в бриге","в инженерке","на базе синдиката","на спутнике ИИ","в моей голове","в дормах")]!",
+				"Я ГОТОВ УМЕРЕТЬ ВО ИМЯ [pick("РИТУАЛА","СВОБОДЫ","ЗАРПЛАТЫ","ОЧКОВ","ТЕХНОЛОГИЙ","СОБАКИ","СИРОПА","ПУШИСТЫХ ДРУЗЕЙ","ЛУТА ИЗ ГЕЙТА")]",
+				"УБИЙ ИХ, [pick("ПЕТУХ","КИРА-КЛОЙН","КЛУВНИ","МИМАНЬЯК","БОМБЯЩИЯ ТАЯРА","ОФЕЦЕР","МОРФЛЕНГ","НАС-РИ")]!"
+			)
 			switch(pick(1,2,3))
 				if(1)
 					say(pick(s1))
@@ -160,7 +158,7 @@
 				if(3)
 					emote("drool")
 
-/mob/living/carbon/human/handle_mutations_and_radiation()
+/mob/living/carbon/human/handle_mutations(time_since_irradiated, seconds_per_tick)
 	for(var/datum/dna/gene/gene as anything in GLOB.dna_genes)
 		if(gene.is_active(src))
 			gene.OnMobLife(src)
@@ -182,79 +180,11 @@
 					if(gene_stability < GENETIC_DAMAGE_STAGE_3)
 						gib()
 
-	if(radiation)
-		if(isnucleation(src))
-			radiation = clamp(radiation, 0, 800) // Типа кристаллы СМ лучше вбирают радиацию и поэтому у нуклей больший запас, а так - что бы эффекты снизу вообще работали
-			switch(radiation)
-				if(1 to 399)
-					radiation = max(radiation-1, 0) // Что бы не копилась бесконечно малое кол-во, но все ещё можно было получать эффект снизу при достаточном облучении
-					return
-				if(400 to INFINITY)
-					if(prob(50))
-						reagents.add_reagent("radium", 1)
-						radiation = max(radiation-50, 0)
-						return
-
-		if(!HAS_TRAIT(src, TRAIT_RADIMMUNE))
-			radiation = clamp(radiation, 0, 200)
-
-			var/autopsy_damage = 0
-			switch(radiation)
-				if(1 to 49)
-					radiation = max(radiation-1, 0)
-					if(prob(25))
-						apply_damages(burn = 1, tox = 1, spread_damage = TRUE)
-						autopsy_damage = 2
-
-				if(50 to 74)
-					radiation = max(radiation-2, 0)
-					apply_damages(burn = 1, tox = 1, spread_damage = TRUE)
-					autopsy_damage = 2
-					if(prob(5))
-						radiation = max(radiation-5, 0)
-						Weaken(6 SECONDS)
-						to_chat(src, span_danger("Вы чувствуете слабость."))
-						emote("collapse")
-
-				if(75 to 100)
-					radiation = max(radiation-2, 0)
-					apply_damages(burn = 2, tox = 2, spread_damage = TRUE)
-					autopsy_damage = 4
-					if(prob(2))
-						to_chat(src, span_danger("Вы мутируете!"))
-						randmutb(src)
-						check_genes()
-
-				if(101 to 150)
-					radiation = max(radiation-3, 0)
-					apply_damages(burn = 3, tox = 2, spread_damage = TRUE)
-					autopsy_damage = 5
-					if(prob(4))
-						to_chat(src, span_danger("Вы мутируете!"))
-						randmutb(src)
-						check_genes()
-
-				if(151 to INFINITY)
-					radiation = max(radiation-3, 0)
-					apply_damages(burn = 3, tox = 2, spread_damage = TRUE)
-					autopsy_damage = 5
-					if(prob(6))
-						to_chat(src, span_danger("Вы мутируете!"))
-						randmutb(src)
-						check_genes()
-
-			if(autopsy_damage)
-				var/obj/item/organ/external/chest/chest = get_organ(BODY_ZONE_CHEST)
-				if(chest)
-					chest.add_autopsy_data("Radiation Poisoning", autopsy_damage)
-
 /mob/living/carbon/human/breathe()
 	if(!dna.species.breathe(src))
 		..()
 
-
 /mob/living/carbon/human/check_breath(datum/gas_mixture/breath)
-
 	var/obj/item/organ/internal/lungs = get_organ_slot(INTERNAL_ORGAN_LUNGS)
 
 	if(!lungs || (lungs && lungs.is_dead()))
@@ -280,20 +210,18 @@
 		var/obj/item/organ/internal/lungs/really_lungs = lungs
 		really_lungs.check_breath(breath, src)
 
-
 // USED IN DEATHWHISPERS
 /mob/living/carbon/human/proc/isInCrit()
 	// Health is in deep shit and we're not already dead
 	return health <= HEALTH_THRESHOLD_CRIT && stat != DEAD
 
-
-/mob/living/carbon/human/handle_environment(datum/gas_mixture/environment)
-	if(!environment)
+/mob/living/carbon/human/handle_environment(datum/gas_mixture/readonly_environment)
+	if(!readonly_environment)
 		return
 
-	SEND_SIGNAL(src, COMSIG_HUMAN_EARLY_HANDLE_ENVIRONMENT, environment)
+	SEND_SIGNAL(src, COMSIG_HUMAN_EARLY_HANDLE_ENVIRONMENT, readonly_environment)
 
-	var/loc_temp = get_temperature(environment)
+	var/loc_temp = get_temperature(readonly_environment)
 //	to_chat(world, "Loc temp: [loc_temp] - Body temp: [bodytemperature] - Fireloss: [getFireLoss()] - Thermal protection: [get_main_thermal_protection()] - Fire protection: [thermal_protection + add_fire_protection(loc_temp)] - Heat capacity: [environment_heat_capacity] - Location: [loc] - src: [src]")
 
 	//Body temperature is adjusted in two steps. Firstly your body tries to stabilize itself a bit.
@@ -384,7 +312,7 @@
 	// Account for massive pressure differences.  Done by Polymorph
 	// Made it possible to actually have something that can protect against high pressure... Done by Errorage. Polymorph now has an axe sticking from his head for his previous hardcoded nonsense!
 
-	var/pressure = environment.return_pressure()
+	var/pressure = readonly_environment.return_pressure()
 	var/adjusted_pressure = calculate_affecting_pressure(pressure) //Returns how much pressure actually affects the mob.
 	if(HAS_TRAIT(src, TRAIT_GODMODE))
 		return TRUE	//godmode
@@ -411,7 +339,6 @@
 			take_overall_damage(brute = pressure_damage, used_weapon = "Low Pressure")
 			throw_alert("pressure", /atom/movable/screen/alert/lowpressure, 2)
 
-
 ///FIRE CODE
 /mob/living/carbon/human/handle_fire()
 	. = ..()
@@ -430,7 +357,6 @@
 		var/datum/antagonist/vampire/vamp = mind?.has_antag_datum(/datum/antagonist/vampire)
 		if(vamp && !vamp.get_ability(/datum/vampire_passive/full) && stat != DEAD)
 			vamp.bloodusable = max(vamp.bloodusable - 5, 0)
-
 
 /mob/living/carbon/human/proc/get_main_thermal_protection()
 	if(HAS_TRAIT(src, TRAIT_RESIST_HEAT))
@@ -488,7 +414,6 @@
 			// body temperature is LOWER than that of our species, we are heating
 			var/clothing_factor = 2 - get_cold_protection(loc_temp) // thermal clothing with cold protection slows down recovery
 			adjust_bodytemperature(min(clothing_factor * metabolism_efficiency * ((body_temperature_difference + enviro_shift) / BODYTEMP_AUTORECOVERY_DIVISOR), BODYTEMP_HEATING_MAX))
-
 
 	//This proc returns a number made up of the flags for body parts which you are protected on. (such as HEAD, UPPER_TORSO, LOWER_TORSO, etc. See setup.dm for the full list)
 /mob/living/carbon/human/proc/get_heat_protection_flags(temperature) //Temperature is the temperature you're being exposed to.
@@ -549,7 +474,6 @@
 			thermal_protection += THERMAL_PROTECTION_HAND_LEFT
 		if(thermal_protection_flags & HAND_RIGHT)
 			thermal_protection += THERMAL_PROTECTION_HAND_RIGHT
-
 
 	return min(1,thermal_protection)
 
@@ -617,7 +541,6 @@
 
 	return min(1,thermal_protection)
 
-
 /mob/living/carbon/human/proc/get_covered_bodyparts()
 	var/covered = 0
 
@@ -670,7 +593,7 @@
 
 			var/list/hunger_mods = list()
 			SEND_SIGNAL(src, COMSIG_GET_HUNGER_MODS, hunger_mods)
-			for(var/mod as anything in hunger_mods)
+			for(var/mod in hunger_mods)
 				hunger_rate *= mod
 
 			adjust_nutrition(-hunger_rate)
@@ -744,7 +667,6 @@
 				if(prob(5))
 					emote(pick("faint", "collapse", "cry", "moan", "gasp", "shudder", "shiver"))
 				SetStuttering(10 SECONDS)
-				EyeBlurry(10 SECONDS)
 				if(prob(7))
 					AdjustConfused(4 SECONDS)
 				if(prob(5))
@@ -788,7 +710,6 @@
 					if(prob(5))
 						to_chat(src, span_userdanger("Вы чувствуете [pick("себя ужасно", "себя отвратительно", "себя, как дерьмо", "боль", "онемение", "холод", "покалывание", "себя кошмарно")]!"))
 						Knockdown(6 SECONDS)
-
 
 #define BODYPART_PAIN_REDUCTION 5
 
@@ -844,12 +765,20 @@
 						icon_num = 4
 					if(damage > (comparison*4))
 						icon_num = 5
+					var/exists_bleeding = bodypart.bleeding_amount > 0 && bodypart.bleeding_amount > bodypart.bleedsuppress
 					if(istype(bodypart, /obj/item/organ/external/tail) && bodypart.dna?.species.tail)
 						new_overlays += "[bodypart.dna.species.tail][icon_num]"
+						if(exists_bleeding)
+							new_overlays += "[bodypart.dna.species.tail]_b"
+
 					if(istype(bodypart, /obj/item/organ/external/wing) && bodypart.dna?.species.tail)
 						new_overlays += "[bodypart.dna.species.wing][icon_num]"
+
 					else
 						new_overlays += "[bodypart.limb_zone][icon_num]"
+						if(exists_bleeding)
+							new_overlays += "[bodypart.limb_zone]_b"
+
 				healthdoll.add_overlay(new_overlays - cached_overlays)
 				healthdoll.cut_overlay(cached_overlays - new_overlays)
 				healthdoll.cached_healthdoll_overlays = new_overlays
@@ -861,24 +790,20 @@
 
 #undef BODYPART_PAIN_REDUCTION
 
-
 /mob/living/carbon/human/proc/handle_embedded_objects()
 	for(var/obj/item/organ/external/bodypart as anything in bodyparts)
 		for(var/obj/item/thing in bodypart.embedded_objects)
 			if(prob(thing.embedded_pain_chance))
 				apply_damage(thing.w_class * thing.embedded_pain_multiplier, def_zone = bodypart)
-				var/get_bodypart = (GLOB.body_zone[bodypart.limb_zone][PREPOSITIONAL] in list("хвосте", "животе", "рте")) ? "вашем" : (GLOB.body_zone[bodypart.limb_zone][PREPOSITIONAL] in list("крыльях" , "глазах")) ? "ваших" : "вашей"
-				to_chat(src, span_userdanger("[capitalize(thing.declent_ru(NOMINATIVE))] в [get_bodypart] [GLOB.body_zone[bodypart.limb_zone][PREPOSITIONAL]] причиняет боль!"))
+				to_chat(src, span_userdanger("[DECLENT_RU_CAP(thing, NOMINATIVE)] в ваш[GEND_EM_EI_EM_IH(bodypart)] [GLOB.body_zone[bodypart.limb_zone][PREPOSITIONAL]] причиняет боль!"))
 
 			if(prob(thing.embedded_fall_chance))
 				bodypart.remove_embedded_object(thing)
 				apply_damage(thing.w_class * thing.embedded_fall_pain_multiplier, def_zone = bodypart)
-				var/get_bodypart = (GLOB.body_zone[bodypart.limb_zone][PREPOSITIONAL] in list("хвоста", "живота", "рта")) ? "вашего" : (GLOB.body_zone[bodypart.limb_zone][PREPOSITIONAL] in list("крыльев", "глаз")) ? "ваших" : "вашей"
 				visible_message(
-					span_danger("[capitalize(thing.declent_ru(NOMINATIVE))] выпадает из [get_bodypart] [GLOB.body_zone[bodypart.limb_zone][GENITIVE]] [name]!"),
-					span_danger("[capitalize(thing.declent_ru(NOMINATIVE))] выпадает из [get_bodypart] [GLOB.body_zone[bodypart.limb_zone][GENITIVE]]!"),
+					span_danger("[DECLENT_RU_CAP(thing, NOMINATIVE)] выпадает из [GLOB.body_zone[bodypart.limb_zone][GENITIVE]] [name]!"),
+					span_danger("[DECLENT_RU_CAP(thing, NOMINATIVE)] выпадает из [GEND_YOURS(bodypart)] [GLOB.body_zone[bodypart.limb_zone][GENITIVE]]!"),
 				)
-
 
 /mob/living/carbon/human/proc/handle_pulse(times_fired)
 	if(times_fired % 5 == 1)
@@ -1050,8 +975,6 @@
 	Weaken(10 SECONDS)
 	AdjustLoseBreath(40 SECONDS, bound_lower = 0, bound_upper = 50 SECONDS)
 	adjustOxyLoss(20)
-
-
 
 // Need this in species.
 //#undef HUMAN_MAX_OXYLOSS

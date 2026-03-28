@@ -119,8 +119,6 @@ GLOBAL_LIST_INIT(snow_recipes, list(
 	))
 
 /obj/item/stack/sheet/mineral
-	force = 5
-	throwforce = 5
 	throw_speed = 3
 
 /obj/item/stack/sheet/mineral/New(loc, new_amount, merge = TRUE)
@@ -134,7 +132,6 @@ GLOBAL_LIST_INIT(snow_recipes, list(
 	singular_name = "sandstone brick"
 	icon_state = "sheet-sandstone"
 	throw_range = 5
-	origin_tech = "materials=1"
 	sheettype = "sandstone"
 	materials = list(MAT_GLASS=MINERAL_MATERIAL_AMOUNT)
 
@@ -167,10 +164,8 @@ GLOBAL_LIST_INIT(sandbag_recipes, list ( \
 /obj/item/emptysandbag
 	name = "empty sandbag"
 	desc = "A bag to be filled with sand."
-	icon = 'icons/obj/items.dmi'
 	icon_state = "sandbag"
 	w_class = WEIGHT_CLASS_TINY
-
 
 /obj/item/emptysandbag/attackby(obj/item/I, mob/user, params)
 	if(istype(I, /obj/item/stack/ore/glass))
@@ -188,7 +183,6 @@ GLOBAL_LIST_INIT(sandbag_recipes, list ( \
 		return ATTACK_CHAIN_BLOCKED_ALL
 
 	return ..()
-
 
 /obj/item/stack/sheet/mineral/diamond
 	name = "diamond"
@@ -254,22 +248,20 @@ GLOBAL_LIST_INIT(sandbag_recipes, list ( \
 		log_and_set_aflame(user, I)
 	return TRUE
 
-
 /obj/item/stack/sheet/mineral/plasma/attackby(obj/item/I, mob/user, params)
 	if(I.get_heat())
 		log_and_set_aflame(user, I)
 		return ATTACK_CHAIN_BLOCKED_ALL
 	return ..()
 
-
 /obj/item/stack/sheet/mineral/plasma/proc/log_and_set_aflame(mob/user, obj/item/I)
 	add_attack_logs(user, src, "Ignited [amount] amount, using [I]", ATKLOG_FEW)
 	investigate_log("was <font color='red'><b>ignited</b></font> by [key_name_log(user)] in [amount] amount.", INVESTIGATE_ATMOS)
 	fire_act()
 
-/obj/item/stack/sheet/mineral/plasma/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume, global_overlay = TRUE)
+/obj/item/stack/sheet/mineral/plasma/fire_act(exposed_temperature, exposed_volume)
 	..()
-	atmos_spawn_air(LINDA_SPAWN_HEAT | LINDA_SPAWN_TOXINS, amount*10)
+	atmos_spawn_air(LINDA_SPAWN_HEAT|LINDA_SPAWN_TOXINS, amount * 10)
 	qdel(src)
 
 /obj/item/stack/sheet/mineral/gold
@@ -354,11 +346,7 @@ GLOBAL_LIST_INIT(sandbag_recipes, list ( \
 	icon_state = "sheet-titanium"
 	item_state = "sheet-titanium"
 	singular_name = "titanium sheet"
-	force = 5
-	throwforce = 5
-	w_class = WEIGHT_CLASS_NORMAL
 	throw_speed = 1
-	throw_range = 3
 	sheettype = "titanium"
 	merge_type = /obj/item/stack/sheet/mineral/titanium
 	materials = list(MAT_TITANIUM=MINERAL_MATERIAL_AMOUNT)
@@ -376,7 +364,6 @@ GLOBAL_LIST_INIT(titanium_recipes, list(
 /obj/item/stack/sheet/mineral/titanium/fifty
 	amount = 50
 
-
 /*
  * Plastitanium
  */
@@ -385,11 +372,7 @@ GLOBAL_LIST_INIT(titanium_recipes, list(
 	icon_state = "sheet-plastitanium"
 	item_state = "sheet-plastitanium"
 	singular_name = "plastitanium sheet"
-	force = 5
-	throwforce = 5
-	w_class = WEIGHT_CLASS_NORMAL
 	throw_speed = 1
-	throw_range = 3
 	sheettype = "plastitanium"
 	merge_type = /obj/item/stack/sheet/mineral/plastitanium
 	materials = list(MAT_TITANIUM=2000, MAT_PLASMA=2000)
@@ -436,12 +419,6 @@ GLOBAL_LIST_INIT(plastitanium_recipes, list(
 	. = ..()
 	recipes = GLOB.plastitanium_recipes
 
-/obj/item/stack/sheet/mineral/enruranium
-	name = "enriched uranium"
-	icon_state = "sheet-enruranium"
-	origin_tech = "materials=6"
-	materials = list(MAT_URANIUM=3000)
-
 //Alien Alloy
 /obj/item/stack/sheet/mineral/abductor
 	name = "alien alloy"
@@ -449,9 +426,6 @@ GLOBAL_LIST_INIT(plastitanium_recipes, list(
 	icon_state = "sheet-abductor"
 	item_state = "sheet-abductor"
 	singular_name = "alien alloy sheet"
-	force = 5
-	throwforce = 5
-	w_class = WEIGHT_CLASS_NORMAL
 	throw_speed = 1
 	origin_tech = "materials=6;abductor=1"
 	sheettype = "abductor"

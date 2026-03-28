@@ -46,7 +46,6 @@
 
 	return .
 
-
 /datum/uplink_item
 	/// Uplink name.
 	var/name = "item name"
@@ -81,14 +80,12 @@
 	/// Associative list UID - refund cost
 	var/static/list/item_to_refund_cost
 
-
 /datum/uplink_item/Destroy(force)
 	if(force)
 		return ..()
 	else
 		// if you're deleting an uplink item something has gone wrong
 		return QDEL_HINT_LETMELIVE
-
 
 /**
  * Spawns object item contained as path in datum item variable if possible.
@@ -112,7 +109,6 @@
 	SSblackbox.record_feedback("nested tally", "traitor_uplink_items_bought", 1, list("[initial(name)]", "[cost]"))
 	return new item(get_turf(buyer))
 
-
 /**
  * Actulizes datum description.
  */
@@ -122,7 +118,6 @@
 		var/obj/temp = item
 		desc = replacetext(initial(temp.desc), "\n", "<br>")
 	return desc
-
 
 /**
  * Handles buying an item, and logging.
@@ -188,9 +183,9 @@
 
 	if(istype(spawned, /obj/item/storage/box) && length(spawned.contents))
 		for(var/atom/box_item in spawned)
-			target_uplink.purchase_log += span_fontsize4(bicon(box_item))
+			target_uplink.purchase_log += span_fontsize4(icon2base64html(box_item))
 	else
-		target_uplink.purchase_log += span_fontsize4(bicon(spawned))
+		target_uplink.purchase_log += span_fontsize4(icon2base64html(spawned))
 
 	return spawned
 
@@ -253,7 +248,7 @@
 
 /datum/uplink_item/jobspecific/bipki
 	name = "Чемодан с бипками"
-	desc = "Хочешь знать, что там внутри? Отсосёшь - скажу."
+	desc = "Хочешь знать, что там внутри? Отсосёшь — скажу."
 	item = /obj/item/case_with_bipki
 	cost = 30
 	job = list(JOB_TITLE_CLOWN)
@@ -329,7 +324,7 @@
 	job = list(JOB_TITLE_CHEF)
 
 /datum/uplink_item/jobspecific/syndidonk
-	name = "Донк-покеты Синдиката"
+	name = "Донк-покеты \"Синдиката\""
 	desc = "Коробка с уникальными Донк-покетами, содержащими сильнодействующие регенерирующие и стимулирующие химические вещества. \
 			Из-за высокой концентрации этих веществ не рекомендуется употреблять более одного покета за раз. В коробке предусмотрен механизм подогрева."
 	item = /obj/item/storage/box/syndidonkpockets
@@ -357,7 +352,7 @@
 
 /datum/uplink_item/jobspecific/voodoo
 	name = "Кукла Вуду"
-	desc = "Кукла, созданная колдунами Синдиката, состоит из различных ингредиентов: ниток, частей головы, тела, а также секретных трав вуду и глутамата натрия."
+	desc = "Кукла, созданная колдунами \"Синдиката\", состоит из различных ингредиентов: ниток, частей головы, тела, а также секретных трав вуду и глутамата натрия."
 	item = /obj/item/voodoo
 	cost = 11
 	job = list(JOB_TITLE_CHAPLAIN)
@@ -388,7 +383,6 @@
 	cost = 1
 	job = list(JOB_TITLE_CHAPLAIN, JOB_TITLE_LIBRARIAN)
 	surplus = 0
-	can_discount = FALSE
 
 //Janitor
 
@@ -420,7 +414,7 @@
 			Важно отметить, что он может некорректно работать на гуманоидах, устойчивых к радиации!"
 	item = /obj/item/rad_laser
 	cost = 23
-	job = list(JOB_TITLE_CMO, JOB_TITLE_DOCTOR, JOB_TITLE_MINING_MEDIC, JOB_TITLE_INTERN, JOB_TITLE_GENETICIST, JOB_TITLE_PSYCHIATRIST, \
+	job = list(JOB_TITLE_CMO, JOB_TITLE_DOCTOR, JOB_TITLE_MINING_MEDIC, JOB_TITLE_MEDICAL_INTERN, JOB_TITLE_GENETICIST, JOB_TITLE_PSYCHIATRIST, \
 			JOB_TITLE_CHEMIST, JOB_TITLE_PARAMEDIC, JOB_TITLE_CORONER, JOB_TITLE_VIROLOGIST)
 
 /datum/uplink_item/jobspecific/batterer
@@ -476,7 +470,7 @@
 
 /datum/uplink_item/jobspecific/lockermech
 	name = "Синди-Шкафомех"
-	desc = "Массивный и невероятно смертоносный экзоскетлет Синдиката (на самом деле нет)."
+	desc = "Массивный и невероятно смертоносный экзоскетлет \"Синдиката\" (на самом деле нет)."
 	item = /obj/mecha/combat/lockersyndie/loaded
 	cost = 25
 	job = list(JOB_TITLE_CIVILIAN, JOB_TITLE_ROBOTICIST)
@@ -495,7 +489,7 @@
 			В комплект входит аккумулятор, который можно заменить с помощью кусачек."
 	item = /obj/item/storage/box/syndie_kit/stungloves
 	cost = 7
-	job = list(JOB_TITLE_CIVILIAN, JOB_TITLE_MECHANIC, JOB_TITLE_ENGINEER, JOB_TITLE_ENGINEER_TRAINEE, JOB_TITLE_CHIEF)
+	job = list(JOB_TITLE_CIVILIAN, JOB_TITLE_SPACEPOD_TECHNICIAN, JOB_TITLE_ENGINEER, JOB_TITLE_ENGINEER_TRAINEE, JOB_TITLE_CHIEF_ENGINEER)
 
 //Bartender
 
@@ -511,7 +505,7 @@
 
 /datum/uplink_item/jobspecific/bee_briefcase
 	name = "Полный чемодан пчёл"
-	desc = "На первый взгляд, это безобидный чемоданчик. Однако внутри него скрываются опасные пчелы, выведенные Синдикатом. \
+	desc = "На первый взгляд, это безобидный чемоданчик. Однако внутри него скрываются опасные пчелы, выведенные \"Синдикатом\". \
 			Чтобы пчелы не обращали внимания на хозяина или хозяев, в чемодан необходимо добавить кровь. \
 			А чтобы увеличить количество пчёл, нужно залить внутрь стабильный мутаген. \
 			Когда чемодан открывается, он подключается к интеркому на станции по беспроводной связи и передаёт устрашающее сообщение."
@@ -535,7 +529,7 @@
 			Для активации устройства необходимо встать на кабель с питанием."
 	item = /obj/item/clothing/gloves/color/yellow/power
 	cost = 33
-	job = list(JOB_TITLE_ENGINEER, JOB_TITLE_ENGINEER_TRAINEE, JOB_TITLE_CHIEF)
+	job = list(JOB_TITLE_ENGINEER, JOB_TITLE_ENGINEER_TRAINEE, JOB_TITLE_CHIEF_ENGINEER)
 
 /datum/uplink_item/jobspecific/supertoolbox
 	name = "Набор экспериментальных инструментов"
@@ -543,8 +537,8 @@
 	item = /obj/item/storage/toolbox/syndisuper
 	cost = 8
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
-	job = list(JOB_TITLE_ENGINEER, JOB_TITLE_ENGINEER_TRAINEE, JOB_TITLE_CHIEF, \
-			JOB_TITLE_MECHANIC, JOB_TITLE_ROBOTICIST, JOB_TITLE_PARAMEDIC)
+	job = list(JOB_TITLE_ENGINEER, JOB_TITLE_ENGINEER_TRAINEE, JOB_TITLE_CHIEF_ENGINEER, \
+			JOB_TITLE_SPACEPOD_TECHNICIAN, JOB_TITLE_ROBOTICIST, JOB_TITLE_PARAMEDIC)
 
 //SCI
 
@@ -559,8 +553,8 @@
 //Roboticist
 
 /datum/uplink_item/jobspecific/syndiemmi
-	name = "НКИ Синдиката"
-	desc = "Разработанный синдикатом Нейронный Компьютерный Интерфейс, который навязывает законы Синдиката любому мозгу, помещённому в него."
+	name = "НКИ \"Синдиката\""
+	desc = "Разработанный \"Синдикатом\" Нейронный Компьютерный Интерфейс, который навязывает законы \"Синдиката\" любому мозгу, помещённому в него."
 	item = /obj/item/mmi/syndie
 	cost = 15
 	job = list(JOB_TITLE_ROBOTICIST)
@@ -575,7 +569,6 @@
 	cost = 50
 	job = list(JOB_TITLE_ROBOTICIST)
 	surplus = 0
-	can_discount = FALSE
 	hijack_only = TRUE
 
 //Librarian
@@ -595,7 +588,6 @@
 	item = /obj/item/spellbook/oneuse/random
 	cost = 25
 	job = list(JOB_TITLE_LIBRARIAN)
-	can_discount = FALSE
 
 /datum/uplink_item/jobspecific/dice_of_fate
 	name = "Кости судьбы"
@@ -604,13 +596,12 @@
 	cost = 100
 	job = list(JOB_TITLE_LIBRARIAN)
 	surplus = 0
-	can_discount = FALSE
 
 /datum/uplink_item/jobspecific/death_book
 	name = "Летопись вашей погибели"
-	desc = "Магический артефакт, захваченный синдикатом для своих агентов. Эта книга рассказывает о том, как погибали целые миры, и тот, кто её прочтёт, сможет на время ощутить себя одним из тех, кто несёт ответственность за эти события."
+	desc = "Магический артефакт, захваченный \"Синдикатом\" для своих агентов. Эта книга рассказывает о том, как погибали целые миры, и тот, кто её прочтёт, сможет на время ощутить себя одним из тех, кто несёт ответственность за эти события."
 	item = /obj/item/death_book
-	cost = 60
+	cost = 50
 	job = list(JOB_TITLE_LIBRARIAN)
 
 //Botanist
@@ -631,7 +622,7 @@
 			Кроме того, для передвижения внутри вентиляции вам потребуются свободные руки."
 	item = /obj/item/clothing/under/contortionist
 	cost = 50
-	job = list(JOB_TITLE_ATMOSTECH, JOB_TITLE_CHIEF)
+	job = list(JOB_TITLE_ATMOSTECH, JOB_TITLE_CHIEF_ENGINEER)
 
 /datum/uplink_item/jobspecific/energizedfireaxe
 	name = "Энергетический пожарный топор"
@@ -639,14 +630,14 @@
 			Однако для повторного заряда требуется определённое время. Кроме того, этот топор значительно острее обычного и может пробивать лёгкую броню."
 	item = /obj/item/twohanded/fireaxe/energized
 	cost = 18
-	job = list(JOB_TITLE_ATMOSTECH, JOB_TITLE_CHIEF)
+	job = list(JOB_TITLE_ATMOSTECH, JOB_TITLE_CHIEF_ENGINEER)
 
 /datum/uplink_item/jobspecific/combat_rcd
-	name = "УБС Синдиката"
+	name = "УБС \"Синдиката\""
 	desc = "Способно разрушать укреплённые стены. Имеет 500 единиц материи вместо стандартных 100."
 	item = /obj/item/rcd/combat
 	cost = 25
-	job = list(JOB_TITLE_ENGINEER, JOB_TITLE_ENGINEER_TRAINEE, JOB_TITLE_MECHANIC, JOB_TITLE_ATMOSTECH, JOB_TITLE_CHIEF)
+	job = list(JOB_TITLE_ENGINEER, JOB_TITLE_ENGINEER_TRAINEE, JOB_TITLE_SPACEPOD_TECHNICIAN, JOB_TITLE_ATMOSTECH, JOB_TITLE_CHIEF_ENGINEER)
 	surplus = 0
 
 /datum/uplink_item/jobspecific/poisonbottle
@@ -654,7 +645,7 @@
 	desc = "Синдикат отправит вам флакон с 40 единицами случайно выбранного яда. Этот яд может быть как совершенно неэффективным, так и крайне смертельным."
 	item = /obj/item/reagent_containers/glass/bottle/traitor
 	cost = 10
-	job = list(JOB_TITLE_RD, JOB_TITLE_CMO, JOB_TITLE_DOCTOR, JOB_TITLE_MINING_MEDIC, JOB_TITLE_INTERN, JOB_TITLE_PSYCHIATRIST, \
+	job = list(JOB_TITLE_RD, JOB_TITLE_CMO, JOB_TITLE_DOCTOR, JOB_TITLE_MINING_MEDIC, JOB_TITLE_MEDICAL_INTERN, JOB_TITLE_PSYCHIATRIST, \
 			JOB_TITLE_CHEMIST, JOB_TITLE_PARAMEDIC, JOB_TITLE_VIROLOGIST, JOB_TITLE_BARTENDER, JOB_TITLE_CHEF)
 
 /datum/uplink_item/jobspecific/poison_pen
@@ -690,6 +681,15 @@
 			Он выпускает специальный химический коктейль, который снимает и значительно сокращает эффект оглушения, а также повышает скорость передвижения."
 	item = /obj/item/implanter/supercharge
 	cost = 40
+	race = list(SPECIES_MACNINEPERSON)
+
+/datum/uplink_item/racial/combat_exoframe
+	name = "Боевой каркас экзоскелета"
+	desc = "Укреплённый титановыми вставками каркас экзоскелета, значительно повышающий прочность корпуса, при этом практически не увеличивая вес. \
+			Благодаря усовершенствованной гидравлической системе повышает мобильность пользователя без потери боевых характеристик. \
+			Поставляется с одноразовым автоимплантером для установки на месте."
+	item = /obj/item/storage/box/syndie_kit/combat_exoframe
+	cost = 28
 	race = list(SPECIES_MACNINEPERSON)
 
 //Slime People
@@ -729,7 +729,7 @@
 	name = "Голографическая сигара"
 	desc = "Привезена из Солнечной системы. Помимо брутального внешнего вида, пользователи отмечают, что она повышает точность при стрельбе обеими руками одновременно."
 	item = /obj/item/clothing/mask/holo_cigar
-	cost = 10
+	cost = 20
 	race = list(SPECIES_HUMAN)
 
 /datum/uplink_item/racial/ghostface_kit
@@ -754,7 +754,7 @@
 	name = "Пояс абдуктора"
 	desc = "Пояс с инструментами, используемый абдукторами. Он включает в себя полный набор инопланетных инструментов."
 	item = /obj/item/storage/belt/military/abductor/full
-	cost = 16
+	cost = 8
 	race = list(SPECIES_GREY)
 
 /datum/uplink_item/racial/silencer
@@ -762,6 +762,13 @@
 	desc = "Компактное устройство, предназначенное для выключения коммуникационного оборудования."
 	item = /obj/item/abductor/silencer
 	cost = 12
+	race = list(SPECIES_GREY)
+
+/datum/uplink_item/racial/agent_surgical_belt
+	name = "Хирургический пояс абдукторов"
+	desc = "Абдукторский хирургический пояс. Включает в себя полный набор абдукторских инструментов и два мендера. Может помещаться в рюкзак"
+	item = /obj/item/storage/belt/medical/surgery/abductor/loaded
+	cost = 8
 	race = list(SPECIES_GREY)
 
 /**
@@ -782,13 +789,13 @@
 
 /datum/uplink_item/dangerous/pistol
 	name = "Комплект с пистолетом FK-69 \"Стечкин\""
-	desc = "Полностью заряженный пистолет, оснащённый магазином на 8 патронов калибра 10 мм. Обладает большим разнообразием боеприпасов. \
+	desc = "Полностью заряженный пистолет, оснащённый магазином на 15 патронов калибра 10 мм. Обладает большим разнообразием боеприпасов. \
 			Крайне компактный пистолет, который легко помещается в карман. Поставляется с тремя магазинами. Совместим с глушителем."
 	item = /obj/item/storage/box/syndie_kit/stechkin_pistol
 	cost = 20
 
 /datum/uplink_item/dangerous/revolver
-	name = "Комплект с револьвером Синдиката .357"
+	name = "Комплект с револьвером \"Синдиката\" .357"
 	desc = "Полностью заряженный револьвер, оснащённый барабаном на 7 патронов \"Магнум\" .357 калибра. Поставляется с тремя дополнительными сменными барабанами."
 	item = /obj/item/storage/box/syndie_kit/revolver
 	cost = 50
@@ -803,10 +810,10 @@
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/dangerous/smg
-	name = "Пистолет-пулемёт \"C-20r\""
+	name = "Пистолет-пулемёт \"C-20rm\""
 	desc = "Полностью заряженный пистолет-пулемёт, оснащённый магазином на 20 патронов .45 калибра. \
-			Имеет два режима стрельбы: полуавтоматический и с отсечкой по 2 патрона. Совместим с глушителем."
-	item = /obj/item/gun/projectile/automatic/c20r
+			Имеет только автоматический режим огня. Совместим с глушителем."
+	item = /obj/item/gun/projectile/automatic/c20r/auto
 	cost = 70
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 	surplus = 40
@@ -833,7 +840,7 @@
 	name = "Снайперская винтовка Bubz \"FX1000\""
 	desc = "Полностью заряженная винтовка со снайперским прицелом, оснащённая магазином на 5 патронов .50 калибра. Совместима с глушителем. \
 			Требует использования обоих рук для стрельбы. Обладает огромной убойной силой и бронепробитием в зависимости от типа патрона. \
-			Будьте уверены, она не оставит вас равнодушными, а ваши ТК будут потрачены с пользой! Невероятная мощь Синдиката!"
+			Будьте уверены, она не оставит вас равнодушными, а ваши ТК будут потрачены с пользой! Невероятная мощь \"Синдиката\"!"
 	item = /obj/item/gun/projectile/automatic/sniper_rifle/syndicate
 	cost = 100
 	surplus = 25
@@ -854,7 +861,7 @@
 	desc = "Он настолько компактный, что легко помещается в карман. Стрелы арбалета содержат токсин, который на короткое время ослабляет цель и наносит ей повреждения. \
 			Перезарядка происходит автоматически."
 	item = /obj/item/gun/energy/kinetic_accelerator/crossbow
-	cost = 48
+	cost = 36
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 	surplus = 50
 
@@ -899,7 +906,7 @@
 	surplus = FALSE
 
 /datum/uplink_item/dangerous/rapier
-	name = "Рапира Синдиката"
+	name = "Рапира \"Синдиката\""
 	desc = "Изящная рапира из пластитана с алмазным наконечником, покрытым особым нокаутирующим ядом. \
 			Поставляется в ножнах и способна пробить практически любую защиту. \
 			Однако из-за внушительных размеров клинка и ножен, это оружие сразу выделяется как исключительно опасное."
@@ -943,7 +950,15 @@
 	cost = 69
 	refund_path = /obj/item/guardiancreator/tech/choose
 	refundable = TRUE
-	can_discount = TRUE
+
+/datum/uplink_item/dangerous/combat_defib
+	name = "Модуль боевого дефибриллятора"
+	desc = "Модуль на МЭК. Практически во всём является копией обычного модуля дефибриллятора, за одним лишь исключением — встроенная \
+			система защиты была переписана, так что теперь его можно использовать в качестве оружия."
+	item = /obj/item/mod/module/defibrillator/combat
+	cost = 12
+	surplus = 0
+	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /**
  * MARK: Support & Mechas
@@ -955,29 +970,29 @@
 
 /datum/uplink_item/support/gygax
 	name = "Экзоскелет \"Gygax\""
-	desc = "Модернизированный экзоскелет \"Gygax\", созданный для нужд Синдиката, оснащён следующими модулями: \
+	desc = "Модернизированный экзоскелет \"Gygax\", созданный для нужд \"Синдиката\", оснащён следующими модулями: \
 			LBX AC 11 \"Ram\", броня для ближнего и дальнего боя, дроид-ремонтник, маневровые двигатели, аккумулятор ёмкостью 40кВт."
 	item = /obj/mecha/combat/gygax/dark/loaded
 	cost = 400
 
 /datum/uplink_item/support/rover
 	name = "Экзоскелет \"Rover\""
-	desc = "Модернизированный экзоскелет \"Durand\", созданный для нужд Синдиката, оснащён следующими модулями: \
+	desc = "Модернизированный экзоскелет \"Durand\", созданный для нужд \"Синдиката\", оснащён следующими модулями: \
 			AC 2 \"Special\", G.M. Ion Shotgun, броня для дальнего боя, дроид-ремонтник, маневровые двигатели, аккумулятор ёмкостью 40кВт. \
-			Обладает способностью создавать энергетические барьеры, преодолеть которые могут лишь члены Синдиката."
+			Обладает способностью создавать энергетические барьеры, преодолеть которые могут лишь члены \"Синдиката\"."
 	item = /obj/mecha/combat/durand/rover/loaded
 	cost = 500
 
 /datum/uplink_item/support/mauler
 	name = "Экзоскелет \"Маулер\""
-	desc = "Модернизированный экзоскелет \"Mauler\", созданный для нужд Синдиката, оснащён следующими модулями: \
+	desc = "Модернизированный экзоскелет \"Mauler\", созданный для нужд \"Синдиката\", оснащён следующими модулями: \
 			AC 2 \"Special\", LBX AC 10 \"Scattershot\", Пусковая ракетная установка SRM-8, броня для дальнего боя, \
 			дроид-ремонтник, маневровые двигатели, аккумулятор с бесконечной ёмкостью. Оснащён системой прицеливания и дымогенератором."
 	item = /obj/mecha/combat/marauder/mauler/loaded
 	cost = 700
 
 /datum/uplink_item/support/reinforcement
-	name = "Подкрепление Синдиката"
+	name = "Подкрепление \"Синдиката\""
 	desc = "Пригласите ещё одного члена команды. У него не будет с собой никакого снаряжения, поэтому вам нужно сохранить несколько телекристаллов, чтобы вооружить его."
 	item = /obj/item/antag_spawner/nuke_ops
 	refund_path = /obj/item/antag_spawner/nuke_ops
@@ -986,8 +1001,8 @@
 	can_discount = FALSE
 
 /datum/uplink_item/support/reinforcement/assault_borg
-	name = "Штурмовой робот Синдиката"
-	desc = "Создан и запрограммирован на уничтожение всех, кто не имеет отношения к Синдикату. \
+	name = "Штурмовой робот \"Синдиката\""
+	desc = "Создан и запрограммирован на уничтожение всех, кто не имеет отношения к \"Синдикату\". \
 			Его арсенал включает самозарядный пулемёт LMG, работающий только в полуавтоматическом режиме стрельбы, \
 			гранатомет на 6 зарядов и энергетический меч. Дополнительное снаряжение включает в себя EMAG, пинпоинтер, флешер, огнетушитель и лом."
 	item = /obj/item/antag_spawner/nuke_ops/borg_tele/assault
@@ -995,7 +1010,7 @@
 	cost = 325
 
 /datum/uplink_item/support/reinforcement/medical_borg
-	name = "Медицинский робот Синдиката"
+	name = "Медицинский робот \"Синдиката\""
 	desc = "Обладает ограниченным наступательным потенциалом, но с лихвой компенсирует его возможностями поддержки. \
 			Его арсенал включает нанитовый гипоспрей, медицинскую лучевую пушку, боевой дефибриллятор и полный хирургический набор, \
 			а также сумку для хранения органов, благодаря которой он способен проводить операции не хуже гуманоида. \
@@ -1005,7 +1020,7 @@
 	cost = 175
 
 /datum/uplink_item/support/reinforcement/saboteur_borg
-	name = "Саботажный робот Синдиката"
+	name = "Саботажный робот \"Синдиката\""
 	desc = "Усовершенствованный инженерный робот, оснащённый модулем скрытности. Благодаря маскировочному проектору \"Хамелеон\" он способен принимать облик \
 			обычного инженерного робота со станции. Его арсенал включает энергетический меч и инженерное оборудование. \
 			Дополнительное снаряжение включает в себя EMAG, пинпоинтер, флешер и огнетушитель, а также модуль тепловизионного зрения."
@@ -1021,25 +1036,25 @@
 
 /datum/uplink_item/ammo/pistol
 	name = "\"Стечкин\" — 2 магазина 10 мм"
-	desc = "Два магазина на 8 стандартных патронов калибра 10 мм. Эти патроны примерно в два раза менее эффективны, чем патроны .357 калибра."
+	desc = "Два магазина на 15 стандартных патронов калибра 10 мм. Эти патроны примерно в два раза менее эффективны, чем патроны .357 калибра."
 	item = /obj/item/storage/box/syndie_kit/pistol_ammo
 	cost = 5
 
 /datum/uplink_item/ammo/pistolap
 	name = "\"Стечкин\" — магазин 10 мм (Бронебойные)"
-	desc = "Магазин на 8 бронебойных патронов калибра 10 мм. Эти патроны наносят немного меньше повреждений, чем стандартные, но обладают высокой пробивной силой."
+	desc = "Магазин на 15 бронебойных патронов калибра 10 мм. Эти патроны наносят немного меньше повреждений, чем стандартные, но обладают высокой пробивной силой."
 	item = /obj/item/ammo_box/magazine/m10mm/ap
 	cost = 5
 
 /datum/uplink_item/ammo/pistolfire
 	name = "\"Стечкин\" — магазин 10 мм (Зажигательные)"
-	desc = "Магазин на 8 зажигательных патронов калибра 10 мм. Эти патроны поджигают цель при попадании."
+	desc = "Магазин на 15 зажигательных патронов калибра 10 мм. Эти патроны поджигают цель при попадании."
 	item = /obj/item/ammo_box/magazine/m10mm/fire
 	cost = 5
 
 /datum/uplink_item/ammo/pistolhp
 	name = "\"Стечкин\" — магазин 10 мм (Экспансивные)"
-	desc = "Магазин на 8 экспансивных патронов калибра 10 мм. Эти патроны наносят намного больше повреждений, чем стандартные, но они совершенно бесполезны против брони."
+	desc = "Магазин на 15 экспансивных патронов калибра 10 мм. Эти патроны наносят намного больше повреждений, чем стандартные, но они совершенно бесполезны против брони."
 	item = /obj/item/ammo_box/magazine/m10mm/hp
 	cost = 5
 
@@ -1167,7 +1182,6 @@
 	name = "Снайперская винтовка Bubz FX1000 — магазин .50 \"Стандартный\""
 	desc = "Магазин на 5 стандартных патронов .50 калибра. Эти патроны способны с лёгкостью оторвать голову или конечность."
 	item = /obj/item/ammo_box/magazine/sniper_rounds
-	cost = 20
 
 /datum/uplink_item/ammo/sniper/soporific
 	name = "Снайперская винтовка Bubz FX1000 — магазин .50 \"Снотворный\""
@@ -1214,7 +1228,7 @@
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/ammo/revolver
-	name = "Револьвер Синдиката .357 — 2 сменных барабана"
+	name = "Револьвер \"Синдиката\" .357 — 2 сменных барабана"
 	desc = "Коробка, содержащая 2 сменных барабана, каждый из которых вмещает 7 патронов \"Магнум\" .357 калибра."
 	item = /obj/item/storage/box/syndie_kit/revolver_ammo
 	cost = 5
@@ -1273,7 +1287,7 @@
 			Однако, чтобы освоить этот путь, вам придётся полностью отказаться от применения любого оружия дальнего боя. Обратите внимание, что техники этого \
 			искусства не будут эффективны, если вы зависимы от каких-либо препаратов. Недоступно для изучения генокрадам и вампирам."
 	item = /obj/item/sleeping_carp_scroll
-	cost = 80
+	cost = 75
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 	refundable = TRUE
@@ -1305,7 +1319,7 @@
 
 /datum/uplink_item/stealthy_weapons/throwingweapons
 	name = "Набор метательного оружия"
-	desc = "В коробке находятся 5 сюрикенов и 2 усиленные болы, которые были созданы в рамках древних боевых искусств, практикуемых на Земле. \
+	desc = "В коробке находятся 4 сюрикена и 2 усиленные болы, которые были созданы в рамках древних боевых искусств, практикуемых на Земле. \
 			Эти метательные орудия крайне эффективны. Болы способны сбивать с ног, а сюрикены могут с лёгкостью вонзаться в конечности, \
 			нанося серьёзные ранения."
 	item = /obj/item/storage/box/syndie_kit/throwing_weapons
@@ -1317,7 +1331,7 @@
 	item = /obj/item/pen/edagger
 	cost = 7
 
-/datum/uplink_item/stealthy_weapons/edagger
+/datum/uplink_item/stealthy_weapons/armguard
 	name = "Скрытый клинок убийцы"
 	desc = "Наручный механизм со скрытым клинком для тайных убийств. Замаскирован под обычные наручи."
 	item = /obj/item/clothing/accessory/armguard/syndicate
@@ -1349,15 +1363,15 @@
 	cost = 1
 
 /datum/uplink_item/stealthy_weapons/soap
-	name = "Мыло Синдиката"
-	desc = "Устрашающе красный кусок специального мыла, созданного Синдикатом, предназначен для быстрого удаления пятен крови и других улик, чтобы скрыть убийства. \
+	name = "Мыло \"Синдиката\""
+	desc = "Устрашающе красный кусок специального мыла, созданного \"Синдикатом\", предназначен для быстрого удаления пятен крови и других улик, чтобы скрыть убийства. \
 			Его можно использовать и как оружие, например, бросить кому-то под ноги, чтобы он поскользнулся."
 	item = /obj/item/soap/syndie
 	cost = 1
 	surplus = 50
 
 /datum/uplink_item/stealthy_weapons/tape
-	name = "Плотная изолента Синдиката"
+	name = "Плотная изолента \"Синдиката\""
 	desc = "Чрезвычайно прочная клейкая лента. Она позволяет быстро заклеить рот жертве, при этом моментально сбивая маску. \
 			Увеличенный размер ленты позволяет использовать её до 40 раз."
 	item = /obj/item/stack/tape_roll/thick
@@ -1385,14 +1399,14 @@
 	name = "Универсальный глушитель"
 	desc = "Обеспечивает повышенную скрытность, заглушая звуки выстрелов."
 	item = /obj/item/gun_module/muzzle/suppressor
-	cost = 4
+	cost = 1
 	surplus = 10
 
 /datum/uplink_item/stealthy_weapons/scope_x8
 	name = "Оптический прицел х8"
 	desc = "Повышает точность при стрельбе на большие дистанции."
 	item = /obj/item/gun_module/rail/scope/x8
-	cost = 4
+	cost = 3
 	surplus = 10
 
 /datum/uplink_item/stealthy_weapons/dehy_carp
@@ -1461,12 +1475,12 @@
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/explosives/syndicate_bomb
-	name = "Бомба Синдиката"
-	desc = "Бомба Синдиката, оснащенная настраиваемым таймером, с минимальным временем задержки в 90 секунд. При заказе бомбы вы получите небольшой маячок, \
+	name = "Бомба \"Синдиката\""
+	desc = "Бомба \"Синдиката\", оснащенная настраиваемым таймером, с минимальным временем задержки в 90 секунд. При заказе бомбы вы получите небольшой маячок, \
 			который телепортирует бомбу к вам при активации. Бомбу можно прикрутить к полу гаечным ключом. После того как таймер будет запущен, \
 			она начнёт издавать громкий звук, который будет усиливаться по мере приближения взрыва. Если бомбу обнаружат вовремя, её можно будет обезвредить. \
 			Взрыв нанесёт серьёзный ущерб окружению."
-	item = /obj/item/radio/beacon/syndicate/bomb
+	item = /obj/item/beacon/syndicate/bomb
 	cost = 40
 	surplus = 0
 	can_discount = FALSE
@@ -1474,7 +1488,6 @@
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/explosives/syndicate_bomb/nuke
-	item = /obj/item/radio/beacon/syndicate/bomb
 	cost = 55
 	excludefrom = list()
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
@@ -1486,7 +1499,7 @@
 			который телепортирует бомбу к вам при активации. Бомбу можно прикрутить к полу гаечным ключом. После того как таймер будет запущен, \
 			она начнёт издавать громкий звук, который будет усиливаться по мере приближения взрыва. Если бомбу обнаружат вовремя, её можно будет обезвредить. \
 			На 2-3 минуты все электронные устройства в радиусе 36 тайлов будут полностью отключены."
-	item = /obj/item/radio/beacon/syndicate/bomb/emp
+	item = /obj/item/beacon/syndicate/bomb/emp
 	cost = 40
 	surplus = 0
 	can_discount = FALSE
@@ -1494,14 +1507,13 @@
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/explosives/emp_bomb/nuke
-	item = /obj/item/radio/beacon/syndicate/bomb/emp
 	cost = 50
 	excludefrom = list()
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 	hijack_only = FALSE
 
 /datum/uplink_item/explosives/syndicate_minibomb
-	name = "Мини-бомба Синдиката"
+	name = "Мини-бомба \"Синдиката\""
 	desc = "Довольно мощная граната с задержкой в 5 секунд."
 	item = /obj/item/grenade/syndieminibomb
 	cost = 30
@@ -1550,7 +1562,7 @@
 /datum/uplink_item/explosives/grenadier
 	name = "Пояс гренадера"
 	desc = "Пояс, наполненный 26 разнообразными гранатами, включает в себя: 4 дымовых шашки, 2 ЭМИ гранаты, 4 глюонные гранаты, 1 кислотную гранату, \
-			1 зариновую гранату, 2 плазменные гранаты, 10 боевых осколочных гранат и 2 мини-бомбы Синдиката."
+			1 зариновую гранату, 2 плазменные гранаты, 10 боевых осколочных гранат и 2 мини-бомбы \"Синдиката\"."
 	item = /obj/item/storage/belt/grenade/full
 	cost = 125
 	surplus = 0
@@ -1560,7 +1572,7 @@
 	name = "Граната доставки Потрошителей"
 	desc = "Представляет собой устройство, в котором находятся 5 дегидратированных Потрошителей аналогично дегидратированным обезьянам, \
 			которые после взрыва будут регидратированы небольшим резервуаром воды, содержащимся внутри гранаты. \
-			Затем эти Потрошители будут нападать на всех, кто не является оперативником Синдиката."
+			Затем эти Потрошители будут нападать на всех, кто не является оперативником \"Синдиката\"."
 	item = /obj/item/grenade/spawnergrenade/manhacks
 	cost = 30
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
@@ -1626,7 +1638,7 @@
 	cost = 20
 
 /datum/uplink_item/stealthy_tools/traitor_belt
-	name = "Пояс агента Синдиката"
+	name = "Пояс агента \"Синдиката\""
 	desc = "Пояс, который выглядит как обычный пояс для инструментов, но с увеличенными карманами. В них можно хранить любые маленькие предметы."
 	item = /obj/item/storage/belt/military/traitor
 	cost = 2
@@ -1642,7 +1654,7 @@
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/stealthy_tools/agent_card
-	name = "ID-карта агента Синдиката"
+	name = "ID-карта агента \"Синдиката\""
 	desc = "Специальная ID-карта, которая позволяет в любой момент изменить её имя, профессию и внешний вид. \
 			При использовании этой карты на другой, она копирует доступ, не удаляя старый. Чем больше различных карт вы просканируете, тем шире будет ваш доступ. \
 			Кроме того позволяет запретить ИИ отслежить вас."
@@ -1704,7 +1716,6 @@
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/stealthy_tools/syndigaloshes/nuke
-	item = /obj/item/clothing/shoes/chameleon/noslip
 	cost = 20
 	excludefrom = list()
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
@@ -1755,7 +1766,7 @@
 
 /datum/uplink_item/device_tools/toolbox
 	name = "Набор инструментов"
-	desc = "Ящик, выполненный в зловещих чёрно-красных тонах, содержащий набор стандартных инструментов, изолированные перчатки и мультитул."
+	desc = "Ящик, выполненный в зловещих чёрно-красных тонах, содержащий набор стандартных инструментов, изолированные перчатки и мультиметр."
 	item = /obj/item/storage/toolbox/syndicate
 	cost = 3
 
@@ -1776,7 +1787,6 @@
 	name = "Кобура для ножей"
 	desc = "Надежно крепится к комбинезону, позволяя носить с собой до 7 ножей."
 	item = /obj/item/clothing/accessory/holster/knives
-	cost = 2
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/device_tools/webbing
@@ -1809,7 +1819,7 @@
 
 /datum/uplink_item/device_tools/surgerybag
 	name = "Сумка с хирургическими инструментами"
-	desc = "Сумка Синдиката, содержащая полный набор хирургических инструментов, а также смирительную рубашку и намордник. \
+	desc = "Сумка \"Синдиката\", содержащая полный набор хирургических инструментов, а также смирительную рубашку и намордник. \
 			В отличие от обычных сумок, она отличается большей вместительностью и легкостью."
 	item = /obj/item/storage/backpack/duffel/syndie/surgery
 	cost = 7
@@ -1822,8 +1832,15 @@
 	item = /obj/item/storage/box/syndie_kit/bonerepair
 	cost = 6
 
+/datum/uplink_item/device_tools/sanguinius
+	name = "Инъектор с Сангвинием"
+	desc = "Одноразовый инъектор, содержащий одну дозу \"Сангвиния\". \
+			Препарат используется для быстрого восстановления крови, пригоден для приёма в полевых условиях."
+	item = /obj/item/reagent_containers/hypospray/autoinjector/sanguinius
+	cost = 2
+
 /datum/uplink_item/device_tools/syndicate_teleporter
-	name = "Экспериментальный телепортер Синдиката"
+	name = "Экспериментальный телепортер \"Синдиката\""
 	desc = "Портативное устройство, способное телепортировать пользователя на расстояние от 4 до 8 тайлов вперёд. \
 			Будьте осторожны: если телепортироваться в стену, активируются защитные системы, которые попытаются переместить вас параллельно направлению телепортации. \
 			Однако, если это не удастся, вы можете быть разорваны на мелкие кусочки. \
@@ -1875,7 +1892,7 @@
 	cost = 30
 
 /datum/uplink_item/device_tools/medkit
-	name = "Боевая аптечка Синдиката"
+	name = "Боевая аптечка \"Синдиката\""
 	desc = "Аптечка, выполненная в зловещих чёрно-красных тонах. В её состав входит продвинутый анализатор здоровья, \
 			медицинский ИЛС с ночным зрением, автомендер с 200 единицами синтплоти и боевой гипоспрей, в состав которого входят \
 			эпинефрин, разбавленный омнизин и физиологический раствор."
@@ -1897,6 +1914,13 @@
 	cost = 20
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
+/datum/uplink_item/device_tools/cyborg_seatmod
+	name = "Модуль встроенного сидения робота"
+	desc = "Позволяет использовать робота в качестве транспорта. Поставляется с уже расширенными возможностями."
+	item = /obj/item/borg/upgrade/mounted_seat/pre_emaged
+	cost = 30
+	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
+
 /datum/uplink_item/device_tools/autoimplanter
 	name = "Автоимплантер"
 	desc = "Устройство, позволяющее устанавливать 3 кибернетических импланта в полевых условиях без необходимости хирургического вмешательства."
@@ -1912,9 +1936,9 @@
 	surplus = 75
 
 /datum/uplink_item/device_tools/bowman_kit
-	name = "Набор гарнитуры с ключом-шифратором Синдиката"
-	desc = "В комплект входит гарнитура, оснащённая технологией \"Хамелеон\", которая обеспечивает защиту от громких звуков, а также ключ-шифратор Синдиката. \
-			Этот ключ открывает доступ к зашифрованному каналу Синдиката и позволяет прослушивать все каналы связи на станции."
+	name = "Набор гарнитуры с ключом-шифратором \"Синдиката\""
+	desc = "В комплект входит гарнитура, оснащённая технологией \"Хамелеон\", которая обеспечивает защиту от громких звуков, а также ключ-шифратор \"Синдиката\". \
+			Этот ключ открывает доступ к зашифрованному каналу \"Синдиката\" и позволяет прослушивать все каналы связи на станции."
 	item = /obj/item/storage/box/syndie_kit/bowman_conversion_kit
 	cost = 2
 	surplus = 75
@@ -1954,7 +1978,7 @@
 	name = "Силовой маяк"
 	desc = "Устройство, притягивающее к себе сингулярность и тесла-шар после того, как они покинут зону содержания. \
 			Чтобы его подключить, необходимо установить его на узел и закрепить с помощью отвёртки, а затем включить."
-	item = /obj/item/radio/beacon/syndicate
+	item = /obj/item/beacon/syndicate
 	cost = 30
 	surplus = 0
 	hijack_only = TRUE //This is an item only useful for a hijack traitor, as such, it should only be available in those scenarios.
@@ -1963,17 +1987,16 @@
 /datum/uplink_item/device_tools/ion_caller
 	name = "Пульт управления ионной пушкой на низкой орбите"
 	desc = "Портативное устройство, позволяющее активировать ионную пушку, которая перезаряжается каждые 15 минут. \
-			Оно может изменять законы станционного ИИ, что приведет к обнаружению вас системой безопасности НаноТрейзен, или же вызывать перебои в телекоммуникациях."
+			Оно может изменять законы станционного ИИ, что приведет к обнаружению вас системой безопасности \"Нанотрейзен\", или же вызывать перебои в телекоммуникациях."
 	item = /obj/item/ion_caller
 	limited_stock = 1	// Might be too annoying if someone had multiple.
 	cost = 30
 	surplus = 10
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
-
 /datum/uplink_item/device_tools/syndicate_detonator
-	name = "Детонатор Синдиката"
-	desc = "При активации детонатора все установленные бомбы Синдиката будут приведены в боевую готовность, и таймер начнет отсчитывать 5 секунд до взрыва. \
+	name = "Детонатор \"Синдиката\""
+	desc = "При активации детонатора все установленные бомбы \"Синдиката\" будут приведены в боевую готовность, и таймер начнет отсчитывать 5 секунд до взрыва. \
 			Убедитесь, что вы находитесь в безопасном месте, прежде чем активировать детонатор."
 	item = /obj/item/syndicatedetonator
 	cost = 15
@@ -1989,7 +2012,7 @@
 
 /datum/uplink_item/device_tools/ai_detector
 	name = "Детектор ИИ"
-	desc = "Устройство, замаскированное под мультитул, которое оповещает владельца световым индикатором о том, что за ним следит искусственный интеллект. \
+	desc = "Устройство, замаскированное под мультиметр, которое оповещает владельца световым индикатором о том, что за ним следит искусственный интеллект. \
 			Расстояние до фокуса ИИ определяется цветом индикатора: жёлтый означает, что до него 20 тайлов, а красный — 8 тайлов."
 	item = /obj/item/multitool/ai_detect
 	cost = 2
@@ -2038,64 +2061,146 @@
 	desc = "Инъектор с запрещённым стимулятором. После его применения гуманоид становится невосприимчивым к оглушению и значительно повышает свои способности к восстановлению."
 	item = /obj/item/reagent_containers/hypospray/autoinjector/stimulants
 	cost = 28
+	surplus = 0
+	can_discount = FALSE
 	excludefrom = list(UPLINK_TYPE_NUCLEAR)
 
 /**
- * MARK: Space Suits & Hardsuits
+ * MARK: Space Suits & MODs
  */
 /datum/uplink_item/suits
-	category = "Скафандры и ИКСы"
-	surplus = 40
+	category = "Скафандры и МЭКы"
+	surplus = 10
 
 /datum/uplink_item/suits/space_suit
-	name = "Скафандр Синдиката"
+	name = "Скафандр \"Синдиката\""
 	desc = "Скафандр, выполненный в зловещих чёрно-красных тонах, отличается компактными размерами по сравнению с ВКД НаноТрейзнен, \
 			легко помещается в сумку и оснащён карманами для хранения оружия. В комплект также входит оборудование для поддержания жизнедеятельности. \
 			Скафандр обеспечивает хорошую защиту, но при этом замедляет передвижение. Шлем защищает от вспышек."
 	item = /obj/item/storage/box/syndie_kit/space
 	cost = 18
 
-/datum/uplink_item/suits/hardsuit
-	name = "ИКС Синдиката"
-	desc = "Знаменитый ИКС, выполненный в зловещих чёрно-красных тонах, отличается компактными размерами по сравнению с ИКСами НаноТрейзнен и \
-			легко помещается в сумку. В комплект также входит оборудование для поддержания жизнедеятельности. ИКС оснащён встроенным джетпаком и \
-			обеспечивает отличную защиту. Он имеет два режима работы: ВКД — для внекорабельной деятельности и боевой — для использования на станции."
-	item = /obj/item/storage/box/syndie_kit/hardsuit
-	cost = 33
+/datum/uplink_item/suits/modsuit
+	name = "МЭК \"Синдиката\""
+	desc = "Знаменитый МЭК, выполненный в зловещих чёрно-красных тонах, обладающий хорошей защитой и практически не стесняющий \
+			пользователя в движениях. В комплект также входит оборудование для поддержания жизнедеятельности. Экипаж, при виде \
+			данного МЭКа, обычно впадает в панику, так что о скрытности можете забыть."
+	item = /obj/item/mod/control/pre_equipped/traitor
+	cost = 30
+	surplus = 60
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
-/datum/uplink_item/suits/chameleon_hardsuit
-	name = "ИКС-\"Хамелеон\""
-	desc = "Скафандр, оснащённый технологией \"Хамелеон\". В комплект также входит оборудование для поддержания жизнедеятельности. \
-			Изначально он выглядит как инженерный ИКС, но его можно замаскировать под любой другой из числа следующих: \
-			инженерный, медицинский, шахтёрский, службы безопасности, а также под стандартный ВКД. \
-			Скафандр обеспечивает хорошую защиту, но при этом замедляет передвижение. Шлем защищает от вспышек."
-	cost = 46 //reskinned blood-red hardsuit with chameleon
-	item = /obj/item/storage/box/syndie_kit/chameleon_hardsuit
-	excludefrom = list(UPLINK_TYPE_NUCLEAR)
+/datum/uplink_item/suits/mod_holster
+	name = "Модуль кобуры"
+	desc = "Модуль для МЭК, представляющий из себя небольшой внутренний карман, позволяющий хранить внутри оружие с возможностью \
+			извлечь его в любой момент. Оружие в комплект не входит."
+	item = /obj/item/mod/module/holster/hidden
+	cost = 2
 
-/datum/uplink_item/suits/hardsuit/elite
-	name = "Элитный ИКС Синдиката"
-	desc = "Усовершенствованная версия знаменитого ИКСа Синдиката, выполненная в мрачном чёрном цвете. Обладает компактными размерами и легко помещается в сумку. \
-			В комплект также входит оборудование для поддержания жизнедеятельности. ИКС оснащён встроенным джетпаком и обеспечивает отличную защиту. \
-			В отличие от своего предшественника, он обладает полной защитой от термического воздействия и обладает превосходной броней. \
-			Он имеет два режима работы: ВКД — для внекорабельной деятельности и боевой — для использования на станции."
-	item = /obj/item/clothing/suit/space/hardsuit/syndi/elite
-	cost = 50
-	excludefrom = list()
+/datum/uplink_item/suits/springlock_module
+	name = "Модифицированный модуль пружинных замков"
+	desc = "Модуль для МЭК, представляющий собой пружинный экзоскелет, располагающийся по всей площади костюма под его внешней \
+			оболочкой. При активации раскрывается, значительно ускоряя процесс облачения пользователя в костюм, однако имеет \
+			критический недостаток: при воздействии влаги пружинный механизм имеет тенденцию \"защёлкиваться\" в исходное положение. \
+			Данная версия модуля позволяет активировать костюм практически моментально, давая возможность быстро избавиться от \
+			жертвы, находящейся внутри. Этот модуль замаскирован под модуль ДНК и блокирует снятие костюма на 10 секунд."
+	item = /obj/item/mod/module/springlock/bite_of_87
+	cost = 5
+
+/datum/uplink_item/suits/grappling_hook
+	name = "Модуль крюк-кошки"
+	desc = "Модуль для МЭК, встраиваемый в предплечье костюма. Позволяет выстрелить крюк-кошкой на лебёдке с встроенным мотором. \
+			Первоначальные модели этого крюка предназначались как спассительная соломинка для инженеров, однако  модуль показал \
+			себя в разы лучше в боевых сценариях."
+	item = /obj/item/mod/module/grappling_hook/upgraded
+	cost = 5
+
+/datum/uplink_item/suits/magboot
+	name = "Модуль продвинутых магбутсов"
+	desc = "Модуль для МЭК, представляет из себя доработанную версию стандартных магнитных ботинок. Не способен защитить пользователя \
+			от смазки, однако предоставляет защиту от гравитации, поскальзывания на воде и мыле и, что самое важное, не замедляет \
+			пользователя. Данный модуль изначально предустановлен в стандартный МЭК \"Синдиката\"."
+	item = /obj/item/mod/module/magboot/advanced
+	cost = 5
+	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
+
+/datum/uplink_item/suits/elite_magboot
+	name = "Модуль элитных магбутсов"
+	desc = "Модуль для МЭК, представляющий из себя магнитные ботинки, основанные на технологиях, любезно предоставленных \"Киберсан\". \
+			Удерживающие магниты последнего поколения позволяют пользователю не скользить на космической смазке, \
+			при этом предоставляя те же самые преимущества, что и продвинутые магбутсы. Не забудьте, что вам, для начала,\
+			необходимо удалить из вашего МЭКа старые магбутсы с помощью поддевающего инструмента."
+	item = /obj/item/mod/module/magboot/advanced/elite
+	cost = 30
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
-/datum/uplink_item/suits/hardsuit/shielded
-	name = "ИКС Синдиката с энергетическим щитом"
-	desc = "Знаменитый ИКС, выполненный в зловещих чёрно-красных тонах, отличается компактными размерами по сравнению с ИКСами НаноТрейзнен и \
-			легко помещается в сумку. В комплект также входит оборудование для поддержания жизнедеятельности. ИКС оснащён встроенным джетпаком и обеспечивает отличную защиту. \
-			В отличие от обычного ИКСа Синдиката, этот обладает энергетическим щитом, который способен блокировать любые атаки, как в ближнем, так и в дальнем бою. \
-			Щит имеет три заряда и восстанавливается в течение 20 секунд, если его не использовать. \
-			Он имеет два режима работы: ВКД — для внекорабельной деятельности и боевой — для использования на станции."
-	item = /obj/item/clothing/suit/space/hardsuit/syndi/shielded
-	cost = 150
-	excludefrom = list()
+/datum/uplink_item/suits/chameleon_module
+	name = "Модуль маскировки блока управления"
+	desc = "Модуль для МЭК, использующий технологию \"Хамелеон\" для маскировки выключенного МЭК под обычный рюкзак. \
+			Внимание: модуль не будет работать в случае, если МЭК запущен."
+	item = /obj/item/mod/module/chameleon
+	cost = 5
+
+/datum/uplink_item/suits/uprgaded_chameleon
+	name = "Модуль активного хамелеона"
+	desc = "Модуль для МЭК, использующий продвинутую технологию \"Хамелеон\" для активной маскировки всех частей МЭК \
+			под один из заранее заданных шаблонов маскировки. Предустановлен в МЭКи класса \"Специалист\", используемые \
+			контрактниками \"Синдиката\". Чувствителен к ЭМИ и очень энергозатратен."
+	item = /obj/item/mod/module/active_chameleon
+	cost = 20
+	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
+
+/datum/uplink_item/suits/plate_compression
+	name = "Модуль уплотнения"
+	desc = "Модуль для МЭК, позволяющий сжать блок управления МЭК до достаточно малых размеров, чтобы он поместился в рюкзак. \
+			Модуль несовместим со всеми модулями хранения, поэтому вам сначала придётся их удалить."
+	item = /obj/item/mod/module/plate_compression
+	cost = 10
+
+/datum/uplink_item/suits/night
+	name = "Модуль ночного видения"
+	desc = "Модуль для МЭК, устанавливаемый в визор костюма. Позволяет пользователю разборчиво видеть окружение даже в полной темноте."
+	item = /obj/item/mod/module/visor/night
+	cost = 5
+
+/datum/uplink_item/suits/thermal
+	name = "Модуль термального зрения"
+	desc = "Модуль для МЭК, устанавливаемый в визор костюма. Предоставляет пользователю термальное зрение."
+	item = /obj/item/mod/module/visor/thermal
+	cost = 15
+
+/datum/uplink_item/suits/elite_mod
+	name = "Элитный МЭК отряда \"Атом\""
+	desc = "Легендарный МЭК, выполненный в зловещих чёрных тонах. Продвинутая версия МЭК \"Синдиката\". Предоставляет превосходную \
+			защиту от всех угроз, при этом не замедляя пользователя. Обладает повышенной модульной вместимостью \
+			позволяя настроить костюм под предпочтения пользователя."
+	item = /obj/item/mod/control/pre_equipped/elite
+	cost = 40
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
+
+/datum/uplink_item/suits/shielded
+	name = "Модуль энергетического щита"
+	desc = "Модуль персонального защитного силового поля для МЭК, который способен блокировать любые атаки, как в ближнем, \
+			так и в дальнем бою. Щит имеет три заряда, которые восстанавливаются со временем."
+	item = /obj/item/mod/module/energy_shield
+	cost = 200
+	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
+
+/datum/uplink_item/suits/shock_absorber
+	name = "Модуль поглощения шока"
+	desc = "Модуль для МЭК, использующий продвинутую технологию поглощения ударных волн для защиты пользователя от шока, \
+			вызываемого оглушающими дубинками. Внимание: модуль не защитит пользователя от урона по выносливости, однако \
+			он не даст вам потерять равновесие и упасть, выронив на пол все ваши драгоценные предметы."
+	item = /obj/item/mod/module/shock_absorber
+	cost = 15
+
+/datum/uplink_item/suits/bloodwall_module
+	name = "Модуль генератора энергощита"
+	desc = "Модуль для МЭК, встраиваемый в предплечье костюма и производящий стационарные генераторы энергощита. Данные генераторы \
+			способны выдержать гораздо больше выстрелов перед тем, как выйти из строя, однако время их работы значительно сокращено. \
+			Щит не способен остановить биологических существ, поэтому остерегайтесь бегущих на вас ассистентов с копьями и туллбоксами."
+	item = /obj/item/mod/module/dispenser/dropwall_syndie
+	cost = 40
 
 /**
  * MARK: Implants
@@ -2147,9 +2252,9 @@
 /datum/uplink_item/implants/adrenal
 	name = "Адреналиновый имплант"
 	desc = "Имплант, который можно вживить в организм и активировать по желанию. Может быть использован до 2 раз, со временем заряды восстанавливаются, потребляя кровь и питательные вещества носителя. Избавляет от оглушения и замедления, восстанавливает выносливость. \
-			Кроме того, вы получаете коктейль из стимуляторов, которые лечат вас, ускоряют и делают менее уязвимыми к оглушению. Не рекомендуется использовать более двух раз подряд без должного восстановления организма."
+			Кроме того, вы получаете коктейль из стимуляторов, которые ускоряют и делают менее уязвимыми к оглушению. Не рекомендуется использовать более двух раз подряд без должного восстановления организма."
 	item = /obj/item/implanter/adrenalin
-	cost = 44
+	cost = 28
 	can_discount = FALSE
 	surplus = 0
 
@@ -2159,6 +2264,15 @@
 			Кроме того, вы получаете коктейль из стимуляторов, которые лечат вас, ускоряют и делают менее уязвимыми к оглушению."
 	item = /obj/item/implanter/adrenalin/prototype
 	cost = 16
+
+/datum/uplink_item/implants/heal
+	name = "Имплант лечения"
+	desc = "Имплант, который можно вживить в организм и активировать по желанию. Может быть использован до 2 раз, со временем заряды восстанавливаются, потребляя питательные вещества носителя. \
+			Лечит вас с помощью нанитов. А также вводит в кровь эпинефрин и транекзамовую кислоту. Не рекомендуется использовать более двух раз подряд без должного восстановления организма."
+	item = /obj/item/implanter/heal
+	cost = 24
+	can_discount = FALSE
+	surplus = 0
 
 /datum/uplink_item/implants/microbomb
 	name = "Имплант микробомбы"
@@ -2184,6 +2298,13 @@
 	item = /obj/item/implanter/explosive_macro
 	cost = 100
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
+
+/datum/uplink_item/implants/fake_mindshield
+	name = "Фальшивый имплант защиты разума"
+	desc = "Имплант, который можно вживить в организм для имитации импланта защиты разума. Активируется по желанию владельца и позволяет включать или отключать своё отображение на ИЛС службы безопасности. \
+			Однако не обладает функционалом настоящего импланта защиты разума."
+	item = /obj/item/implanter/fake_mindshield
+	cost = 5
 
 /**
  * MARK: Cybernetic Implants
@@ -2239,7 +2360,6 @@
 			С его помощью вы сможете продемонстрировать противнику, насколько опасным может быть ваш хвост."
 	item = /obj/item/autoimplanter/oneuse/razorblade
 	cost = 42
-	surplus = 0
 	uplinktypes = list(UPLINK_TYPE_TRAITOR)
 
 /datum/uplink_item/cyber_implants/laserblade
@@ -2248,8 +2368,16 @@
 			С его помощью вы сможете продемонстрировать противнику, насколько опасным может быть ваш хвост."
 	item = /obj/item/autoimplanter/oneuse/laserblade
 	cost = 38
-	surplus = 0
 	uplinktypes = list(UPLINK_TYPE_TRAITOR)
+
+/datum/uplink_item/cyber_implants/nuke_map
+	name = "Имплант миникарты отряда \"Атом\""
+	desc = "Имплант для постоянного отображения мини-карты в левом верхнем углу поля зрения пользователя с помощью технологии дополненной реальности. \
+			Показывает членов вашего отряда и остальных живых целей. Также показывает где находится диск."
+	item = /obj/item/storage/box/cyber_implants/nuke_map
+	cost = 33
+	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
+
 
 /**
  * MARK: Pointless Badassery
@@ -2266,13 +2394,19 @@
 	cost = 50
 
 /datum/uplink_item/badass/syndiecigs
-	name = "Сигареты Синдиката"
+	name = "Сигареты \"Синдиката\""
 	desc = "Насыщенный аромат, плотный дым и вкус синдизина. Обычные сигареты."
 	item = /obj/item/storage/fancy/cigarettes/cigpack_syndicate
 	cost = 2
 
+/datum/uplink_item/badass/syndieecig
+	name = "Электронная сигарета \"Синдиката\""
+	desc = "Со вкусом \"Двойное яблочко\"."
+	item = /obj/item/ecig/syndi
+	cost = 6
+
 /datum/uplink_item/badass/syndiecards
-	name = "Игральные карты Синдиката"
+	name = "Игральные карты \"Синдиката\""
 	desc = "У них очень острые края, поэтому во время игры можно легко пораниться. Обычные игральные карты."
 	item = /obj/item/deck/cards/syndicate
 	cost = 2
@@ -2295,17 +2429,16 @@
 
 /datum/uplink_item/badass/balloon
 	name = "Фирменный воздушный шар \"Синдикат\""
-	desc = "Изящный красный воздушный шар с эмблемой Синдиката."
+	desc = "Изящный красный воздушный шар с эмблемой \"Синдиката\"."
 	item = /obj/item/toy/syndicateballoon
 	cost = 100
 	can_discount = FALSE
 
 /datum/uplink_item/badass/unocard
-	name = "Реверсивная карта Синдиката"
+	name = "Реверсивная карта \"Синдиката\""
 	desc = "Устройство, замаскированное под игральную карту, способно телепортировать оружие вашего противника прямо к вам в руку, когда он пытается выстрелить в вас."
 	item = /obj/item/syndicate_reverse_card
 	cost = 10
-
 
 /datum/uplink_item/badass/bandage
 	name = "Военный перевязочный пакет"
@@ -2344,8 +2477,8 @@
 
 /datum/uplink_item/bundles_TC/medical
 	name = "Медицинский набор"
-	desc = "Сумка, в которой находятся: боевая аптечка Синдиката, автомендор с синтплотью, боевой гипоспрей, боевой компактный дефибриллятор, боевой ручной дефибриллятор, \
-			имплант медицинской лучевой пушки, имплант хирургических инструментов, отвертка, автоимплантер, элитный медицинский ИКС Синдиката, портативный анализатор тела, \
+	desc = "Сумка, в которой находятся: боевая аптечка \"Синдиката\", автомендор с синтплотью, боевой гипоспрей, боевой компактный дефибриллятор, боевой ручной дефибриллятор, \
+			имплант медицинской лучевой пушки, имплант хирургических инструментов, отвертка, автоимплантер, элитный МЭК \"Синдиката\", портативный анализатор тела, \
 			медицинская шина, инъектор с нанокальцием."
 	item = /obj/item/storage/backpack/duffel/syndie/med/medicalbundle
 	cost = 130 // normally 200
@@ -2353,7 +2486,7 @@
 
 /datum/uplink_item/bundles_TC/sniper
 	name = "Набор — Снайперская винтовка Bubz FX1000"
-	desc = "Портфель, в которой находятся: снайперская винтовка Bubz FX1000, красный галстук, тактический комбинезон и 2 магазина .50 \"Снотворный\"."
+	desc = "Портфель, в которой находятся: снайперская винтовка Bubz FX1000, красный галстук, тактический комбинезон, глушитель, оптический прицел и 2 магазина .50 \"Снотворный\"."
 	item = /obj/item/storage/briefcase/sniperbundle
 	cost = 110 // normally 135
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
@@ -2372,15 +2505,15 @@
 	uplinktypes = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/bundles_TC/badass
-	name = "Набор Синдиката"
+	name = "Набор \"Синдиката\""
 	desc = "Предлагает вам выбрать один из трёх наборов или получить случайный набор. Общая стоимость предметов в наборах превышает 100 телекристаллов."
-	item = /obj/item/radio/beacon/syndicate/bundle
+	item = /obj/item/beacon/syndicate/bundle
 	cost = 100
 	refundable = TRUE
 	excludefrom = list(UPLINK_TYPE_NUCLEAR, UPLINK_TYPE_SST)
 
 /datum/uplink_item/bundles_TC/surplus_crate
-	name = "Ящик снабжения Синдиката"
+	name = "Ящик снабжения \"Синдиката\""
 	desc = "Ящик с различным снаряжением, стоимость которого составляет 250 телекристаллов."
 	cost = 100
 	item = /obj/item/storage/box/syndicate
@@ -2388,7 +2521,7 @@
 	var/crate_value = 250
 
 /datum/uplink_item/bundles_TC/surplus_crate/super
-	name = "Большой ящик снабжения Синдиката"
+	name = "Большой ящик снабжения \"Синдиката\""
 	desc = "Ящик с различным снаряжением, стоимость которого составляет 625 телекристаллов. Из-за высокой цены этот набор не доступен для покупки в одиночку."
 	cost = 200
 	crate_value = 625
@@ -2402,8 +2535,7 @@
 	target_uplink.uses -= cost
 	target_uplink.used_TC = cost
 
-
-	while(remaining_TC && buyable_items.len)
+	while(remaining_TC && length(buyable_items))
 		var/datum/uplink_item/chosen_item = pick(buyable_items)
 		if(!chosen_item.surplus || prob(100 - chosen_item.surplus))
 			continue
@@ -2415,10 +2547,10 @@
 		remaining_TC -= chosen_item.cost
 		itemlog += chosen_item.name // To make the name more readable for the log compared to just i.item
 
-	target_uplink.purchase_log += "<BIG>[bicon(crate)]</BIG>"
+	target_uplink.purchase_log += "<big>[icon2base64html(crate)]</big>"
 	for(var/bought_item in bought_items)
 		var/obj/purchased = new bought_item(crate)
-		target_uplink.purchase_log += "<BIG>[bicon(purchased)]</BIG>"
+		target_uplink.purchase_log += "<big>[icon2base64html(purchased)]</big>"
 	add_game_logs("purchased a surplus crate with [jointext(itemlog, ", ")]", buyer)
 
 /datum/uplink_item/bundles_TC/telecrystal
@@ -2464,7 +2596,7 @@
 
 /datum/uplink_item/contractor/baton
 	name = "Дубинка Контрактника"
-	desc = "Компактная специализированная дубинка, которую выдают контрактникам Синдиката. \
+	desc = "Компактная специализированная дубинка, которую выдают контрактникам \"Синдиката\". \
 			Это оружие применяется для поражения цели слабым электрическим током, что позволяет быстро обездвижить её."
 	item = /obj/item/melee/baton/telescopic/contractor
 	cost = 40
@@ -2517,7 +2649,7 @@
 
 /datum/uplink_item/contractor/contractor_partner
 	name = "Вызов напарника"
-	desc = "Устройство, позволяющее связаться с ближайшими отделениями Синдиката в вашем регионе. \
+	desc = "Устройство, позволяющее связаться с ближайшими отделениями \"Синдиката\" в вашем регионе. \
 			Если в вашем районе есть свободный агент, его незамедлительно отправят к вам на помощь. \
 			В случае отсутствия свободных агентов, сердства будут возвращены."
 	item = /obj/item/antag_spawner/contractor_partner

@@ -1,11 +1,8 @@
 /datum/action/item_action/advanced/ninja/ninja_clones
-	name = "Energy Clones"
-	desc = "Creates two clones of the user to confuse enemies in the fight. Also changes your and the clones possition after that. Energy cost: 4000"
+	name = "Энергетические клоны"
+	desc = "Создаёт двух ваших клонов, незамедлительно вступающих в бой с противником. Также меняет вас и одного из клонов местами. Затраты энергии: 4000"
 	check_flags = AB_CHECK_CONSCIOUS
-	charge_type = ADV_ACTION_TYPE_RECHARGE
 	charge_max = 8 SECONDS
-	use_itemicon = FALSE
-	icon_icon = 'icons/mob/actions/actions_ninja.dmi'
 	button_icon_state = "ninja_clones"
 	button_icon = 'icons/mob/actions/actions_ninja.dmi'
 	background_icon_state = "background_green"
@@ -21,7 +18,6 @@
 			ninja_action.use_action()
 			break
 		addtimer(CALLBACK(src, PROC_REF(spawn_ninja_clones), ninja), 15)
-
 
 /obj/item/clothing/suit/space/space_ninja/proc/spawn_ninja_clones(mob/living/carbon/human/ninja)
 	if(auto_smoke)

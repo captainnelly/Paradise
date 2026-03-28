@@ -38,7 +38,6 @@ SUBSYSTEM_DEF(addition_goals)
 	//console stuff
 	var/list/console_list = list()
 
-
 /// Initialization
 /datum/controller/subsystem/addition_goals/Initialize()
 	init_goal_types()
@@ -57,16 +56,12 @@ SUBSYSTEM_DEF(addition_goals)
 		RegisterSignal(shuttle, COMSIG_SHUTTLE_DOCK, PROC_REF(on_shuttle_dock))
 	funeral_shuttle = SSshuttle.getShuttle(AGS_FUNERAL_SHUTTLE_ID)
 
-
 /// Fire
 /datum/controller/subsystem/addition_goals/fire(resumed = FALSE)
 	//TODO need?
-
-
-
+	return
 
 // MARK:	Goals logic
-
 /// Check available refresh
 /datum/controller/subsystem/addition_goals/proc/is_refresh_available()
 	var/current_time = world.time
@@ -77,7 +72,7 @@ SUBSYSTEM_DEF(addition_goals)
 	if(!force && !is_refresh_available())
 		return FALSE
 	available_goals_refresh_time = world.time
-	for(var/goal as anything in available_goals) // delete old available goals
+	for(var/goal in available_goals) // delete old available goals
 		qdel(goal)
 		available_goals -= goal
 	for(var/i = 0; i < AVAILABLE_GOALS_COUNT; i++) // create new goals as available
@@ -121,7 +116,6 @@ SUBSYSTEM_DEF(addition_goals)
 	addtimer(CALLBACK(src, PROC_REF(send_shuttle_to_centcom), user), COMPLETE_GOAL_SHUTTLE_SEND_DELAY SECONDS)
 	return TRUE
 
-
 /// When dock shuttle to dock (signal handler)
 /datum/controller/subsystem/addition_goals/proc/on_shuttle_dock(datum/source, /obj/docking_port/mobile/shuttle, obj/docking_port/stationary/new_dock)
 	SIGNAL_HANDLER
@@ -142,16 +136,12 @@ SUBSYSTEM_DEF(addition_goals)
 		refresh_available_goals(force = TRUE)
 	goal_state = AGS_STATE_IDLE
 
-
 /datum/controller/subsystem/addition_goals/proc/add_reward(credits, cargopoints)
 	if(credits > 0)
 		var/datum/money_account/account = GLOB.station_account
 		account.credit(round(credits), "Завершение дополнительной цели", "Дополнительная цель", account.owner_name)
 	if(cargopoints > 0)
 		SSshuttle.points += round(cargopoints)
-
-
-
 
 // MARK:	Console logic
 
@@ -164,7 +154,7 @@ SUBSYSTEM_DEF(addition_goals)
 		reward_number++
 	if(goal.reward_cargopoints > 0)
 		report += "<br>[reward_number]. [goal.reward_cargopoints] очков поставки в карго."
-	var/addition = "Данный запрос считается действительным только при наличии печати Центрального Командоваия Нанотрейзен"
+	var/addition = "Данный запрос считается действительным только при наличии печати Центрального Командоваия \"Нанотрейзен\""
 	var/report_message = create_paper_content(goal.name, report, addition)
 	print_report_on_console(goal.name, report_message, stamp = TRUE)
 
@@ -182,9 +172,6 @@ SUBSYSTEM_DEF(addition_goals)
 		if(stamp)
 			paper.stamp(/obj/item/stamp/centcom)
 
-
-
-
 // MARK:	Basic Addition Goal
 
 /datum/addition_goal
@@ -198,7 +185,6 @@ SUBSYSTEM_DEF(addition_goals)
 	var/reward_credits = 0
 	var/reward_cargopoints = 0
 	var/accept_time = "???"
-
 
 /datum/addition_goal/proc/setup()
 	message_admins("addition goal '[name]' not implement setup")
@@ -223,7 +209,7 @@ SUBSYSTEM_DEF(addition_goals)
 	for(var/turf/turf in shuttle_turfs)
 		//open all containers before check
 		for(var/atom/movable/content in turf.contents)
-			if(istype(content, /obj/structure/closet))
+			if(iscloset(content))
 				var/obj/structure/closet/closet = content
 				closet.open()
 		//check turfs contains
@@ -231,7 +217,6 @@ SUBSYSTEM_DEF(addition_goals)
 			if(content == target)
 				return TRUE
 	return FALSE
-
 
 GLOBAL_LIST_INIT(addition_goal_spawn_human_types, list(
 	/mob/living/carbon/human,
@@ -245,7 +230,6 @@ GLOBAL_LIST_INIT(addition_goal_spawn_human_types, list(
 
 /obj/effect/mob_spawn/human/addition_goal
 	roundstart = FALSE
-	instant = FALSE
 	random = TRUE
 	uses = -1
 

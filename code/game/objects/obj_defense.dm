@@ -1,8 +1,7 @@
 /// The essential proc to call when an obj must receive damage of any kind.
 /obj/proc/take_damage(damage_amount, damage_type = BRUTE, damage_flag = "", sound_effect = TRUE, attack_dir, armour_penetration = 0)
 	if(QDELETED(src))
-		stack_trace("[src] taking damage after deletion")
-		return
+		CRASH("[src] taking damage after deletion")
 	if(sound_effect)
 		play_attack_sound(damage_amount, damage_type, damage_flag)
 	if((resistance_flags & INDESTRUCTIBLE) || obj_integrity <= 0)
@@ -17,18 +16,16 @@
 /obj/proc/run_obj_armor(damage_amount, damage_type, damage_flag = 0, attack_dir, armour_penetration = 0)
 	if(damage_flag == MELEE && damage_amount < damage_deflection)
 		return 0
-	switch(damage_type)
-		if(BRUTE)
-		if(BURN)
-		else
-			return 0
+	if(damage_type != BRUTE && damage_type != BURN)
+		return 0
 	var/armor_protection = 0
+	if(!armor)
+		return
 	if(damage_flag)
 		armor_protection = armor.getRating(damage_flag)
 	if(armor_protection)		//Only apply weak-against-armor/hollowpoint effects if there actually IS armor.
 		armor_protection = clamp(armor_protection - armour_penetration, min(armor_protection, 0), 100)
 	return round(damage_amount * (100 - armor_protection) * 0.01, DAMAGE_PRECISION)
-
 
 /// Proc for recovering atom_integrity. Returns the amount repaired by
 /obj/proc/repair_damage(amount)
@@ -38,7 +35,6 @@
 	. = new_integrity - obj_integrity
 
 	update_integrity(new_integrity)
-
 
 /// Handles the integrity of an obj changing. This must be called instead of changing integrity directly.
 /obj/proc/update_integrity(new_value, damage_flag = MELEE)
@@ -110,10 +106,9 @@
 /obj/bullet_act(obj/projectile/P)
 	. = ..()
 	playsound(src, P.hitsound, 50, TRUE)
-	visible_message(span_danger(pick(list("[capitalize(declent_ru(NOMINATIVE))] пораж[genderize_ru(gender,"ён","ена","ено","ены")] [P.declent_ru(INSTRUMENTAL)]!", "[P.declent_ru(NOMINATIVE)] попадает в [declent_ru(ACCUSATIVE)]!"))), projectile_message = TRUE)
+	visible_message(span_danger(pick(list("[DECLENT_RU_CAP(src, NOMINATIVE)] поражен[GEND_A_O_Y(src)] [P.declent_ru(INSTRUMENTAL)]!", "[DECLENT_RU_CAP(P, NOMINATIVE)] попадает в [declent_ru(ACCUSATIVE)]!"))), projectile_message = TRUE)
 	if(!QDELETED(src)) //Bullet on_hit effect might have already destroyed this object
 		take_damage(P.damage, P.damage_type, P.flag, 0, turn(P.dir, 180), P.armour_penetration)
-
 
 /obj/blob_act(obj/structure/blob/B)
 	if(!..() || (obj_flags & IGNORE_BLOB_ACT))
@@ -123,7 +118,6 @@
 		if((T.intact && level == 1) || T.transparent_floor == TURF_TRANSPARENT) //the blob doesn't destroy thing below the floor
 			return
 	take_damage(400, BRUTE, MELEE, 0, get_dir(src, B))
-
 
 /obj/proc/attack_generic(mob/user, damage_amount = 0, damage_type = BRUTE, damage_flag = 0, sound_effect = 1, armor_penetration = 0) //used by attack_alien, attack_animal, and attack_slime
 	user.do_attack_animation(src)
@@ -172,7 +166,6 @@
 	if(. && !play_soundeffect)
 		playsound(QDELETED(src) ? source_turf : src, 'sound/effects/meteorimpact.ogg', 100, TRUE)
 
-
 /obj/force_pushed(atom/movable/pusher, force = MOVE_FORCE_DEFAULT, direction)
 	return TRUE
 
@@ -185,7 +178,7 @@
 	take_damage(amt, BRUTE)
 
 /obj/attack_slime(mob/living/simple_animal/slime/user)
-	if(user.age_state.age == SLIME_BABY )
+	if(user.age_state.age == SLIME_BABY)
 		return
 	attack_generic(user, rand(5 + user.age_state.damage, 10 + user.age_state.damage), BRUTE, MELEE, 1)
 
@@ -251,7 +244,7 @@ GLOBAL_DATUM_INIT(acid_overlay, /mutable_appearance, mutable_appearance('icons/e
 
 // MARK: FIRE
 
-/obj/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume, global_overlay = TRUE)
+/obj/fire_act(exposed_temperature, exposed_volume)
 	if(isturf(loc))
 		var/turf/T = loc
 		if((T.intact && level == 1) || T.transparent_floor == TURF_TRANSPARENT) //fire can't damage things hidden below the floor.
@@ -260,7 +253,7 @@ GLOBAL_DATUM_INIT(acid_overlay, /mutable_appearance, mutable_appearance('icons/e
 	if(QDELETED(src)) // no taking damage after deletion
 		return
 	if(exposed_temperature && !(resistance_flags & FIRE_PROOF))
-		take_damage(clamp(0.02 * exposed_temperature, 0, 20), BURN, "fire", 0)
+		take_damage(clamp(0.02 * exposed_temperature, 0, 20), BURN, FIRE, 0)
 	if(!(resistance_flags & ON_FIRE) && (resistance_flags & FLAMMABLE) && !(resistance_flags & FIRE_PROOF))
 		resistance_flags |= ON_FIRE
 		SSfires.processing[src] = src
@@ -318,7 +311,6 @@ GLOBAL_DATUM_INIT(acid_overlay, /mutable_appearance, mutable_appearance('icons/e
 		current_integrity = max(1, round(percentage * new_max))	//don't destroy it as a result
 		update_integrity(current_integrity)
 
-
 	if(new_failure_integrity != null)
 		integrity_failure = new_failure_integrity
 
@@ -335,12 +327,14 @@ GLOBAL_DATUM_INIT(acid_overlay, /mutable_appearance, mutable_appearance('icons/e
 			var/mob/living/buckled_mob = mob
 			buckled_mob.electrocute_act((clamp(round(strength * 1.25e-3), 10, 90) + rand(-5, 5)), src, flags = SHOCK_TESLA)
 
-/obj/handle_flamer_fire(src, damage, delta_time)
+/obj/handle_flamer_fire(source, damage, delta_time)
 	flamer_fire_act(damage)
 
 /obj/flamer_fire_act(damage)
 	if(resistance_flags & FIRE_PROOF)
 		resistance_flags &= ~FIRE_PROOF
+
 	if(armor.getRating(FIRE) > 50)
 		armor = armor.setRating(fire_value = 50)
+
 	return ..()

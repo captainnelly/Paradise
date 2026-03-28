@@ -30,14 +30,13 @@
 	SIGNAL_HANDLER
 	INVOKE_ASYNC(src, PROC_REF(async_fire_ranged_attack), firer, target, modifiers)
 
-
 /datum/element/ranged_attacks/proc/async_fire_ranged_attack(mob/living/basic/firer, atom/target, modifiers)
 	var/turf/startloc = get_turf(firer)
 
 	if(casingtype)
 		var/obj/item/ammo_casing/casing = new casingtype(startloc)
 		playsound(firer, projectilesound, 100)
-		casing.fire(target, firer, zone_override = ran_zone())
+		casing.fire(target, firer, params = null, distro = null, quiet = FALSE, zone_override = ran_zone(), firer_source_atom = firer)
 		casing.after_fire()
 
 	else if(projectiletype)

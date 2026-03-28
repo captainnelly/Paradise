@@ -1,12 +1,14 @@
 /obj/item/melee/baton
+	icon = 'icons/obj/weapons/baton.dmi'
 	name = "police baton"
-	desc = "A wooden truncheon for beating criminal scum."
+	desc = "Несмертельное холодное оружие, представляющее собой деревянную палку. \
+			Используется охранными и силовыми структурами для обезвреживания преступных элементов. \
+			Несколько старомодно, но всё ещё относительно популярно в отдалённых частях Галактики."
 	gender = FEMALE
 	icon_state = "baton"
 	item_state = "classic_baton"
 	slot_flags = ITEM_SLOT_BELT
-	force = 12 //9 hit crit
-	w_class = WEIGHT_CLASS_NORMAL
+	force = 12
 	/// Whether this baton is active or not.
 	var/active = TRUE
 	/// Default wait time until can stun again.
@@ -40,16 +42,23 @@
 	/// Cooldown timestamp
 	COOLDOWN_DECLARE(stun_cooldown)
 
+/obj/item/melee/baton/get_ru_names()
+	return list(
+		NOMINATIVE = "полицейская дубинка",
+		GENITIVE = "полицейской дубинки",
+		DATIVE = "полицейской дубинке",
+		ACCUSATIVE = "полицейскую дубинку",
+		INSTRUMENTAL = "полицейской дубинкой",
+		PREPOSITIONAL = "полицейской дубинке"
+	)
 
 /obj/item/melee/baton/New()
 	. = ..()
 	RegisterSignal(src, COMSIG_ITEM_TRY_PUT_IN_HAND, PROC_REF(try_take_baton))
 
-
 /obj/item/melee/baton/Destroy()
 	UnregisterSignal(src, COMSIG_ITEM_TRY_PUT_IN_HAND)
 	. = ..()
-
 
 /obj/item/melee/baton/proc/try_take_baton(baton, mob/living/carbon/user)
 	SIGNAL_HANDLER
@@ -90,7 +99,6 @@
 				return ..(target, user, params, def_zone, stun_animation)
 			return ATTACK_CHAIN_PROCEED_SUCCESS
 
-
 /obj/item/melee/baton/proc/baton_attack(mob/living/target, mob/living/user)
 	. = BATON_ATTACKING
 
@@ -108,11 +116,11 @@
 			return BATON_DO_NORMAL_ATTACK
 		var/wait_desc = get_wait_description()
 		if(wait_desc)
-			to_chat(user, wait_desc)
+			balloon_alert(user, wait_desc)
 		return BATON_ATTACK_DONE
 
 	if(HAS_TRAIT_FROM(target, TRAIT_IWASBATONED, UNIQUE_TRAIT_SOURCE(user))) //no doublebaton abuse son!
-		to_chat(user, span_danger("You fumble and miss [target]!"))
+		balloon_alert(user, "промах!")
 		return BATON_ATTACK_DONE
 
 	if(stun_animation)
@@ -122,7 +130,7 @@
 
 	if(ishuman(target))
 		var/mob/living/carbon/human/human_target = target
-		if(human_target.check_shields(src, 0, "[user]'s [name]", ITEM_ATTACK))
+		if(human_target.check_shields(src, 0, "[declent_ru(ACCUSATIVE)] [user.declent_ru(GENITIVE)]", ITEM_ATTACK))
 			return BATON_ATTACK_DONE
 		if(check_martial_counter(target, user))
 			return BATON_ATTACK_DONE
@@ -132,7 +140,7 @@
 		if(affect_cyborgs)
 			attack_desc = get_cyborg_stun_description(target, user)
 		else
-			attack_desc = get_unga_dunga_cyborg_stun_description(target, user)
+			attack_desc = get_failed_cyborg_stun_description(target, user)
 			playsound(get_turf(src), 'sound/effects/bang.ogg', 10, TRUE) //bonk
 			. = BATON_ATTACK_DONE
 
@@ -140,7 +148,7 @@
 		if(affect_bots)
 			attack_desc = get_cyborg_stun_description(target, user)
 		else
-			attack_desc = get_unga_dunga_cyborg_stun_description(target, user)
+			attack_desc = get_failed_cyborg_stun_description(target, user)
 			playsound(get_turf(src), 'sound/effects/bang.ogg', 10, TRUE)
 			. = BATON_ATTACK_DONE
 	else
@@ -148,7 +156,6 @@
 
 	if(attack_desc)
 		target.visible_message(attack_desc["visible"], attack_desc["local"])
-
 
 /obj/item/melee/baton/proc/finalize_baton_attack(mob/living/target, mob/living/user, in_attack_chain = TRUE)
 	if(!in_attack_chain && HAS_TRAIT_FROM(target, TRAIT_IWASBATONED, UNIQUE_TRAIT_SOURCE(user)))
@@ -165,14 +172,15 @@
 	if(baton_effect(target, user) && user)
 		set_batoned(target, user, cooldown)
 
-
 /obj/item/melee/baton/proc/baton_effect(mob/living/target, mob/living/user, stun_override)
+	var/trait_check = HAS_TRAIT(target, TRAIT_BATON_RESISTANCE)
+
 	if(isrobot(target))
 		if(!affect_cyborgs)
 			return FALSE
 		var/mob/living/silicon/robot/cyborg = target
 		cyborg.flash_eyes(3, affect_silicon = TRUE)
-		cyborg.Stun((isnull(stun_override) ? stun_time_cyborg : stun_override))
+		cyborg.Stun((isnull(stun_override) ? stun_time_cyborg : stun_override) * (trait_check ? 0.1 : 1))
 		additional_effects_cyborg(cyborg, user)
 	else if(isbot(target))
 		if(!affect_bots)
@@ -184,10 +192,12 @@
 			var/mob/living/carbon/human/human_target = target
 			human_target.forcesay(GLOB.hit_appends)
 		target.apply_damage(stamina_damage, STAMINA)
-		target.Knockdown((isnull(stun_override) ? knockdown_time : stun_override))
+		if(!trait_check)
+			target.Knockdown((isnull(stun_override) ? knockdown_time : stun_override))
 		additional_effects_non_cyborg(target, user)
-	return TRUE
 
+	SEND_SIGNAL(target, COMSIG_MOB_BATONED, user, src)
+	return TRUE
 
 /obj/item/melee/baton/proc/set_batoned(mob/living/target, mob/living/user, cooldown)
 	if(!cooldown)
@@ -196,20 +206,21 @@
 	ADD_TRAIT(target, TRAIT_IWASBATONED, user_UID)
 	addtimer(TRAIT_CALLBACK_REMOVE(target, TRAIT_IWASBATONED, user_UID), cooldown)
 
-
 /obj/item/melee/baton/proc/clumsy_check(mob/living/user, mob/living/intented_target)
+	var/trait_check = HAS_TRAIT(user, TRAIT_BATON_RESISTANCE)
+
 	if(!active || !HAS_TRAIT(user, TRAIT_CLUMSY) || prob(50))
 		return FALSE
 	user.visible_message(
-		span_danger("[user] accidentally hits [user.p_them()]self over the head with [src]! What a doofus!"),
-		span_userdanger("You accidentally hit yourself over the head with [src]!"),
+		span_danger("[user.declent_ru(NOMINATIVE)] замахива[PLUR_ET_YUT(user)]ся [declent_ru(INSTRUMENTAL)] и со всей силы бь[PLUR_ET_YUT(user)] себя по голове!"),
+		span_userdanger("Вы замахиваетесь [declent_ru(INSTRUMENTAL)] и со всей силы бьёте себя по голове!"),
 	)
 
 	if(isrobot(user))
 		if(affect_cyborgs)
 			var/mob/living/silicon/robot/cyborg = user
 			cyborg.flash_eyes(3, affect_silicon = TRUE)
-			cyborg.Stun(clumsy_knockdown_time)
+			cyborg.Stun(clumsy_knockdown_time * (trait_check ? 0.1 : 1))
 			additional_effects_cyborg(user, user) // user is the target here
 			if(on_stun_sound)
 				playsound(get_turf(src), on_stun_sound, on_stun_volume, TRUE, -1)
@@ -219,7 +230,8 @@
 		if(ishuman(user))
 			var/mob/living/carbon/human/human_user = user
 			human_user.forcesay(GLOB.hit_appends)
-		user.Knockdown(clumsy_knockdown_time)
+		if(!trait_check)
+			user.Knockdown(clumsy_knockdown_time)
 		user.apply_damage(stamina_damage, STAMINA)
 		additional_effects_non_cyborg(user, user) // user is the target here
 		if(on_stun_sound)
@@ -230,89 +242,110 @@
 	add_attack_logs(user, user, "accidentally stun attacked [user.p_them()]self due to their clumsiness")
 	if(stun_animation)
 		user.do_attack_animation(user)
-	return TRUE
 
+	SEND_SIGNAL(user, COMSIG_MOB_BATONED, user, src)
+	return TRUE
 
 /// Description for trying to stun when still on cooldown.
 /obj/item/melee/baton/proc/get_wait_description()
 	return
 
-
 /// Default message for stunning a living, non-cyborg mob.
 /obj/item/melee/baton/proc/get_stun_description(mob/living/target, mob/living/user)
 	. = list()
-	.["visible"] = span_danger("[user] knocks [target] down with [src]!")
-	.["local"] = span_userdanger("[user] knocks you down with [src]!")
-
-
+	.["visible"] = span_danger("[user.declent_ru(NOMINATIVE)] сбива[PLUR_ET_YUT(user)] [target.declent_ru(ACCUSATIVE)] с ног ударом [declent_ru(GENITIVE)]!")
+	.["local"] = span_userdanger("[user.declent_ru(NOMINATIVE)] сбива[PLUR_ET_YUT(user)] вас с ног ударом [declent_ru(GENITIVE)]!")
 
 /// Default message for stunning a cyborg.
 /obj/item/melee/baton/proc/get_cyborg_stun_description(mob/living/target, mob/living/user)
 	. = list()
-	.["visible"] = span_danger("[user] pulses [target]'s sensors with the baton!")
-	.["local"] = span_danger("You pulse [target]'s sensors with the baton!")
-
+	.["visible"] = span_danger("[user.declent_ru(NOMINATIVE)] перегружа[PLUR_ET_YUT(user)] сенсоры [target.declent_ru(ACCUSATIVE)] ударом [declent_ru(GENITIVE)]!")
+	.["local"] = span_danger("Вы перегружаете сенсоры [target.declent_ru(ACCUSATIVE)] ударом [declent_ru(GENITIVE)]!")
 
 /// Default message for trying to stun a cyborg with a baton that can't stun cyborgs.
-/obj/item/melee/baton/proc/get_unga_dunga_cyborg_stun_description(mob/living/target, mob/living/user)
+/obj/item/melee/baton/proc/get_failed_cyborg_stun_description(mob/living/target, mob/living/user)
 	. = list()
-	.["visible"] = span_danger("[user] tries to knock down [target] with [src], and predictably fails!") //look at this duuuuuude
-	.["local"] = span_userdanger("[user] tries to... knock you down with [src]?") //look at the top of his head!
-
+	.["visible"] = span_danger("[user.declent_ru(NOMINATIVE)] безуспешно пыта[PLUR_ET_YUT(user)]ся оглушить [target.declent_ru(ACCUSATIVE)] ударом [declent_ru(GENITIVE)]!")
+	.["local"] = span_userdanger("[user.declent_ru(NOMINATIVE)] безуспешно пыта[PLUR_ET_YUT(user)]ся оглушить вас ударом [declent_ru(GENITIVE)]!")
 
 /// Contains any special effects that we apply to living, non-cyborg mobs we stun. Does not include applying a knockdown, dealing stamina damage, etc.
 /obj/item/melee/baton/proc/additional_effects_non_cyborg(mob/living/target, mob/living/user)
-	return
-
+	if(HAS_TRAIT(target, TRAIT_BATON_RESISTANCE))
+		return FALSE
+	return TRUE
 
 /// Contains any special effects that we apply to cyborgs we stun. Does not include flashing the cyborg's screen, hardstunning them, etc.
 /obj/item/melee/baton/proc/additional_effects_cyborg(mob/living/target, mob/living/user)
-	return
+	if(HAS_TRAIT(target, TRAIT_BATON_RESISTANCE))
+		return FALSE
+	return TRUE
 
 
 /obj/item/melee/baton/ntcane
 	name = "fancy cane"
-	desc = "A cane with special engraving on it. It seems well suited for fending off assailants..."
+	desc = "Инструмент для создания опоры при ходьбе, а также аристократический аксессуар. Рукоять отделана изящной гравировкой. \
+			Достаточно увесистая, благодарая чему может использоваться для самообороны."
 	icon_state = "cane_nt"
 	item_state = "cane_nt"
 	needs_permit = FALSE
 
+/obj/item/melee/baton/ntcane/get_ru_names()
+	return list(
+		NOMINATIVE = "парадная трость",
+		GENITIVE = "парадной трости",
+		DATIVE = "парадной трости",
+		ACCUSATIVE = "парадную трость",
+		INSTRUMENTAL = "парадной тростью",
+		PREPOSITIONAL = "парадной трости"
+	)
 
 // Telescopic baton
 /obj/item/melee/baton/telescopic
 	name = "telescopic baton"
-	desc = "A compact yet robust personal defense weapon. Can be concealed when folded."
+	desc = "Средство самообороны, представляющее собой несмертельное холодное оружие. \
+			Складывается и раскладывается, что облегчает ношение, в том числе скрытое."
 	icon_state = "telebaton"
 	item_state = null
-	slot_flags = ITEM_SLOT_BELT
 	w_class = WEIGHT_CLASS_SMALL
 	needs_permit = FALSE
 	active = FALSE
 	force = 0
 	attack_verb = "ткнул"
 	clumsy_knockdown_time = 15 SECONDS
-	/// The sound effecte played when our baton is extended.
+	/// The sound effect played when our baton is extended.
 	var/extend_sound = 'sound/weapons/batonextend.ogg'
 	/// The inhand iconstate used when our baton is extended.
 	var/extend_item_state = "telebaton"
 	/// The force on extension.
 	var/extend_force = 10
 
+/obj/item/melee/baton/telescopic/get_ru_names()
+	return list(
+		NOMINATIVE = "телескопическая дубинка",
+		GENITIVE = "телескопической дубинки",
+		DATIVE = "телескопической дубинке",
+		ACCUSATIVE = "телескопическую дубинку",
+		INSTRUMENTAL = "телескопической дубинкой",
+		PREPOSITIONAL = "телескопической дубинке"
+	)
 
-/obj/item/melee/baton/telescopic/Initialize(mapload)
+/obj/item/melee/baton/telescopic/ComponentInitialize()
 	. = ..()
+	AddElement(/datum/element/item_skins)
 	AddComponent( \
 		/datum/component/transforming, \
 		force_on = src.extend_force, \
-		hitsound_on = src.hitsound, \
+		hitsound_on = on_stun_sound, \
 		hitsound_off = src.hitsound, \
 		w_class_on = WEIGHT_CLASS_NORMAL, \
 		item_state_on = src.extend_item_state, \
 		clumsy_check_prob = 0, \
 		attack_verb_on = list("ударил", "вмазал", "врезал"), \
 	)
-	RegisterSignal(src, COMSIG_TRANSFORMING_ON_TRANSFORM, PROC_REF(on_transform))
 
+/obj/item/melee/baton/telescopic/Initialize(mapload)
+	. = ..()
+	RegisterSignal(src, COMSIG_TRANSFORMING_ON_TRANSFORM, PROC_REF(on_transform))
 
 /*
  * Signal proc for [COMSIG_TRANSFORMING_ON_TRANSFORM].
@@ -327,4 +360,3 @@
 		balloon_alert(user, "[active ? "разложено" : "сложено"]")
 	playsound(src, extend_sound, 50, TRUE)
 	return COMPONENT_NO_DEFAULT_MESSAGE
-

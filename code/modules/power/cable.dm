@@ -31,7 +31,6 @@
 	icon_state = "0-1"
 	var/d1 = 0
 	var/d2 = 1
-	plane = GAME_PLANE
 	layer = WIRE_LAYER //Just below unary stuff, which is at 2.45 and above pipes, which are at 2.4
 	color = CABLE_HEX_COLOR_RED
 
@@ -96,7 +95,6 @@
 		invisibility = i ? INVISIBILITY_MAXIMUM : 0
 	update_icon(UPDATE_ICON_STATE)
 
-
 /obj/structure/cable/update_icon_state()
 	if(invisibility)
 		icon_state = "[d1]-[d2]-f"
@@ -107,7 +105,6 @@
 		SET_PLANE_IMPLICIT(src, FLOOR_PLANE)
 	else
 		SET_PLANE_IMPLICIT(src, GAME_PLANE)
-
 
 ////////////////////////////////////////////
 // Power related
@@ -157,7 +154,6 @@
 /obj/structure/cable/attack_tk(mob/user)
 	return
 
-
 /obj/structure/cable/attackby(obj/item/I, mob/user, params)
 	var/turf/our_turf = get_turf(src)
 	if(!our_turf)
@@ -186,7 +182,7 @@
 		rcl.is_empty(user)
 		return ATTACK_CHAIN_BLOCKED_ALL
 
-	if(istype(I, /obj/item/toy/crayon))
+	if(iscrayon(I))
 		add_fingerprint(user)
 		var/obj/item/toy/crayon/crayon = I
 		cable_color(crayon.colourName)
@@ -197,7 +193,6 @@
 		return ATTACK_CHAIN_BLOCKED_ALL
 
 	return ..()
-
 
 /obj/structure/cable/multitool_act(mob/user, obj/item/I)
 	. = TRUE
@@ -211,7 +206,7 @@
 
 /obj/structure/cable/proc/generate_power_message()
 	if(powernet && (powernet.avail > 0))
-		return chat_box_examine(span_notice("Total power: [DisplayPower(powernet.avail)]\nLoad: [DisplayPower(powernet.load)]\nSurplus: [DisplayPower(surplus())]"))
+		return chat_box_examine(span_notice("Total power: [display_power(powernet.avail)]\nLoad: [display_power(powernet.load)]\nSurplus: [display_power(surplus())]"))
 	else
 		return span_warning("The cable is not powered.")
 
@@ -224,13 +219,13 @@
 	. = TRUE
 	var/turf/T = get_turf(src)
 	if((T.transparent_floor == TURF_TRANSPARENT) || T.intact)
-		to_chat(user, "<span class='danger'>You can't interact with something that's under the floor!</span>")
+		to_chat(user, span_danger("You can't interact with something that's under the floor!"))
 		return
 	if(!I.use_tool(src, user, 0, volume = I.tool_volume))
 		return
 	if(shock(user, 50))
 		return
-	user.visible_message("[user] cuts the cable.", "<span class='notice'>You cut the cable.</span>")
+	user.visible_message("[user] cuts the cable.", span_notice("You cut the cable."))
 	investigate_log("was cut by [key_name_log(usr)] at [COORD(T)]", INVESTIGATE_WIRES)
 	deconstruct()
 
@@ -440,7 +435,7 @@
 		return
 
 	var/list/powerlist = power_list(T1,src,0,0) //find the other cables that ended in the centre of the turf, with or without a powernet
-	if(powerlist.len>0)
+	if(length(powerlist)>0)
 		var/datum/powernet/PN = new()
 		propagate_network(powerlist[1],PN) //propagates the new powernet beginning at the source cable
 
@@ -459,8 +454,7 @@
 
 	P_list += power_list(loc, src, d1, 0, cable_only = 1)//... and on turf
 
-
-	if(P_list.len == 0)//if nothing in both list, then the cable was a lone cable, just delete it and its powernet
+	if(length(P_list) == 0)//if nothing in both list, then the cable was a lone cable, just delete it and its powernet
 		powernet.remove_cable(src)
 
 		for(var/obj/machinery/power/P in T1)//check if it was powering a machine

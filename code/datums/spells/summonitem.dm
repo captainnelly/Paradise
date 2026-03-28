@@ -2,7 +2,6 @@
 	name = "Instant Summons"
 	desc = "This spell can be used to recall a previously marked item to your hand from anywhere in the universe."
 	school = "transmutation"
-	base_cooldown = 10 SECONDS
 	cooldown_min = 10 SECONDS
 	clothes_req = FALSE
 	human_req = FALSE
@@ -15,10 +14,8 @@
 	var/static/list/blacklisted_summons = list(/obj/machinery/computer/cryopod = TRUE, /obj/machinery/atmospherics = TRUE, /obj/structure/disposalholder = TRUE, /obj/machinery/disposal = TRUE)
 	action_icon_state = "summons"
 
-
 /obj/effect/proc_holder/spell/summonitem/create_new_targeting()
 	return new /datum/spell_targeting/self
-
 
 /obj/effect/proc_holder/spell/summonitem/cast(list/targets, mob/user = usr)
 	for(var/mob/living/target in targets)
@@ -28,7 +25,7 @@
 		if(!marked_item) //linking item to the spell
 			message = "<span class='notice'>"
 			for(var/obj/item in hand_items)
-				if(istype(item, /obj/item/organ/internal/brain)) //Yeah, sadly this doesn't work due to the organ system.
+				if(is_internal_organ_brain(item)) //Yeah, sadly this doesn't work due to the organ system.
 					break
 				if(isitem(item))
 					var/obj/item/I = item
@@ -89,6 +86,10 @@
 					if(is_type_in_typecache(item_to_retrieve.loc, blacklisted_summons))
 						break
 					item_to_retrieve = item_to_retrieve.loc
+					if(ismodstorage(item_to_retrieve))
+						var/obj/item/storage/backpack/modstorage/bag = item_to_retrieve
+						if(bag.source && bag.source.mod)
+							item_to_retrieve = bag.source.mod //Grab the modsuit.
 
 				infinite_recursion += 1
 

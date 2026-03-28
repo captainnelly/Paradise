@@ -30,33 +30,36 @@
 /datum/data/pda/proc/program_hit_check()
 	return
 
-/datum/data/pda/proc/notify(message, blink = 1)
-	if(message)
-		//Search for holder of the PDA.
-		var/mob/living/L = null
-		if(pda.loc && isliving(pda.loc))
-			L = pda.loc
+/datum/data/pda/proc/notify(message, blink = TRUE)
+	if(!message)
+		return
+	//Search for holder of the PDA.
+	var/mob/living/target_living = null
+	if(pda.loc && isliving(pda.loc))
+		target_living = pda.loc
 		//Maybe they are a pAI!
-		else
-			L = get(pda, /mob/living/silicon)
+	else
+		target_living = get(pda, /mob/living/silicon)
 
-		if(L && L.stat != UNCONSCIOUS) // Awake or dead people can see their messages
-			to_chat(L, "[bicon(pda)] [message]")
-			SStgui.update_user_uis(L, pda) // Update the receiving user's PDA UI so that they can see the new message
+	var/list/balloon_recipients = list()
+	if(target_living && target_living.stat != UNCONSCIOUS) // Awake or dead people can see their messages
+		to_chat(target_living, "[icon2html(pda, target_living)] [message]")
+		balloon_recipients += target_living
+		SStgui.update_user_uis(target_living, pda) // Update the receiving user's PDA UI so that they can see the new message
+
+	balloon_recipients -= target_living
 
 	if(!pda.silent)
-		pda.play_ringtone()
+		pda.play_ringtone(balloon_recipients)
 
 	if(blink && !(src in pda.notifying_programs))
 		pda.notifying_programs |= src
 		pda.update_icon(UPDATE_OVERLAYS)
 
-
 /datum/data/pda/proc/unnotify()
 	if(src in pda.notifying_programs)
 		pda.notifying_programs -= src
 		pda.update_icon(UPDATE_OVERLAYS)
-
 
 // An app has a button on the home screen and its own UI
 /datum/data/pda/app
@@ -82,14 +85,11 @@
 /datum/data/pda/app/proc/update_ui(mob/user, list/data)
 	return
 
-
 // Utilities just have a button on the home screen, but custom code when clicked
 /datum/data/pda/utility
 	name = "Utility"
 	icon = "gear"
-	size = 1
 	category = "Utilities"
-
 
 /datum/data/pda/utility/scanmode
 	var/base_name

@@ -20,7 +20,6 @@
  * * * Either world.time or stoppable timer cooldowns, depending on the other factors. Regular timer cooldowns do not support this.
 */
 
-
 /*
  * Cooldown system based on an datum-level associative lazylist using timers.
 */
@@ -54,6 +53,7 @@
 #define COOLDOWN_CIRCUIT_PATHFIND_DIF "circuit_pathfind_different"
 #define COOLDOWN_CIRCUIT_TARGET_INTERCEPT "circuit_target_intercept"
 #define COOLDOWN_CIRCUIT_VIEW_SENSOR "circuit_view_sensor"
+#define COOLDOWN_CIRCUIT_LASER "circuit_laser"
 
 // mob cooldowns
 #define COOLDOWN_YAWN_PROPAGATION "yawn_propagation_cooldown"
@@ -90,7 +90,6 @@
 #define S_TIMER_COOLDOWN_RESET(cd_source, cd_index) reset_cooldown(cd_source, cd_index)
 
 #define S_TIMER_COOLDOWN_TIMELEFT(cd_source, cd_index) (timeleft(TIMER_COOLDOWN_RUNNING(cd_source, cd_index)))
-
 
 /*
  * Cooldown system based on storing world.time on a variable, plus the cooldown time.

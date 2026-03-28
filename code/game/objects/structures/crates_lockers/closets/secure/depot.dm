@@ -1,8 +1,7 @@
-
 /obj/structure/closet/secure_closet/syndicate/depot
 	name = "depot supply closet"
-	desc = ""
-	locked = 0
+	desc = "A red and black lootbox full of things the Head of Security is going to flip their shit over."
+	locked = FALSE
 	anchored = TRUE
 	req_access = list()
 	max_integrity = 250
@@ -33,10 +32,9 @@
 
 /obj/structure/closet/secure_closet/syndicate/depot/attack_animal(mob/M)
 	if(isanimal(M) && ("syndicate" in M.faction))
-		to_chat(M, "<span class='warning'>The [src] resists your attack!</span>")
+		to_chat(M, span_warning("The [src] resists your attack!"))
 		return
 	return ..()
-
 
 /obj/structure/closet/secure_closet/syndicate/depot/attackby(obj/item/I, mob/user, params)
 	if(opened)
@@ -48,7 +46,6 @@
 		return ATTACK_CHAIN_PROCEED
 
 	return ..()
-
 
 /obj/structure/closet/secure_closet/syndicate/depot/emp_act(severity)
 	return

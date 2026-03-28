@@ -1,5 +1,4 @@
 /turf/simulated/wall/shuttle
-	name = "wall"
 	desc = "A light-weight titanium wall used in shuttles."
 	icon = 'icons/turf/walls/shuttle/shuttle_wall.dmi'
 	icon_state = "shuttle-0"
@@ -39,10 +38,8 @@
 /turf/simulated/wall/shuttle/burn_down()
 	return
 
-
 /turf/simulated/wall/shuttle/attackby(obj/item/I, mob/user, params)
 	return ATTACK_CHAIN_BLOCKED_ALL
-
 
 /turf/simulated/wall/shuttle/attack_hand(mob/user)
 	return
@@ -113,7 +110,6 @@
 	if(prob(20))
 		ChangeTurf(/turf/simulated/wall/cult)
 
-
 // sub-type to be used for interior shuttle walls
 // won't get an underlay of the destination turf on shuttle move
 // it's underlay must be preadded by using underlay_floor variables
@@ -125,14 +121,14 @@
 /turf/simulated/wall/shuttle/nosmooth/interior/Initialize(mapload)
 	. = ..()
 	if(underlay_floor_icon && underlay_floor_icon_state)
-		var/image/floor_underlay = image(underlay_floor_icon,,underlay_floor_icon_state,,underlay_floor_dir)
+		var/image/floor_underlay = image(icon = underlay_floor_icon, icon_state = underlay_floor_icon_state, dir = underlay_floor_dir)
 		underlays.Cut()
 		underlays.Add(floor_underlay)
 
 /turf/simulated/wall/shuttle/nosmooth/interior/copyTurf(turf/T)
 	if(T.type != type)
 		T.ChangeTurf(type)
-		if(underlays.len)
+		if(length(underlays))
 			T.underlays = underlays
 	if(T.icon_state != icon_state)
 		T.icon_state = icon_state
@@ -148,18 +144,11 @@
 //ПОЛЫ//
 
 /turf/simulated/floor/shuttle
-	name = "floor"
 	icon = 'icons/turf/shuttle/floors.dmi'
 	icon_state = "floor"
-	footstep = FOOTSTEP_FLOOR
-	barefootstep = FOOTSTEP_HARD_BAREFOOT
-	clawfootstep = FOOTSTEP_HARD_CLAW
-	heavyfootstep = FOOTSTEP_GENERIC_HEAVY
-
 
 /turf/simulated/floor/shuttle/attackby(obj/item/I, mob/user, params)
 	return ATTACK_CHAIN_BLOCKED_ALL
-
 
 /turf/simulated/floor/shuttle/tool_act()
 	return FALSE
@@ -179,9 +168,6 @@
 	icon = 'icons/turf/floors.dmi'
 	icon_state = "plating"
 	footstep = FOOTSTEP_PLATING
-	barefootstep = FOOTSTEP_HARD_BAREFOOT
-	clawfootstep = FOOTSTEP_HARD_CLAW
-	heavyfootstep = FOOTSTEP_GENERIC_HEAVY
 
 /turf/simulated/floor/shuttle/plating/vox	//Vox skipjack plating
 	oxygen = 0
@@ -208,10 +194,6 @@
 /turf/simulated/floor/shuttle/objective_check		// Added this floor tile so that I have a seperate turf to check in the shuttle -- Polymorph
 	name = "brig floor"       						// Also added it into the 2x3 brig area of the shuttle.
 	icon_state = "floor4"
-	footstep = FOOTSTEP_FLOOR
-	barefootstep = FOOTSTEP_HARD_BAREFOOT
-	clawfootstep = FOOTSTEP_HARD_CLAW
-	heavyfootstep = FOOTSTEP_GENERIC_HEAVY
 
 /turf/simulated/floor/shuttle/objective_check/vox	//Vox skipjack floors
 	name = "skipjack floor"

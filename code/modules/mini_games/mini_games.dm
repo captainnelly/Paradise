@@ -18,9 +18,7 @@
 	icon = 'icons/obj/assemblies.dmi'
 	icon_state = "thunderdome-bomb"
 	anchored = TRUE
-	density = FALSE
 	invisibility = INVISIBILITY_MAXIMUM
-	opacity = FALSE
 	layer = BELOW_MOB_LAYER
 	resistance_flags = INDESTRUCTIBLE
 
@@ -37,7 +35,7 @@
 		if(flashwindow)
 			window_flash(O.client)
 		if(source)
-			var/atom/movable/screen/alert/notify_action/A = O.throw_alert("\ref[source]_notify_action", /atom/movable/screen/alert/notify_action)
+			var/atom/movable/screen/alert/notify_action/A = O.throw_alert("[source.UID()]_notify_action", /atom/movable/screen/alert/notify_action)
 			if(A)
 				if(O.client.prefs && O.client.prefs.UI_style)
 					A.icon = ui_style2icon(O.client.prefs.UI_style)

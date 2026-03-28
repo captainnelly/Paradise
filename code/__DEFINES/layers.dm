@@ -1,7 +1,6 @@
 //Defines for atom layers and planes
 //KEEP THESE IN A NICE ACSCENDING ORDER, PLEASE
 
-
 //-------------------- PLANES ---------------------
 
 //NEVER HAVE ANYTHING BELOW THIS PLANE ADJUST IF YOU NEED MORE SPACE
@@ -29,11 +28,11 @@
 /// Slightly above the game plane but does not catch mouse clicks. Useful for certain visuals that should be clicked through, like seethrough trees
 #define SEETHROUGH_PLANE -2
 
-
 #define RENDER_PLANE_GAME_WORLD -1
 
 #define DEFAULT_PLANE 0 //Marks out the default plane, even if we don't use it
 
+#define WEATHER_PLANE 1
 #define AREA_PLANE 2
 #define MASSIVE_OBJ_PLANE 3
 #define GHOST_PLANE 4
@@ -102,7 +101,10 @@
 //-------------------- Rendering ---------------------
 #define RENDER_PLANE_GAME 100
 #define RENDER_PLANE_NON_GAME 101
-#define RENDER_PLANE_MASTER 102
+/// Plane related to the menu when pressing Escape.
+/// Needed so that we can apply a blur effect to EVERYTHING, and guarantee we are above all UI.
+#define ESCAPE_MENU_PLANE 102
+#define RENDER_PLANE_MASTER 103
 
 // NOTE! You can only ever have planes greater then -10000, if you add too many with large offsets you will brick multiz
 // Same can be said for large multiz maps. Tread carefully mappers
@@ -112,6 +114,7 @@
 
 ///Plane master controller keys
 #define PLANE_MASTERS_GAME "plane_masters_game"
+#define PLANE_MASTERS_NON_MASTER "plane_masters_non_master"
 
 //Plane master critical flags
 //Describes how different plane masters behave when they are being culled for performance reasons
@@ -136,7 +139,7 @@
 /// A value of /datum/preference/numeric/multiz_performance that disables the option
 #define MULTIZ_PERFORMANCE_DISABLE -1
 /// We expect at most 3 layers of multiz
-/// Increment this define if you make a huge map. We unit test for it too just to make it easy for you
+/// Increment this define if you make a huge map. We game test for it too just to make it easy for you
 /// If you modify this, you'll need to modify the tsx file too
 #define MAX_EXPECTED_Z_DEPTH 2
 
@@ -189,7 +192,7 @@
 #define BLASTDOOR_LAYER 2.65
 #define OPEN_DOOR_LAYER 2.7
 #define DOOR_HELPER_LAYER 2.71 //keep this above OPEN_DOOR_LAYER
-#define PROJECTILE_HIT_THRESHHOLD_LAYER 2.75 //projectiles won't hit objects at or below this layer if possible
+#define PROJECTILE_HIT_THRESHOLD_LAYER 2.75 //projectiles won't hit objects at or below this layer if possible
 #define TABLE_LAYER 2.8
 #define BELOW_OBJ_LAYER 2.9
 #define LOW_ITEM_LAYER 2.95
@@ -212,6 +215,7 @@
 #define MOB_BELOW_PIGGYBACK_LAYER 3.94
 //#define MOB_LAYER 4 //For easy recordkeeping; this is a byond define
 #define MOB_ABOVE_PIGGYBACK_LAYER 4.06
+#define HITSCAN_PROJECTILE_LAYER 4.09
 #define ABOVE_MOB_LAYER 4.1
 #define WALL_OBJ_LAYER 4.25
 #define EDGED_TURF_LAYER 4.3
@@ -249,10 +253,19 @@
 #define BLIND_LAYER 30.3
 #define CRIT_LAYER 30.4
 #define CURSE_LAYER 30.5
+#define BLOODY_SCREEN_LAYER 30.6
 
 #define HUD_LAYER 31
+#define BUILDMOD_LAYER 31.1
 #define ABOVE_HUD_LAYER 32
 
 #define SPLASHSCREEN_LAYER 33
 
+///Layer for screentips
+#define SCREENTIP_LAYER 34
 
+//-------------------- Radial ---------------------
+
+#define RADIAL_BACKGROUND_LAYER 0
+///1000 is an unimportant number, it's just to normalize copied layers
+#define RADIAL_CONTENT_LAYER 1000

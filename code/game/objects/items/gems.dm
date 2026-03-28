@@ -44,7 +44,7 @@
 		DATIVE = "самоцвету",
 		ACCUSATIVE = "самоцвет",
 		INSTRUMENTAL = "самоцветом",
-		PREPOSITIONAL = "самоцвете"
+		PREPOSITIONAL = "самоцвете",
 	)
 
 /obj/item/gem/Destroy()
@@ -83,7 +83,6 @@
 	card.mining_points += point_value
 	playsound(loc, 'sound/machines/ping.ogg', 15, TRUE)
 
-
 /obj/item/gem/welder_act(mob/living/user, obj/item/I) //Jank code that detects if the gem in question has a sheet_type and spawns the items specifed in it
 	if(I.use_tool(src, user, 0, volume=50))
 		if(src.sheet_type)
@@ -99,11 +98,14 @@
 	name = "ruperium crystal"
 	desc = "Крайне радиоактивное кристаллическое соединение, которое можно найти во внутренностях златожора. Хоть вы и можете преобразовать кристалл в урановую руду, его истинная ценность заключается в его резонирующих свойствах."
 	light_color = "#5ECC38"
-	icon_state = "rupee"
 	materials = list(MAT_URANIUM = 60000)
 	sheet_type = /obj/item/stack/sheet/mineral/uranium{amount = 30}
 	point_value = 500
 	sell_multiplier = 2
+	/// Is the crystal protected?
+	var/shielded = TRUE
+	/// Cooldown between radiation pulses
+	COOLDOWN_DECLARE(radiation_cooldown)
 
 /obj/item/gem/rupee/get_ru_names()
 	return list(
@@ -112,35 +114,44 @@
 		DATIVE = "кристаллу рупериума",
 		ACCUSATIVE = "кристалл рупериума",
 		INSTRUMENTAL = "кристаллом рупериума",
-		PREPOSITIONAL = "кристалле рупериума"
+		PREPOSITIONAL = "кристалле рупериума",
 	)
-
 
 /obj/item/gem/rupee/Initialize(mapload)
 	. = ..()
-	AddComponent(/datum/component/radioactivity, \
-			rad_per_cycle = 10, \
-			rad_cycle = 3 SECONDS, \
-			rad_cycle_radius = 5 \
-	)
-	ADD_TRAIT(src, TRAIT_BLOCK_RADIATION, INNATE_TRAIT)
+	START_PROCESSING(SSobj, src)
 
+/obj/item/gem/rupee/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
+/obj/item/gem/rupee/process()
+	if(shielded)
+		return
+
+	if(!COOLDOWN_FINISHED(src, radiation_cooldown))
+		return
+
+	COOLDOWN_START(src, radiation_cooldown, 3 SECONDS)
+	radiation_pulse(
+		src,
+		max_range = 5,
+		threshold = RAD_EXTREME_INSULATION,
+	)
 
 /obj/item/gem/rupee/examine(mob/user)
 	. = ..()
-	if(HAS_TRAIT(src, TRAIT_BLOCK_RADIATION))
+	if(shielded)
 		. += span_notice("Вы можете использовать что-нибудь <b>острое</b>, чтобы распилить кристалл.")
 	else
-		. += span_warning("Кристалл ярко горит!")
-
+		. += span_warning("Кристалл ярко горит и излучает смертоносную радиацию!")
 
 /obj/item/gem/rupee/update_icon_state()
-	icon_state = "[HAS_TRAIT(src, TRAIT_BLOCK_RADIATION) ? "" : "broken_"]rupee"
-
+	icon_state = "[shielded ? "" : "broken_"]rupee"
 
 /obj/item/gem/rupee/attackby(obj/item/I, mob/living/user, params)
 	. = ..()
-	if(ATTACK_CHAIN_CANCEL_CHECK(.) || !is_sharp(I) || !HAS_TRAIT(src, TRAIT_BLOCK_RADIATION))
+	if(ATTACK_CHAIN_CANCEL_CHECK(.) || !I.sharp || !shielded)
 		return .
 
 	to_chat(user, span_notice("Вы начали распиливать кристалл! Это явно плохая идея..."))
@@ -148,10 +159,8 @@
 		return .
 	. |= ATTACK_CHAIN_SUCCESS
 	to_chat(user, span_warning("Вы разрушили внешнюю оболочку кристалла! Голова начинает болеть..."))
-	user.apply_effect(50, IRRADIATE)
-	REMOVE_TRAIT(src, TRAIT_BLOCK_RADIATION, INNATE_TRAIT)
+	shielded = FALSE
 	update_icon(UPDATE_ICON_STATE)
-
 
 //magmawing watcher gem
 /obj/item/gem/magma
@@ -175,7 +184,7 @@
 		DATIVE = "окаменелому ауриту",
 		ACCUSATIVE = "окаменелый аурит",
 		INSTRUMENTAL = "окаменелым ауритом",
-		PREPOSITIONAL = "окаменелом аурите"
+		PREPOSITIONAL = "окаменелом аурите",
 	)
 
 /obj/item/gem/magma/examine(mob/user)
@@ -224,9 +233,8 @@
 		DATIVE = "морозному бриллианту",
 		ACCUSATIVE = "морозный бриллиант",
 		INSTRUMENTAL = "морозным бриллиантом",
-		PREPOSITIONAL = "морозном бриллианте"
+		PREPOSITIONAL = "морозном бриллианте",
 	)
-
 
 /obj/item/gem/fdiamond/examine(mob/user)
 	. = ..()
@@ -274,7 +282,7 @@
 		DATIVE = "стабилизированному бароксильдиуму",
 		ACCUSATIVE = "стабилизированный бароксильдиум",
 		INSTRUMENTAL = "стабилизированным бароксильдиумом",
-		PREPOSITIONAL = "стабилизированном бароксильдиуме"
+		PREPOSITIONAL = "стабилизированном бароксильдиуме",
 	)
 
 //hierophant gem
@@ -299,7 +307,7 @@
 		DATIVE = "уплотненному дилитиуму",
 		ACCUSATIVE = "уплотненный дилитиум",
 		INSTRUMENTAL = "уплотненным дилитиумом",
-		PREPOSITIONAL = "уплотненном дилитиуме"
+		PREPOSITIONAL = "уплотненном дилитиуме",
 	)
 
 /obj/item/gem/purple/Initialize(mapload)
@@ -338,7 +346,7 @@
 		DATIVE = "драконьему жемчугу",
 		ACCUSATIVE = "драконий жемчуг",
 		INSTRUMENTAL = "драконим жемчугом",
-		PREPOSITIONAL = "драконем жемчуге"
+		PREPOSITIONAL = "драконем жемчуге",
 	)
 
 //colossus gem
@@ -363,7 +371,7 @@
 		DATIVE = "пустотному кристаллу",
 		ACCUSATIVE = "пустотный кристалл",
 		INSTRUMENTAL = "пустотным кристаллом",
-		PREPOSITIONAL = "пустотном кристалле"
+		PREPOSITIONAL = "пустотном кристалле",
 	)
 
 /obj/item/gem/void/attack_self_tk(mob/user)
@@ -374,14 +382,13 @@
 	if(!cooldown)
 		. += span_notice("Кристалл подрагивает и ярко светится.")
 
-
 /obj/item/gem/void/attack_self(mob/user)
 	if(cooldown)
 		to_chat(user, span_warning("Кристалл неподвижен. Может стоит немного подождать?"))
 		return
 	var/mob/living/carbon/human/H = user
 	teleport(H)
-	H.visible_message(span_notice("[H] сжима[pluralize_ru(H.gender, "ет", "ют")] [declent_ru(ACCUSATIVE)] в руках!"))
+	H.visible_message(span_notice("[H] сжима[PLUR_ET_YUT(H)] [declent_ru(ACCUSATIVE)] в руках!"))
 	cooldown = TRUE
 	addtimer(CALLBACK(src, PROC_REF(reset_cooldown)),cooldown_time)
 
@@ -416,7 +423,7 @@
 		DATIVE = "кровавому ихору",
 		ACCUSATIVE = "кровавый ихор",
 		INSTRUMENTAL = "кровавым ихором",
-		PREPOSITIONAL = "кровавом ихоре"
+		PREPOSITIONAL = "кровавом ихоре",
 	)
 
 /obj/item/gem/bloodstone/examine(mob/user)
@@ -429,16 +436,15 @@
 /obj/item/gem/bloodstone/attack_self(mob/user)
 	var/datum/antagonist/vampire/vampire = user.mind.has_antag_datum(/datum/antagonist/vampire)
 	if(vampire && !used)
-		user.visible_message(span_warning("[user] начина[pluralize_ru(user.gender, "ет", "ют")] сжимать [declent_ru(ACCUSATIVE)] в своих руках!"), \
+		user.visible_message(span_warning("[user] начина[PLUR_ET_YUT(user)] сжимать [declent_ru(ACCUSATIVE)] в своих руках!"), \
 							span_notice("вы сжимаете [declent_ru(ACCUSATIVE)] в ваших руках."))
 		if(!do_after(user, 10 SECONDS, user, max_interact_count = 1, cancel_on_max = TRUE, cancel_message = span_warning("Вы ослабили хватку.")))
 			return
-		user.visible_message(span_warning("[user] начина[pluralize_ru(user.gender, "ет", "ют")] впитывать в себя содержимое [declent_ru(GENITIVE)]!"), \
+		user.visible_message(span_warning("[user] начина[PLUR_ET_YUT(user)] впитывать в себя содержимое [declent_ru(GENITIVE)]!"), \
 						span_notice("Вы пожираете содержимое [declent_ru(GENITIVE)]. Энергия от кристалла насыщает вас."))
 		vampire.bloodusable += blood
 		used = TRUE
 		set_light_range_power_color(3, 2, "#ac2626")
-
 
 /obj/item/gem/bloodstone/afterattack(obj/item/I, mob/user, proximity, params)
 	if(!proximity)
@@ -447,7 +453,6 @@
 		I.hidden_uplink.uses += charges
 		qdel(src)
 		to_chat(user, span_notice("Вы вставляете [declent_ru(ACCUSATIVE)] внутрь вашего апплинка, заряжая его."))
-
 
 //vetus gem
 /obj/item/gem/data
@@ -472,7 +477,7 @@
 		DATIVE = "блюспейс кристаллу данных",
 		ACCUSATIVE = "блюспейс кристалл данных",
 		INSTRUMENTAL = "блюспейс кристаллом данных",
-		PREPOSITIONAL = "блюспейс кристалле данных"
+		PREPOSITIONAL = "блюспейс кристалле данных",
 	)
 
 //mining gems
@@ -492,7 +497,6 @@
 /obj/item/gem/ruby
 	name = "ruby"
 	icon_state = "ruby"
-	point_value = 100
 	simple = TRUE
 	light_color = "#C72414"
 	sell_multiplier = 0.5
@@ -504,13 +508,12 @@
 		DATIVE = "рубину",
 		ACCUSATIVE = "рубин",
 		INSTRUMENTAL = "рубином",
-		PREPOSITIONAL = "рубине"
+		PREPOSITIONAL = "рубине",
 	)
 
 /obj/item/gem/sapphire
 	name = "sapphire"
 	icon_state = "sapphire"
-	point_value = 100
 	simple = TRUE
 	light_color = "#1726BF"
 	sell_multiplier = 0.5
@@ -522,13 +525,12 @@
 		DATIVE = "сапфиру",
 		ACCUSATIVE = "сапфир",
 		INSTRUMENTAL = "сапфиром",
-		PREPOSITIONAL = "сапфире"
+		PREPOSITIONAL = "сапфире",
 	)
 
 /obj/item/gem/emerald
 	name = "emerald"
 	icon_state = "emerald"
-	point_value = 100
 	simple = TRUE
 	light_color = "#14A73C"
 	sell_multiplier = 0.5
@@ -540,13 +542,12 @@
 		DATIVE = "изумруду",
 		ACCUSATIVE = "изумруд",
 		INSTRUMENTAL = "изумрудом",
-		PREPOSITIONAL = "изумруд"
+		PREPOSITIONAL = "изумруд",
 	)
 
 /obj/item/gem/topaz
 	name = "topaz"
 	icon_state = "topaz"
-	point_value = 100
 	simple = TRUE
 	light_color = "#C73914"
 	sell_multiplier = 0.5
@@ -558,5 +559,5 @@
 		DATIVE = "топазу",
 		ACCUSATIVE = "топаз",
 		INSTRUMENTAL = "топазом",
-		PREPOSITIONAL = "топазе"
+		PREPOSITIONAL = "топазе",
 	)

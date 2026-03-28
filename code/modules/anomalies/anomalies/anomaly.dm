@@ -1,5 +1,4 @@
 #define ANOMALY_DOUBLE_MOVE_CHANCE 5
-#define ANOMALY_ITEM_TO_RELIC_CHANCE 1
 #define ANOMALY_strength_MOVE_MULTIPLIER 2
 
 /obj/effect/anomaly
@@ -7,7 +6,6 @@
 	desc = "Загадочная аномалия. Обычно такую можно наблюдать только в станционном секторе."
 	icon_state = "bhole3"
 	gender = FEMALE
-	anchored = TRUE
 	density = TRUE
 	alpha = 0
 	light_range = 3
@@ -53,7 +51,7 @@
 		DATIVE = "аномалии", \
 		ACCUSATIVE = "аномалию", \
 		INSTRUMENTAL = "аномалией", \
-		PREPOSITIONAL = "аномалии"
+		PREPOSITIONAL = "аномалии",
 	)
 
 /obj/effect/anomaly/proc/size_by_strength(cur_strength)
@@ -69,14 +67,13 @@
 	matr.Scale(mult, mult)
 	animate(src, transform = matr, time = 1 SECONDS, alpha = 255, flags = ANIMATION_PARALLEL)
 
-
 /obj/effect/anomaly/Initialize(mapload, spawn_strength = rand(20, 40), spawn_stability = rand(10, 29))
 	GLOB.created_anomalies[anomaly_type]++
 	. = ..()
 	if(!get_area(src))
 		return INITIALIZE_HINT_QDEL
 
-	set_strength(spawn_strength, FALSE)
+	set_strength(spawn_strength, do_anim =  FALSE)
 	INVOKE_ASYNC(src, TYPE_PROC_REF(/obj/effect/anomaly, init_animation))
 	stability = spawn_stability
 
@@ -89,12 +86,12 @@
 	for(var/datum/anomaly_impulse/imp in impulses)
 		addtimer(CALLBACK(imp, TYPE_PROC_REF(/datum/anomaly_impulse, impulse_cycle)), rand(0, imp.scale_by_strength(imp.period_low, imp.period_high)))
 
-	if(!has_warp)
-		return
+	if(has_warp)
+		warp = new(src)
+		vis_contents += warp
+		apply_wibbly_filters(warp)
 
-	warp = new(src)
-	vis_contents += warp
-	apply_wibbly_filters(warp)
+	addtimer(CALLBACK(src, PROC_REF(check_size_change)), 0)
 
 /obj/effect/anomaly/Destroy()
 	STOP_PROCESSING(SSobj, src)
@@ -134,13 +131,15 @@
 	strength = clamp(new_strength, 0, 100)
 	check_size_change()
 
-/obj/effect/anomaly/proc/collapse()
-	visible_message(span_warning("[capitalize(declent_ru(NOMINATIVE))] достигает критической массы и распадается!"))
+/obj/effect/anomaly/proc/collapse_base()
+	visible_message(span_warning("[DECLENT_RU_CAP(src, NOMINATIVE)] достигает критической массы и распадается!"))
 	add_filter("collapse", 1, gauss_blur_filter(1))
 	matr.Scale(3, 3)
 	animate(src, transform = matr, time = 1 SECONDS, alpha = 0, flags = ANIMATION_PARALLEL)
-	sleep(1 SECONDS)
-	qdel(src)
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(qdel), src), 1 SECONDS)
+
+/obj/effect/anomaly/proc/collapse()
+	collapse_base()
 
 /obj/effect/anomaly/proc/stabilyse()
 	var/datum/effect_system/fluid_spread/smoke/smoke = new
@@ -156,23 +155,22 @@
 
 /obj/effect/anomaly/proc/level_down()
 	if(weaker_anomaly_type)
-		visible_message(span_warning("[capitalize(declent_ru(NOMINATIVE))] ослабевает!"))
+		visible_message(span_warning("[DECLENT_RU_CAP(src, NOMINATIVE)] ослабевает!"))
 		new weaker_anomaly_type(loc, rand(50, 80), clamp(stability + rand(10, 20), 0, 100))
 		qdel(src)
 		return
 
 	matr.Scale(0, 0)
 	animate(src, transform = matr, time = 1 SECONDS, flags = ANIMATION_PARALLEL)
-	visible_message(span_warning("[capitalize(declent_ru(NOMINATIVE))] теряет свою энергию и растворяется в пространстве!"))
-	sleep(1 SECONDS)
-	qdel(src)
+	visible_message(span_warning("[DECLENT_RU_CAP(src, NOMINATIVE)] теряет свою энергию и растворяется в пространстве!"))
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(qdel), src), 1 SECONDS)
 
 /obj/effect/anomaly/proc/level_up()
 	if(!stronger_anomaly_type)
 		collapse()
 		return
 
-	visible_message(span_warning("[capitalize(declent_ru(NOMINATIVE))] становится мощнее!"))
+	visible_message(span_warning("[DECLENT_RU_CAP(src, NOMINATIVE)] становится мощнее!"))
 	new stronger_anomaly_type(loc, rand(20, 50), clamp(stability - rand(10, 20), 0, 100))
 	qdel(src)
 
@@ -199,7 +197,7 @@
 	var/mult = core.tier <= tier ? (1 << (tier - core.tier)) : (1.0 / (1 << (core.tier - tier)))
 
 	if(!iscoreempty(core))
-		core.visible_message(span_warning("[capitalize(core.declent_ru(NOMINATIVE))] распадается, передавая свой заряд [declent_ru(DATIVE)]."))
+		core.visible_message(span_warning("[DECLENT_RU_CAP(core, NOMINATIVE)] распадается, передавая свой заряд [declent_ru(DATIVE)]."))
 		set_strength(strength + core.charge / mult)
 		qdel(core)
 		do_sparks(5, FALSE, src)
@@ -214,7 +212,7 @@
 	if(new_charge <= 50)
 		core.charge = new_charge
 		core.random_throw(3, 6, 5)
-		core.visible_message(span_warning("[capitalize(core.declent_ru(NOMINATIVE))] заряжается от [declent_ru(GENITIVE)], \
+		core.visible_message(span_warning("[DECLENT_RU_CAP(core, NOMINATIVE)] заряжается от [declent_ru(GENITIVE)], \
 											но остаётся пустым из-за слишком низкого заряда."))
 		COOLDOWN_START(core, anomaly_toch_cooldown, 5 SECONDS)
 		return
@@ -223,7 +221,7 @@
 	path = text2path(path)
 	var/obj/item/assembly/signaler/core/new_core = new path(core.loc, new_charge)
 	COOLDOWN_START(new_core, anomaly_toch_cooldown, 5 SECONDS)
-	new_core.visible_message(span_warning("[capitalize(core.declent_ru(NOMINATIVE))] заряжается от [declent_ru(GENITIVE)], \
+	new_core.visible_message(span_warning("[DECLENT_RU_CAP(core, NOMINATIVE)] заряжается от [declent_ru(GENITIVE)], \
 											превращаясь в [new_core.declent_ru(ACCUSATIVE)]."))
 	qdel(core)
 	new_core.random_throw(3, 6, 5)
@@ -235,41 +233,22 @@
 		return
 
 	if(tier == 3 && istype(item, /obj/item/anomaly_upgrader))
-		visible_message(span_danger("[capitalize(item.declent_ru(NOMINATIVE))] попадает в [declent_ru(ACCUSATIVE)], прикрепляется к ней и активируется!"))
+		visible_message(span_danger("[DECLENT_RU_CAP(item, NOMINATIVE)] попадает в [declent_ru(ACCUSATIVE)], прикрепляется к ней и активируется!"))
 		var/type = text2path("/obj/effect/anomaly/[anomaly_type]/tier4")
 		new type(loc, rand(20, 50), clamp(stability - rand(10, 20), 0, 100))
 		qdel(item)
 		qdel(src)
 		return FALSE
 
-	if(iscore(item))
-		var/obj/item/assembly/signaler/core/core = item
-		if(core.born_moment + 1 SECONDS >= world.time)
-			return TRUE
-
-		core_touch_effect(core)
-		return FALSE
-
-	if(!item.origin_tech)
+	if(!iscore(item))
 		return
 
-	if(prob(ANOMALY_ITEM_TO_RELIC_CHANCE))
-		do_sparks(5, TRUE, src)
-		new /obj/item/relic(get_turf(item))
-		qdel(item)
-		return
+	var/obj/item/assembly/signaler/core/core = item
+	if(core.born_moment + 1 SECONDS >= world.time)
+		return TRUE
 
-	if(!istype(item, /obj/item/relict_production/rapid_dupe))
-		return
-
-	var/amount = rand(1, 3)
-	for (var/i; i <= amount; i++)
-		new /obj/item/relic(get_turf(item))
-		//var/datum/effect_system/fluid_spread/smoke/smoke = new
-		//smoke.set_up(5, get_turf(item))
-		//smoke.start()
-
-	qdel(item)
+	core_touch_effect(core)
+	return FALSE
 
 /obj/effect/anomaly/attackby(obj/item/item, mob/living/user, params)
 	. = ..()
@@ -380,5 +359,4 @@
 	return
 
 #undef ANOMALY_DOUBLE_MOVE_CHANCE
-#undef ANOMALY_ITEM_TO_RELIC_CHANCE
 #undef ANOMALY_strength_MOVE_MULTIPLIER

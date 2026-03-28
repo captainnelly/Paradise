@@ -272,8 +272,10 @@
 	else if(!contract.can_start_extraction_process(contractor, target))
 		return "Чтобы начать процесс похищения, вы и цель должны находиться в нужной локации."
 
-	contractor.visible_message(span_notice("[contractor] начина[pluralize_ru(contractor.gender, "ет", "ют")] вводить загадочную серию символов в [uplink.declent_ru(ACCUSATIVE)]..."),\
-					  span_notice("Вы начинаете подавать сигнал для эвакуации своим кураторам через [uplink.declent_ru(ACCUSATIVE)]..."))
+	contractor.visible_message(
+		span_notice("[contractor] начина[PLUR_ET_YUT(contractor)] вводить загадочную серию символов в [uplink.declent_ru(ACCUSATIVE)]..."),\
+		span_notice("Вы начинаете подавать сигнал для эвакуации своим кураторам через [uplink.declent_ru(ACCUSATIVE)]...")
+	)
 	if(!do_after(contractor, EXTRACTION_PHASE_PREPARE, contractor))
 		return
 	if(!uplink.Adjacent(contractor) || extraction_deadline > world.time)
@@ -281,8 +283,8 @@
 	var/obj/effect/contractor_flare/flare = new(get_turf(contractor))
 	extraction_flare = flare
 	extraction_deadline = world.time + extraction_cooldown
-	contractor.visible_message(span_notice("[contractor] ввод[pluralize_ru(contractor.gender, "ит", "ят")] таинственный код в [uplink.declent_ru(ACCUSATIVE)] и доста[pluralize_ru(contractor.gender, "ёт", "ют")] \
-						чёрно-золотую сигнальную ракету, после чего зажига[pluralize_ru(contractor.gender, "ет", "ют")] её."),\
+	contractor.visible_message(span_notice("[contractor] ввод[PLUR_IT_YAT(contractor)] таинственный код в [uplink.declent_ru(ACCUSATIVE)] и доста[PLUR_YOT_YUT(contractor)] \
+						чёрно-золотую сигнальную ракету, после чего зажига[PLUR_ET_YUT(contractor)] её."),\
 						span_notice("Вы завершаете ввод сигнала в [uplink.declent_ru(ACCUSATIVE)] и зажигаете сигнальную ракету, начиная процесс эвакуации."))
 	addtimer(CALLBACK(src, PROC_REF(open_extraction_portal), uplink, contractor, flare), EXTRACTION_PHASE_PORTAL)
 	extraction_timer_handle = addtimer(CALLBACK(src, PROC_REF(deadline_reached)), portal_duration, TIMER_STOPPABLE)
@@ -300,16 +302,21 @@
 		invalidate()
 		return
 	else if(!flare)
-		uplink.message_holder("Агент, нам не удалось обнаружить [flare.declent_ru(ACCUSATIVE)]. Убедитесь, что зона эвакуации свободна, прежде чем посылать нам сигнал.", 'sound/machines/terminal_prompt_deny.ogg')
+		uplink.message_holder(
+			"Агент, нам не удалось обнаружить [flare.declent_ru(ACCUSATIVE)]. Убедитесь, что зона эвакуации свободна, прежде чем посылать нам сигнал.",
+			'sound/machines/terminal_prompt_deny.ogg'
+		)
 		return
 	else if(!ismob(contract.target.current))
 		invalidate()
 		return
-	uplink.message_holder("Агент, мы получили сигнал эвакуации. Системы помех, мешающих навигации в секторе станции НСС [SSmapping.map_datum.station_name], были саботированы. "\
-				   + "Мы направляем эвакуационную капсулу на место вашей сигнальной ракеты. Поместите цель в капсулу, чтобы завершить процесс эвакуации.", 'sound/effects/confirmdropoff.ogg')
+	uplink.message_holder(
+		"Агент, мы получили сигнал эвакуации. Системы помех, мешающих навигации в секторе станции НСС [SSmapping.map_datum.station_name], были саботированы. " \
+		+ "Мы направляем эвакуационную капсулу на место вашей сигнальной ракеты. Поместите цель в капсулу, чтобы завершить процесс эвакуации.",
+		'sound/effects/confirmdropoff.ogg'
+	)
 	// Open a portal
 	launch_extraction_pod(get_turf(flare))
-
 
 // Launch the pod to collect our victim.
 /datum/syndicate_contract/proc/launch_extraction_pod(turf/empty_pod_turf)
@@ -347,11 +354,10 @@
 		return
 
 	if(user == victim)
-		to_chat(user, span_warning("Вы не хотите лезть в непонятную капсулу с символикой Синдиката!"))
+		to_chat(user, span_warning("Вы не хотите лезть в непонятную капсулу с символикой \"Синдиката\"!"))
 		return
 
 	return COMPONENT_CLIMB
-
 
 /datum/syndicate_contract/proc/check_target(mob/living/sent_mob)
 
@@ -413,10 +419,9 @@
 		penalty_text = " (штраф применяется, если цель была эвакуирована мёртвой)"
 	owning_hub.contractor_uplink?.message_holder(
 		"Отличная работа, агент! Цель доставлена и в ближайшее время её обработают, после чего отправят обратно. " \
-		+ "Как и было оговорено, вам начислено [tc] ТК[penalty_text] и [creds] кредит[declension_ru(creds, "", "а", "ов")].", \
+		+ "Как и было оговорено, вам начислено [tc] ТК[penalty_text] и [creds] кредит[DECL_CREDIT(creds)].", \
 		'sound/machines/terminal_prompt_confirm.ogg'
 	)
-
 
 /datum/syndicate_contract/proc/remove_victim_items(mob/living/victim, turf/portal_turf)
 	var/mob/living/carbon/human/human_victim = victim
@@ -444,6 +449,11 @@
 			continue
 
 		stuff_to_transfer += implant
+
+	if(victim.back) //Lets not bork modsuits in funny ways.
+		var/obj/modsuit_safety = victim.back
+		if(victim.drop_item_ground(modsuit_safety))
+			stuff_to_transfer += modsuit_safety
 
 	// Regular items get removed in second
 	for(var/obj/item/item in victim.contents)
@@ -525,7 +535,6 @@
 	var/obj/item/reagent_containers/food/drinks/drinkingglass/drink = new(food_turf)
 	drink.reagents.add_reagent("tea", 25) // British coders beware, tea in glasses
 	temp_objs = list(food, drink)
-
 
 #define VICTIM_EXPERIENCE_START 0
 #define VICTIM_EXPERIENCE_FIRST_HIT 1
@@ -649,7 +658,7 @@
 			victim.take_overall_damage(RETURN_BRUISE_DAMAGE)
 
 	// Return them a bit confused.
-	victim.visible_message(span_notice("[capitalize(victim.declent_ru(NOMINATIVE))] исчеза[pluralize_ru(victim.gender, "ет", "ют")]..."))
+	victim.visible_message(span_notice("[DECLENT_RU_CAP(victim, NOMINATIVE)] исчеза[PLUR_ET_YUT(victim)]..."))
 	victim.Paralyse(3 SECONDS)
 	victim.EyeBlurry(5 SECONDS)
 	victim.AdjustConfused(5 SECONDS)
@@ -664,7 +673,7 @@
 	var/datum/feed_message/news_message = new
 	news_message.author = NEWS_CHANNEL_NYX
 	news_message.admin_locked = TRUE
-	news_message.body = "В системе зафиксирована подозрительная активность, предположительно связанная с Синдикатом. Появились слухи о том, что [record?.fields["rank"] || victim?.mind.assigned_role || UNKNOWN_STATUS_RUS] на борту [SSmapping.map_datum.station_name] стал жертвой похищения.\n\n" +\
+	news_message.body = "В системе зафиксирована подозрительная активность, предположительно связанная с \"Синдикатом\". Появились слухи о том, что [record?.fields["rank"] || victim?.mind.assigned_role || UNKNOWN_STATUS_RUS] на борту [SSmapping.map_datum.station_name] стал жертвой похищения.\n\n" +\
 				"Надёжный источник сообщил следующее: Была найдена записка с инициалами жертвы — \"[initials]\", а также каракулями, гласящими: \"[fluff_message]\""
 	GLOB.news_network.get_channel_by_name("Никс Дейли")?.add_message(news_message)
 
@@ -675,7 +684,7 @@
 		var/datum/feed_message/second_news_message = new
 		second_news_message.author = NEWS_CHANNEL_NYX
 		second_news_message.admin_locked = TRUE
-		second_news_message.body = "Совет по управлению активами НаноТрейзен сегодня ушёл в отставку после серии похищений на борту [SSmapping.map_datum.station_name]." +\
+		second_news_message.body = "Совет по управлению активами \"Нанотрейзен\" сегодня ушёл в отставку после серии похищений на борту [SSmapping.map_datum.station_name]." +\
 					"Один из бывших членов совета заявил: – Я больше не могу этого выносить. Как одна смена на этой проклятой станции может обойтись нам более чем в десять миллионов кредитов в виде выкупов? Неужели на борту совсем нет службы безопасности?!\""
 		GLOB.news_network.get_channel_by_name("Никс Дейли")?.add_message(second_news_message)
 
@@ -698,7 +707,7 @@
  */
 /datum/syndicate_contract/proc/clean_up(clean_pod = TRUE)
 	QDEL_NULL(extraction_flare)
-	if(clean_pod)
+	if(clean_pod && pod)
 		pod.reversing = FALSE
 		pod.startExitSequence(pod)
 	deltimer(extraction_timer_handle)

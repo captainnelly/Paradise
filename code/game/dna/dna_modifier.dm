@@ -17,8 +17,13 @@
 	var/id = null
 	var/implant = null
 	var/ckey = null
-	var/mind = null
+	var/datum/weakref/mind = null
 	var/languages = null
+
+/datum/dna2/record/Destroy(force)
+	dna = null
+	mind = null
+	return ..()
 
 /datum/dna2/record/proc/GetData()
 	var/list/ser=list("data" = null, "owner" = null, "label" = null, "type" = null, "ue" = 0)
@@ -47,7 +52,6 @@
 	newrecord.implant = implant
 	return newrecord
 
-
 /////////////////////////// DNA MACHINES
 /obj/machinery/dna_scannernew
 	name = "DNA modifier"
@@ -56,7 +60,6 @@
 	icon_state = "scanner_open"
 	density = TRUE
 	anchored = TRUE
-	use_power = IDLE_POWER_USE
 	idle_power_usage = 50
 	active_power_usage = 300
 	interact_offline = 1
@@ -75,7 +78,7 @@
 		DATIVE = "ДНК-модификатору",
 		ACCUSATIVE = "ДНК-модификатор",
 		INSTRUMENTAL = "ДНК-модификатором",
-		PREPOSITIONAL = "ДНК-модификаторе"
+		PREPOSITIONAL = "ДНК-модификаторе",
 	)
 
 /obj/machinery/dna_scannernew/Initialize(mapload)
@@ -139,10 +142,7 @@
 /obj/machinery/dna_scannernew/proc/eject_occupant(user, force)
 	go_out(user, force)
 	for(var/obj/O in src)
-		if(!istype(O,/obj/item/circuitboard/clonescanner) && \
-		   !istype(O,/obj/item/stock_parts) && \
-		   !istype(O,/obj/item/stack/cable_coil) && \
-		   O != beaker)
+		if(!istype(O,/obj/item/circuitboard/clonescanner) && !istype(O,/obj/item/stock_parts) && !iscoil(O) && O != beaker)
 			O.forceMove(get_turf(src))//Ejects items that manage to get in there (exluding the components and beaker)
 	if(!occupant)
 		for(var/mob/M in src)//Failsafe so you can get mobs out
@@ -159,13 +159,13 @@
 		return
 	if(!ismob(O)) //humans only
 		return
-	if(isanimal(O) || istype(O, /mob/living/silicon)) //animals and robutts dont fit
+	if(isanimal(O) || issilicon(O)) //animals and robutts dont fit
 		return
 	if(!ishuman(user) && !isrobot(user)) //No ghosts or mice putting people into the sleeper
 		return
 	if(user.loc==null) // just in case someone manages to get a closet into the blue light dimension, as unlikely as that seems
 		return
-	if(!istype(user.loc, /turf) || !istype(O.loc, /turf)) // are you in a container/closet/pod/etc?
+	if(!isturf(user.loc) || !isturf(O.loc)) // are you in a container/closet/pod/etc?
 		return
 	if(occupant)
 		balloon_alert(user, "внутри кто-то есть!")
@@ -177,11 +177,10 @@
 		balloon_alert(user, "руки субъекта заняты!")
 		return TRUE
 	if(L.has_buckled_mobs()) //mob attached to us
-		to_chat(user, span_warning("[L] не помест[pluralize_ru(L.gender, "ит", "ят")]ся в [declent_ru(ACCUSATIVE)], пока на [genderize_ru(L.gender, "нём", "ней", "нём", "них")] сидит слайм!"))
+		to_chat(user, span_warning("[L] не помест[PLUR_IT_YAT(L)]ся в [declent_ru(ACCUSATIVE)], пока на [GEND_ON_IN_HIM(L)] сидит слайм!"))
 		return TRUE
 	put_in(L, user)
 	return TRUE
-
 
 /obj/machinery/dna_scannernew/attackby(obj/item/I, mob/user, params)
 	if(user.a_intent == INTENT_HARM)
@@ -190,7 +189,7 @@
 	if(exchange_parts(user, I))
 		return ATTACK_CHAIN_PROCEED_SUCCESS
 
-	if(istype(I, /obj/item/reagent_containers/glass))
+	if(isglassreagentcontainer(I))
 		add_fingerprint(user)
 		if(beaker)
 			balloon_alert(user, "слот для ёмкости занят!")
@@ -198,13 +197,12 @@
 		if(!user.drop_transfer_item_to_loc(I, src))
 			return ..()
 		beaker = I
-		visible_message(span_notice("[user] вставля[pluralize_ru(user.gender,"ет","ют")] [I.declent_ru(GENITIVE)] в [declent_ru(ACCUSATIVE)]."))
+		visible_message(span_notice("[user] вставля[PLUR_ET_YUT(user)] [I.declent_ru(GENITIVE)] в [declent_ru(ACCUSATIVE)]."))
 		balloon_alert(user, "ёмкость установлена")
 		SStgui.update_uis(src)
 		return ATTACK_CHAIN_BLOCKED_ALL
 
 	return ..()
-
 
 /obj/machinery/dna_scannernew/grab_attack(mob/living/grabber, atom/movable/grabbed_thing)
 	. = TRUE
@@ -221,11 +219,10 @@
 		balloon_alert(grabber, "руки субъекта заняты!")
 		return .
 	if(target.has_buckled_mobs()) //mob attached to us
-		to_chat(grabber, span_warning("[target] не помест[pluralize_ru(target.gender, "ит", "ят")]ся в [declent_ru(ACCUSATIVE)], пока на [genderize_ru(target.gender, "нём", "ней", "нём", "них")] сидит слайм!"))
+		to_chat(grabber, span_warning("[target] не помест[PLUR_IT_YAT(target)]ся в [declent_ru(ACCUSATIVE)], пока на [GEND_ON_IN_HIM(target)] сидит слайм!"))
 		return .
 	put_in(target, grabber)
 	add_fingerprint(grabber)
-
 
 /obj/machinery/dna_scannernew/crowbar_act(mob/user, obj/item/I)
 	if(default_deconstruction_crowbar(user, I))
@@ -248,9 +245,9 @@
 /obj/machinery/dna_scannernew/proc/put_in(mob/M, mob/living/user)
 	add_fingerprint(user)
 	if(M == user)
-		visible_message("[user] начина[pluralize_ru(user.gender,"ет","ют")] залезать в [declent_ru(ACCUSATIVE)].")
+		visible_message("[user] начина[PLUR_ET_YUT(user)] залезать в [declent_ru(ACCUSATIVE)].")
 	else
-		visible_message("[user] начина[pluralize_ru(user.gender,"ет","ют")] укладывать [M] в [declent_ru(ACCUSATIVE)].")
+		visible_message("[user] начина[PLUR_ET_YUT(user)] укладывать [M] в [declent_ru(ACCUSATIVE)].")
 
 	if(!do_after(user, 2 SECONDS, M))
 		return
@@ -265,7 +262,7 @@
 		balloon_alert(user, "руки субъекта заняты!")
 		return
 	if(L.has_buckled_mobs()) //mob attached to us
-		to_chat(user, span_warning("[L] не помест[pluralize_ru(L.gender, "ит", "ят")]ся в [declent_ru(ACCUSATIVE)], пока на [genderize_ru(L.gender, "нём", "ней", "нём", "них")] сидит слайм!"))
+		to_chat(user, span_warning("[L] не помест[PLUR_IT_YAT(L)]ся в [declent_ru(ACCUSATIVE)], пока на [GEND_ON_IN_HIM(L)] сидит слайм!"))
 		return
 
 	M.forceMove(src)
@@ -311,43 +308,26 @@
 		update_icon()
 		SStgui.update_uis(src)
 
-// Checks if occupants can be irradiated/mutated - prevents exploits where wearing full rad protection would still let you gain mutations
-/obj/machinery/dna_scannernew/proc/radiation_check()
-	if(!occupant)
-		return TRUE
-
-	if(HAS_TRAIT(occupant, TRAIT_NO_DNA))
-		return TRUE
-
-	var/radiation_protection = occupant.run_armor_check(null, "rad", "Ваша одежда кажется теплой.", "Ваша одежда кажется теплой.")
-	if(radiation_protection > NEGATE_MUTATION_THRESHOLD)
-		return TRUE
-	return FALSE
-
 /obj/machinery/computer/scan_consolenew
 	name = "DNA Modifier access console"
 	desc = "Консоль для работы с ДНК-модификатором."
-	icon = 'icons/obj/machines/computer.dmi'
 	icon_screen = "dna"
 	icon_keyboard = "med_key"
-	density = TRUE
 	circuit = /obj/item/circuitboard/scan_consolenew
-	var/selected_ui_block = 1.0
-	var/selected_ui_subblock = 1.0
-	var/selected_se_block = 1.0
-	var/selected_se_subblock = 1.0
+	var/selected_ui_block = 1
+	var/selected_ui_subblock = 1
+	var/selected_se_block = 1
+	var/selected_se_subblock = 1
 	var/selected_ui_target = 1
 	var/selected_ui_target_hex = 1
-	var/radiation_duration = 2.0
-	var/radiation_intensity = 1.0
+	var/radiation_duration = 2
+	var/radiation_intensity = 1
 	var/list/datum/dna2/record/buffers[3]
 	var/irradiating = 0
 	var/injector_ready = FALSE	//Quick fix for issue 286 (screwdriver the screen twice to restore injector)	-Pete
 	var/obj/machinery/dna_scannernew/connected = null
 	var/obj/item/disk/data/disk = null
 	var/selected_menu_key = PAGE_UI
-	anchored = TRUE
-	use_power = IDLE_POWER_USE
 	idle_power_usage = 10
 	active_power_usage = 400
 
@@ -358,7 +338,7 @@
 		DATIVE = "консоли управления ДНК-модификатором",
 		ACCUSATIVE = "консоль управления ДНК-модификатором",
 		INSTRUMENTAL = "консолью управления ДНК-модификатором",
-		PREPOSITIONAL = "консоли управления ДНК-модификатором"
+		PREPOSITIONAL = "консоли управления ДНК-модификатором",
 	)
 
 /obj/machinery/computer/scan_consolenew/attackby(obj/item/I, mob/user, params)
@@ -370,12 +350,11 @@
 		if(!user.drop_transfer_item_to_loc(I, src))
 			return ..()
 		disk = I
-		visible_message(span_notice("[user] вставля[pluralize_ru(user.gender, "ет", "ют")] [I.declent_ru(ACCUSATIVE)] в [declent_ru(ACCUSATIVE)]."))
+		visible_message(span_notice("[user] вставля[PLUR_ET_YUT(user)] [I.declent_ru(ACCUSATIVE)] в [declent_ru(ACCUSATIVE)]."))
 		balloon_alert(user, "дискета вставлена")
 		SStgui.update_uis(src)
 		return ATTACK_CHAIN_BLOCKED_ALL
 	return ..()
-
 
 /obj/machinery/computer/scan_consolenew/Initialize(mapload)
 	. = ..()
@@ -394,7 +373,7 @@
 
 /obj/machinery/computer/scan_consolenew/proc/all_dna_blocks(list/buffer)
 	var/list/arr = list()
-	for(var/i = 1, i <= buffer.len, i++)
+	for(var/i = 1, i <= length(buffer), i++)
 		arr += "[i]:[EncodeDNABlock(buffer[i])]"
 	return arr
 
@@ -503,15 +482,17 @@
 		occupantData["uniqueEnzymes"] = connected.occupant.dna.unique_enzymes
 		occupantData["uniqueIdentity"] = connected.occupant.dna.uni_identity
 		occupantData["structuralEnzymes"] = connected.occupant.dna.struc_enzymes
-		occupantData["radiationLevel"] = connected.occupant.radiation
-	data["occupant"] = occupantData
 
+		var/datum/status_effect/genetic_damage/genetic_damage = connected.occupant.has_status_effect(/datum/status_effect/genetic_damage)
+		data["radiationLevel"] = genetic_damage ? round((genetic_damage.total_damage / genetic_damage.minimum_before_tox_damage) * 100, 0.1) : 0
+
+	data["occupant"] = occupantData
 	data["isBeakerLoaded"] = connected.beaker ? 1 : 0
 	data["beakerLabel"] = null
 	data["beakerVolume"] = 0
 	if(connected.beaker)
 		data["beakerLabel"] = connected.beaker.label_text ? connected.beaker.label_text : null
-		if(connected.beaker.reagents && connected.beaker.reagents.reagent_list.len)
+		if(connected.beaker.reagents && length(connected.beaker.reagents.reagent_list))
 			for(var/datum/reagent/R in connected.beaker.reagents.reagent_list)
 				data["beakerVolume"] += R.volume
 
@@ -523,7 +504,7 @@
 /obj/machinery/computer/scan_consolenew/ui_act(action, params)
 	if(..())
 		return FALSE // don't update uis
-	if(!istype(usr.loc, /turf))
+	if(!isturf(usr.loc))
 		return FALSE // don't update uis
 	if(!src || !connected)
 		return FALSE // don't update uis
@@ -538,6 +519,8 @@
 		return TRUE
 
 	. = TRUE
+
+	var/radiation = rand((100 + radiation_intensity + radiation_duration) / connected.damage_coeff, (200 + radiation_intensity + radiation_duration) / connected.damage_coeff)
 	switch(action)
 		if("selectMenuKey")
 			var/key = params["key"]
@@ -545,7 +528,7 @@
 				return
 			selected_menu_key = key
 		if("toggleLock")
-			if(connected && connected.occupant)
+			if(connected?.occupant)
 				connected.locked = !(connected.locked)
 		if("pulseRadiation")
 			irradiating = radiation_duration
@@ -561,10 +544,7 @@
 			if(!connected.occupant)
 				return
 
-			var/radiation = (((radiation_intensity * 3) + radiation_duration * 3) / connected.damage_coeff)
-			connected.occupant.apply_effect(radiation, IRRADIATE, 0)
-			if(connected.radiation_check())
-				return
+			connected.occupant.apply_status_effect(/datum/status_effect/genetic_damage, radiation)
 
 			if(prob(95))
 				if(prob(75))
@@ -609,20 +589,13 @@
 				return
 
 			if(prob((80 + (radiation_duration / 2))))
-				var/radiation = (radiation_intensity + radiation_duration)
-				connected.occupant.apply_effect(radiation,IRRADIATE,0)
-
-				if(connected.radiation_check())
-					return
+				connected.occupant.apply_status_effect(/datum/status_effect/genetic_damage, radiation)
 
 				block = miniscrambletarget(num2text(selected_ui_target), radiation_intensity, radiation_duration)
 				connected.occupant.dna.SetUISubBlock(selected_ui_block, selected_ui_subblock, block)
 				connected.occupant.UpdateAppearance()
 			else
-				var/radiation = ((radiation_intensity * 2) + radiation_duration)
-				connected.occupant.apply_effect(radiation, IRRADIATE, 0)
-				if(connected.radiation_check())
-					return
+				connected.occupant.apply_status_effect(/datum/status_effect/genetic_damage, radiation)
 
 				if(prob(20 + radiation_intensity))
 					randmutb(connected.occupant)
@@ -663,13 +636,11 @@
 			irradiating = 0
 			connected.locked = lock_state
 
-			if(connected.occupant)
-				if(prob((80 + ((radiation_duration / 2) + (connected.precision_coeff ** 3)))))
-					var/radiation = ((radiation_intensity + radiation_duration) / connected.damage_coeff)
-					connected.occupant.apply_effect(radiation, IRRADIATE, 0)
+			var/precision_coeff = connected.precision_coeff
 
-					if(connected.radiation_check())
-						return 1
+			if(connected.occupant)
+				if(prob((80 + ((radiation_duration / 2) + POW3(precision_coeff)))))
+					connected.occupant.apply_status_effect(/datum/status_effect/genetic_damage, radiation)
 
 					var/real_SE_block=selected_se_block
 					block = miniscramble(block, radiation_intensity, radiation_duration)
@@ -683,11 +654,7 @@
 					connected.occupant.dna.SetSESubBlock(real_SE_block, selected_se_subblock, block)
 					connected.occupant.check_genes()
 				else
-					var/radiation = (((radiation_intensity * 2) + radiation_duration) / connected.damage_coeff)
-					connected.occupant.apply_effect(radiation, IRRADIATE, 0)
-
-					if(connected.radiation_check())
-						return
+					connected.occupant.apply_status_effect(/datum/status_effect/genetic_damage, radiation)
 
 					if(prob(80 - radiation_duration))
 						//testing("Random bad mut!")
@@ -760,16 +727,12 @@
 					irradiating = 0
 					connected.locked = lock_state
 
-					var/radiation = (rand(20,50) / connected.damage_coeff)
-					connected.occupant.apply_effect(radiation, IRRADIATE, 0)
-
-					if(connected.radiation_check())
-						return
+					connected.occupant.apply_status_effect(/datum/status_effect/genetic_damage, radiation)
 
 					var/datum/dna2/record/buf = buffers[bufferId]
 
-					if((buf.types & DNA2_BUF_UI))
-						if((buf.types & DNA2_BUF_UE))
+					if(buf.types & DNA2_BUF_UI)
+						if(buf.types & DNA2_BUF_UE)
 							connected.occupant.real_name = buf.dna.real_name
 							connected.occupant.name = buf.dna.real_name
 						connected.occupant.UpdateAppearance(buf.dna.UI.Copy())

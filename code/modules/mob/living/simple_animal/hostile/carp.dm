@@ -8,7 +8,6 @@
 	icon_living = "base"
 	icon_dead = "base_dead"
 	icon_gib = "carp_gib"
-	speak_chance = 0
 	turns_per_move = 5
 	butcher_results = list(/obj/item/reagent_containers/food/snacks/carpmeat = 2)
 	response_help = "гладит"
@@ -37,29 +36,31 @@
 
 	var/carp_stamina_damage = 8
 
-	var/random_color = TRUE //if the carp uses random coloring
-	var/rarechance = 1 //chance for rare color variant
-
-	var/static/list/carp_colors = list(\
-	"lightpurple" = "#c3b9f1", \
-	"lightpink" = "#da77a8", \
-	"green" = "#70ff25", \
-	"grape" = "#df0afb", \
-	"swamp" = "#e5e75a", \
-	"turquoise" = "#04e1ed", \
-	"brown" = "#ca805a", \
-	"teal" = "#20e28e", \
-	"lightblue" = "#4d88cc", \
-	"rusty" = "#dd5f34", \
-	"beige" = "#bbaeaf", \
-	"yellow" = "#f3ca4a", \
-	"blue" = "#09bae1", \
-	"palegreen" = "#7ef099", \
+	/// If the carp uses random coloring
+	var/random_color = TRUE
+	/// The chance for a rare color variant
+	var/rarechance = 1
+	/// List of usual carp colors
+	var/static/list/carp_colors = list(
+		"lightpurple" = "#aba2ff",
+		"lightpink" = "#da77a8",
+		"green" = "#70ff25",
+		"grape" = "#df0afb",
+		"swamp" = "#e5e75a",
+		"turquoise" = "#04e1ed",
+		"brown" = "#ca805a",
+		"teal" = "#20e28e",
+		"lightblue" = "#4d88cc",
+		"rusty" = "#dd5f34",
+		"lightred" = "#fd6767",
+		"yellow" = "#f3ca4a",
+		"blue" = "#09bae1",
+		"palegreen" = "#7ef099"
 	)
-	var/static/list/carp_colors_rare = list(\
-	"silver" = "#fdfbf3", \
+	/// List of rare carp colors
+	var/static/list/carp_colors_rare = list(
+		"silver" = "#fdfbf3"
 	)
-
 /mob/living/simple_animal/hostile/carp/get_ru_names()
 	return list(
 		NOMINATIVE = "космокарп",
@@ -67,13 +68,14 @@
 		DATIVE = "космокарпу",
 		ACCUSATIVE = "космокарпа",
 		INSTRUMENTAL = "космокарпом",
-		PREPOSITIONAL = "космокарпе"
+		PREPOSITIONAL = "космокарпе",
 	)
 
-
 /mob/living/simple_animal/hostile/carp/Initialize(mapload)
+	if(random_color)
+		set_greyscale_config(/datum/greyscale_config/carp)
+		carp_randomify(rarechance)
 	. = ..()
-	carp_randomify(rarechance)
 	update_icons()
 	ADD_TRAIT(src, TRAIT_HEALS_FROM_CARP_RIFTS, INNATE_TRAIT)
 	AddElement(/datum/element/simple_flying)
@@ -85,30 +87,21 @@
 		minbodytemp = 0, \
 	)
 
+/**
+ * Randomly assigns a color to a carp from either a common or rare color variant lists
+ *
+ * Arguments:
+ * * rare The chance of the carp receiving color from the rare color variant list
+ */
 /mob/living/simple_animal/hostile/carp/proc/carp_randomify(rarechance)
-	if(random_color)
-		var/our_color
-		if(prob(rarechance))
-			our_color = pick(carp_colors_rare)
-			add_atom_colour(carp_colors_rare[our_color], FIXED_COLOUR_PRIORITY)
-		else
-			our_color = pick(carp_colors)
-			add_atom_colour(carp_colors[our_color], FIXED_COLOUR_PRIORITY)
-		regenerate_icons()
+	var/our_color
+	if(prob(rarechance))
+		our_color = pick(carp_colors_rare)
+		set_greyscale_colors(list(carp_colors_rare[our_color]))
+	else
+		our_color = pick(carp_colors)
+		set_greyscale_colors(list(carp_colors[our_color]))
 
-/mob/living/simple_animal/hostile/carp/proc/add_carp_overlay()
-	if(!random_color)
-		return
-	var/mutable_appearance/base_overlay = mutable_appearance(icon, "base_mouth")
-	base_overlay.appearance_flags = RESET_COLOR
-	add_overlay(base_overlay)
-
-/mob/living/simple_animal/hostile/carp/proc/add_dead_carp_overlay()
-	if(!random_color)
-		return
-	var/mutable_appearance/base_dead_overlay = mutable_appearance(icon, "base_dead_mouth")
-	base_dead_overlay.appearance_flags = RESET_COLOR
-	add_overlay(base_dead_overlay)
 
 /mob/living/simple_animal/hostile/carp/Process_Spacemove(movement_dir = NONE, continuous_move = FALSE)
 	return TRUE	//No drifting in space for space carp!	//original comments do not steal
@@ -121,22 +114,15 @@
 
 /mob/living/simple_animal/hostile/carp/death(gibbed)
 	. = ..()
+
 	if(!random_color || gibbed)
 		return
-	regenerate_icons()
+
+	update_icon()
 
 /mob/living/simple_animal/hostile/carp/revive()
 	..()
-	regenerate_icons()
-
-/mob/living/simple_animal/hostile/carp/regenerate_icons()
-	..()
-	if(!random_color)
-		return
-	if(stat != DEAD)
-		add_carp_overlay()
-	else
-		add_dead_carp_overlay()
+	update_icon()
 
 /mob/living/simple_animal/hostile/carp/holocarp
 	icon_state = "holocarp"
@@ -177,7 +163,7 @@
 		DATIVE = "мегакосмокарпу",
 		ACCUSATIVE = "мегакосмокарпа",
 		INSTRUMENTAL = "мегакосмокарпом",
-		PREPOSITIONAL = "мегакосмокарпе"
+		PREPOSITIONAL = "мегакосмокарпе",
 	)
 
 /mob/living/simple_animal/hostile/carp/megacarp/Initialize(mapload)
@@ -186,7 +172,6 @@
 	melee_damage_lower += rand(5, 10)
 	melee_damage_upper += rand(10, 20)
 	maxHealth += rand(60, 90)
-
 
 /mob/living/simple_animal/hostile/carp/megacarp/adjustHealth(
 	amount = 0,
@@ -199,7 +184,6 @@
 	if(. && amount > 0)
 		regen_cooldown = world.time + REGENERATION_DELAY
 
-
 /mob/living/simple_animal/hostile/carp/megacarp/Life()
 	..()
 	if(regen_cooldown < world.time)
@@ -210,14 +194,11 @@
 	desc = "Большая рыба, имеющая сходства с дальними космическими родственниками."
 	icon_state = "carp"
 	butcher_results = list(/obj/item/reagent_containers/food/snacks/carpmeat = 1)
-	response_help = "гладит"
-	response_disarm = "осторожно отодвигает в сторону"
 	response_harm = "ударяет"
 	retreat_distance = 6
 	vision_range = 5
 	retaliate_only = TRUE
 	gold_core_spawnable = NO_SPAWN
-	var/carp_color = "carp" //holder for icon set
 
 /mob/living/simple_animal/hostile/carp/sea/get_ru_names()
 	return list(
@@ -226,7 +207,7 @@
 		DATIVE = "морскому карпу",
 		ACCUSATIVE = "морского карпа",
 		INSTRUMENTAL = "морским карпом",
-		PREPOSITIONAL = "морском карпе"
+		PREPOSITIONAL = "морском карпе",
 	)
 
 /mob/living/simple_animal/hostile/carp/sea/ComponentInitialize()
@@ -243,7 +224,6 @@
 	icon_living = "Mcarp"
 	icon_dead = "MCarp_Dead"
 
-	obj_damage = 50
 	melee_damage_lower = 25
 	melee_damage_upper = 30
 	maxHealth = 150
@@ -256,7 +236,7 @@
 		DATIVE = "мутирововшему карпу",
 		ACCUSATIVE = "мутировавшего карпа",
 		INSTRUMENTAL = "мутировавшим карпом",
-		PREPOSITIONAL = "мутировавшем карпе"
+		PREPOSITIONAL = "мутировавшем карпе",
 	)
 
 /mob/living/simple_animal/hostile/carp/koi
@@ -271,14 +251,13 @@
 	melee_damage_lower = 2
 	melee_damage_upper = 2
 	obj_damage = 5
-	maxHealth = 25
-	health = 25
 	speak_emote = list("бурчит")
 	butcher_results = list(/obj/item/reagent_containers/food/snacks/salmonmeat = 1)
 
 	var/randomize_icon = TRUE
 
 	retaliate_only = TRUE
+	random_color = FALSE
 
 /mob/living/simple_animal/hostile/carp/koi/get_ru_names()
 	return list(
@@ -287,7 +266,7 @@
 		DATIVE = "космическому кои",
 		ACCUSATIVE = "космического кои",
 		INSTRUMENTAL = "космическим кои",
-		PREPOSITIONAL = "космическом кои"
+		PREPOSITIONAL = "космическом кои",
 	)
 
 /mob/living/simple_animal/hostile/carp/koi/Initialize(mapload)
@@ -303,6 +282,5 @@
 	icon_living = "koi5"
 	icon_dead = "koi5-dead"
 	randomize_icon = FALSE
-	retaliate_only = TRUE
 
 #undef REGENERATION_DELAY

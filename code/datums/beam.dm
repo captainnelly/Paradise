@@ -101,7 +101,9 @@
  */
 /datum/beam/proc/redrawing(atom/movable/mover, atom/oldloc, direction)
 	SIGNAL_HANDLER
-	if(origin && target && get_dist(origin,target)<max_distance && origin.z == target.z)
+	if(QDELING(src))
+		return
+	if(!QDELETED(origin) && !QDELETED(target) && get_dist(origin, target) < max_distance && origin.z == target.z)
 		QDEL_LIST(elements)
 		INVOKE_ASYNC(src, PROC_REF(Draw))
 	else
@@ -109,7 +111,9 @@
 
 /datum/beam/Destroy()
 	QDEL_LIST(elements)
-	QDEL_NULL(visuals)
+	if(visuals)
+		visuals.vis_contents.Cut()
+		QDEL_NULL(visuals)
 	UnregisterSignal(origin, COMSIG_MOVABLE_MOVED)
 	UnregisterSignal(target, COMSIG_MOVABLE_MOVED)
 	target = null
@@ -185,12 +189,24 @@
 /obj/effect/ebeam
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	layer = ABOVE_ALL_MOB_LAYER
-	anchored = TRUE
 	var/emissive = FALSE
 	var/datum/beam/owner
 
 /obj/effect/ebeam/Initialize(mapload, beam_owner)
 	owner = beam_owner
+	return ..()
+
+/obj/effect/ebeam/Destroy()
+	if(owner)
+		if(owner.elements)
+			owner.elements -= src
+		if(owner.visuals == src)
+			owner.visuals = null
+		owner = null
+
+	vis_contents.Cut()
+	transform = null
+	color = null
 	return ..()
 
 /obj/effect/ebeam/update_overlays()
@@ -201,10 +217,6 @@
 	emissive_overlay.transform = transform
 	emissive_overlay.alpha = alpha
 	. += emissive_overlay
-
-/obj/effect/ebeam/Destroy()
-	owner = null
-	return ..()
 
 /obj/effect/ebeam/singularity_pull()
 	return
@@ -329,12 +341,11 @@
 	target.adjustBruteLoss(5)
 	to_chat(target, span_danger("You cut yourself on the thorny vines."))
 
-
 /obj/effect/ebeam/vetus
 
 /obj/effect/ebeam/vetus/Destroy()
 	for(var/mob/living/mob in get_turf(src))
-		mob.electrocute_act(20, "электрической дуги", flags = SHOCK_NOGLOVES)
+		mob.electrocute_act(20, src, flags = SHOCK_NOGLOVES)
 	return ..()
 
 /obj/effect/ebeam/vetus_leg
@@ -345,6 +356,10 @@
 
 /obj/effect/ebeam/medical
 	name = "medical beam"
+
+/obj/effect/ebeam/laser_sight
+	name = "laser sight"
+	layer = OBJ_LAYER
 
 /obj/effect/ebeam/reacting/deadly
 

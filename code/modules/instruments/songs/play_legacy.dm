@@ -46,7 +46,7 @@
  * * acc - either "b", "n", or "#"
  * * oct - 1-8 (or 9 for C)
  */
-/datum/song/proc/playkey_legacy(note, acc as text, oct, mob/user)
+/datum/song/proc/playkey_legacy(note, acc as text, oct, atom/player)
 	// handle accidental -> B<>C of E<>F
 	if(acc == "b" && (note == 3 || note == 6)) // C or F
 		if(note == 3)
@@ -96,5 +96,5 @@
 		if(!HASBIT(mob.client?.prefs?.sound, SOUND_INSTRUMENTS))
 			continue
 
-		mob.playsound_local(source, null, volume * using_instrument.volume_multiplier, sound = music_played)
+		mob.playsound_local(source, null, volume * using_instrument.volume_multiplier, sound_to_use = music_played)
 		// Could do environment and echo later but not for now

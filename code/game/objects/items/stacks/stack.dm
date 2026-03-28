@@ -71,7 +71,6 @@
 	)
 	AddElement(/datum/element/connect_loc, loc_connections)
 
-
 /obj/item/stack/hitby(atom/movable/hitting, skipcatch, hitpush, blocked, datum/thrownthing/throwingdatum)
 	if(can_merge(hitting, inhand = TRUE))
 		merge(hitting)
@@ -91,7 +90,7 @@
 		return
 
 	. += "There are [amount] [singular_name? singular_name : name]\s in the stack."
-	. += span_notice("Alt-click to take a custom amount.")
+	. += span_notice("Используйте <b>ALT+ЛКМ</b>, чтобы взять произвольное количество.")
 
 /obj/item/stack/proc/add(newamount)
 	if(is_cyborg)
@@ -106,7 +105,6 @@
 
 	var/obj/item/storage/container = loc
 	addtimer(CALLBACK(container, TYPE_PROC_REF(/obj/item/storage, drop_overweight)), 0)
-
 
 /obj/item/storage/proc/drop_overweight()
 	if(QDELETED(src))
@@ -352,13 +350,13 @@
 /obj/item/stack/proc/change_stack(mob/user, amount)
 	var/obj/item/stack/material = new type(user, amount, FALSE)
 	. = material
+	use(amount)
 	material.copy_evidences(src)
 	if(!user.put_in_hands(material, merge_stacks = FALSE))
 		material.forceMove(user.drop_location())
 	add_fingerprint(user)
 	material.add_fingerprint(user)
 	do_pickup_animation(user)
-	use(amount)
 	SStgui.update_uis(src)
 
 /**
@@ -421,7 +419,7 @@
 /obj/item/stack/proc/update_weight()
 	if(amount <= (max_amount * (1/3)))
 		w_class = clamp(full_w_class-2, WEIGHT_CLASS_TINY, full_w_class)
-	else if (amount <= (max_amount * (2/3)))
+	else if(amount <= (max_amount * (2/3)))
 		w_class = clamp(full_w_class-1, WEIGHT_CLASS_TINY, full_w_class)
 	else
 		w_class = full_w_class

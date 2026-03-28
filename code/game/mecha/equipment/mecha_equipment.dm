@@ -8,6 +8,7 @@
 	force = 5
 	origin_tech = "materials=2;engineering=2"
 	max_integrity = 300
+	abstract_type = /obj/item/mecha_parts/mecha_equipment
 	/// Only used in start_cooldown() and do_after_cooldown(), so be sure to add one of these procs to your successful action().
 	var/equip_cooldown = 0
 	/// Can we use equip?
@@ -213,7 +214,7 @@
 
 /obj/item/mecha_parts/mecha_equipment/proc/occupant_message(message)
 	if(chassis)
-		chassis.occupant_message("[bicon(src)] [message]")
+		chassis.occupant_message("[icon2html(src, chassis.occupant)] [message]")
 
 /obj/item/mecha_parts/mecha_equipment/proc/self_occupant_attack()
 	return

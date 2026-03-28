@@ -24,36 +24,51 @@
 	var/list/eballs_types = list()
 	/// Desired distance from the eball.
 	var/eball_dist = 2
+	/// Is the anomaly exploding?
+	var/explosive = TRUE
 
-/obj/effect/anomaly/energetic/New()
+/obj/effect/anomaly/energetic/Initialize(mapload, spawn_strength, spawn_stability)
 	. = ..()
+	END_OF_TICK(CALLBACK(src, PROC_REF(spawn_energy_balls)))
+
+/obj/effect/anomaly/energetic/proc/spawn_energy_balls()
 	for(var/i = 1 to rand(eballs_num_low, eballs_num_high))
 		var/type = pick_weight_classic(eballs_types)
 		eballs.Add(new type(loc, src))
 
 /obj/effect/anomaly/energetic/Destroy()
 	QDEL_LAZYLIST(eballs)
-	. = ..()
+	return ..()
 
 /obj/effect/anomaly/energetic/collapse()
-	for(var/i = 1 to rand(collapse_jumps_low, collapse_jumps_high))
-		jump_to_machinery(collapse_shock_damage * 2)
-		do_shock_ex(collapse_shock_range, collapse_shock_damage, TRUE)
+	var/jumps_left = rand(collapse_jumps_low, collapse_jumps_high)
+	if(jumps_left <= 0)
+		collapse_base()
+		return
+	energetic_collapse_step(jumps_left)
+
+/obj/effect/anomaly/energetic/proc/energetic_collapse_step(jumps_left)
+	jump_to_machinery(collapse_shock_damage * 2)
+	do_shock_ex(collapse_shock_range, collapse_shock_damage, TRUE)
+	if(explosive)
 		explosion(loc, devastation_range = -1, heavy_impact_range = -1, light_impact_range = -1, flash_range = tier)
-		sleep(0.2 SECONDS)
 
+	jumps_left--
+	if(jumps_left > 0)
+		addtimer(CALLBACK(src, PROC_REF(energetic_collapse_step), jumps_left), 0.2 SECONDS)
+	else
+		addtimer(CALLBACK(src, PROC_REF(finish_energetic_collapse)), 0.2 SECONDS)
+
+/obj/effect/anomaly/energetic/proc/finish_energetic_collapse()
 	explosion(loc, devastation_range = max(-1, tier - 2), heavy_impact_range = max(-1, tier - 1), light_impact_range = max(-1, tier), flash_range = (tier + 2))
-	if(tier < 3)
-		return ..()
 
-	for(var/obj/effect/energy_ball/eball as anything in eballs)
-		if(!prob(50))
-			continue
+	if(tier >= 3)
+		for(var/obj/effect/energy_ball/eball as anything in eballs)
+			if(prob(50))
+				var/spawn_type = eball.spawn_type
+				new spawn_type(eball.loc)
 
-		var/spawn_type = eball.spawn_type
-		new spawn_type(eball.loc)
-
-	return ..()
+	collapse_base()
 
 /obj/effect/anomaly/energetic/process()
 	. = ..()
@@ -75,7 +90,7 @@
 
 /obj/effect/anomaly/energetic/mob_touch_effect(mob/living/mob)
 	. = ..(mob)
-	mob.electrocute_act(collapse_shock_damage, "энергетической аномалии", flags = SHOCK_NOGLOVES)
+	mob.electrocute_act(collapse_shock_damage, src, flags = SHOCK_NOGLOVES)
 
 /obj/effect/anomaly/energetic/item_touch_effect(obj/item/item)
 	. = ..(item)
@@ -87,7 +102,7 @@
 		if(!(mach.stat & BROKEN))
 			possible_targets += mach
 
-	if(!possible_targets.len)
+	if(!length(possible_targets))
 		return
 
 	var/obj/target = pick(possible_targets)
@@ -113,7 +128,6 @@
 
 /obj/effect/anomaly/energetic/tier1
 	name = "малая энергетическая аномалия"
-	icon_state = "energetic1"
 	core_type = /obj/item/assembly/signaler/core/energetic/tier1
 	stronger_anomaly_type = /obj/effect/anomaly/energetic/tier2
 	tier = 1
@@ -137,7 +151,7 @@
 		DATIVE = "малой энергетической аномалии", \
 		ACCUSATIVE = "малую энергетическую аномалию", \
 		INSTRUMENTAL = "малой энергетической аномалией", \
-		PREPOSITIONAL = "малой энергетической аномалии"
+		PREPOSITIONAL = "малой энергетической аномалии",
 	)
 
 /obj/effect/anomaly/energetic/tier2
@@ -170,7 +184,7 @@
 		DATIVE = "энергетической аномалии", \
 		ACCUSATIVE = "энергетическую аномалию", \
 		INSTRUMENTAL = "энергетической аномалией", \
-		PREPOSITIONAL = "энергетической аномалии"
+		PREPOSITIONAL = "энергетической аномалии",
 	)
 
 /obj/effect/anomaly/energetic/tier3
@@ -202,7 +216,7 @@
 		DATIVE = "большой энергетической аномалии", \
 		ACCUSATIVE = "большую энергетическую аномалию", \
 		INSTRUMENTAL = "большой энергетической аномалией", \
-		PREPOSITIONAL = "большой энергетической аномалии"
+		PREPOSITIONAL = "большой энергетической аномалии",
 	)
 
 /obj/effect/anomaly/energetic/tier3/New()
@@ -216,7 +230,6 @@
 
 		mob.playsound_local(null, 'sound/magic/lightningbolt.ogg', 15, TRUE)
 		to_chat(mob, span_energetic_anomaly("Вы слышите тихое потрескивание в воздухе. Подозрительно похоже на статическое электричество."))
-
 
 /obj/effect/energy_ball
 	name = "энергетический шар"
@@ -240,7 +253,7 @@
 		DATIVE = "энергетическому шару", \
 		ACCUSATIVE = "энергетический шар", \
 		INSTRUMENTAL = "энергетическим шаром", \
-		PREPOSITIONAL = "энергетическом шаре"
+		PREPOSITIONAL = "энергетическом шаре",
 	)
 
 /obj/effect/energy_ball/New(loc, owner)
@@ -302,7 +315,7 @@
 		return
 
 	var/mob/living/mob = mover
-	mob.electrocute_act(rand(20, 30), "энергетического шара",  flags = SHOCK_NOGLOVES)
+	mob.electrocute_act(rand(20, 30), src,  flags = SHOCK_NOGLOVES)
 
 /obj/effect/energy_ball/big
 	size = 1
@@ -310,7 +323,6 @@
 /obj/effect/energy_ball/verybig
 	size = 1.5
 	spawn_type = /obj/effect/anomaly/energetic/tier2
-
 
 //			 TIER 4 ADMIN SPAWN ONLY
 
@@ -345,13 +357,13 @@
 		DATIVE = "колоссальной энергетической аномалии", \
 		ACCUSATIVE = "колоссальную энергетическую аномалию", \
 		INSTRUMENTAL = "колоссальной энергетической аномалией", \
-		PREPOSITIONAL = "колоссальной энергетической аномалии"
+		PREPOSITIONAL = "колоссальной энергетической аномалии",
 	)
 
 /obj/effect/anomaly/energetic/tier4/New()
 	. = ..()
 	for(var/mob/living/mob as anything in GLOB.player_list)
-		mob.electrocute_act(rand(5, 15), "[declent_ru(GENITIVE)]")
+		mob.electrocute_act(rand(5, 15), src)
 		if(mob.stat)
 			continue
 

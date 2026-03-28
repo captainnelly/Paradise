@@ -3,8 +3,6 @@
 /obj/machinery/computer/operating
 	name = "operating computer"
 	desc = "Высокотехнологичный медицинский компьютер, используемый для контролирования процесса хиругических операций."
-	density = TRUE
-	anchored = TRUE
 	icon_keyboard = "med_key"
 	icon_screen = "crew"
 	circuit = /obj/item/circuitboard/operating
@@ -31,7 +29,7 @@
 		DATIVE = "операционному компьютеру",
 		ACCUSATIVE = "операционный компьютер",
 		INSTRUMENTAL = "операционным компьютером",
-		PREPOSITIONAL = "операционном компьютере"
+		PREPOSITIONAL = "операционном компьютере",
 	)
 
 /obj/machinery/computer/operating/Initialize(mapload)
@@ -69,7 +67,7 @@
 /obj/machinery/computer/operating/ui_interact(mob/user, datum/tgui/ui = null)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)
-		ui = new(user, src, "OperatingComputer", capitalize(declent_ru(NOMINATIVE)))
+		ui = new(user, src, "OperatingComputer", DECLENT_RU_CAP(src, NOMINATIVE))
 		ui.open()
 
 /obj/machinery/computer/operating/ui_data(mob/user)
@@ -161,14 +159,13 @@
 
 	return data
 
-
 /obj/machinery/computer/operating/ui_act(action, params)
 	if(..())
 		return
 	if(stat & (NOPOWER|BROKEN))
 		return
 
-	if((usr.contents.Find(src) || (in_range(src, usr) && istype(src.loc, /turf))) || (istype(usr, /mob/living/silicon)))
+	if((usr.contents.Find(src) || (in_range(src, usr) && isturf(src.loc))) || (issilicon(usr)))
 		usr.set_machine(src)
 
 	. = TRUE
@@ -232,7 +229,7 @@
 
 	if(nextTick < world.time)
 		nextTick=world.time + OP_COMPUTER_COOLDOWN
-		if(crit && table.patient.health <= -50 )
+		if(crit && table.patient.health <= -50)
 			playsound(src.loc, 'sound/machines/defib_success.ogg', 50, FALSE)
 		if(oxy && table.patient.getOxyLoss()>oxyAlarm)
 			playsound(src.loc, 'sound/machines/defib_saftyoff.ogg', 50, FALSE)

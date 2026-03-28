@@ -7,7 +7,7 @@
 
 /proc/key_name_helper(whom, include_name, include_link = FALSE, type = null, ticket_id = null)
 	if(include_link != FALSE && include_link != TRUE)
-		log_runtime(EXCEPTION("Key_name was called with an incorrect include_link [include_link]"))
+		stack_trace("Key_name was called with an incorrect include_link [include_link]")
 
 	var/mob/M
 	var/client/C
@@ -40,7 +40,7 @@
 	. = ""
 
 	if(key)
-		if(C && C.holder && C.holder.fakekey && !include_name)
+		if(C?.holder && C.holder.fakekey && !include_name)
 			if(include_link)
 				. += "<a href='byond://?priv_msg=[C.getStealthKey()];type=[type];ticket_id=[ticket_id]'>"
 			. += "Administrator"

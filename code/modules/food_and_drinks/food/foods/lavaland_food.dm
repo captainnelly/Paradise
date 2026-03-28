@@ -14,7 +14,6 @@
 	icon_state = "soft_meat_cut"
 	item_state = "soft_meat_cut"
 	list_reagents = list("nutriment" = 1, "vitamin" = 3, "protein" = 3)
-	bitesize = 2
 	filling_color = "#D49284"
 	tastes = list("сырого мяса" = 1)
 	foodtype = MEAT | RAW
@@ -36,7 +35,6 @@
 	icon_state = "eel_filet"
 	item_state = "eel_filet"
 	list_reagents = list("nutriment" = 2, "menthol" = 3, "protein" = 4)
-	bitesize = 2
 	filling_color = "#414F71"
 	tastes = list("сырого мяса" = 1)
 	foodtype = MEAT | RAW
@@ -76,7 +74,7 @@
 	name = "soft meat cubes"
 	desc = "Филе рыбы, порезанное на маленькие кубики и обжаренное в печи. Выглядит аппетитно."
 	gender = PLURAL
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "soft_meat_cubes"
 	list_reagents = list("nutriment" = 2, "vitamin" = 3, "protein" = 3)
 	bitesize = 3
@@ -97,7 +95,7 @@
 /obj/item/reagent_containers/food/snacks/lavaland/predatory_fish_slab
 	name = "cooked predatory fish slab"
 	desc = "Кусок мяса хищной рыбы, обжаренный в печи. Пригоден к употреблению."
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "predatory_fish_slab"
 	list_reagents = list("nutriment" = 4, "protein" = 6)
 	bitesize = 3
@@ -119,7 +117,7 @@
 	name = "eel ringlets"
 	desc = "Обжаренное в печи филе донного угря. Невероятно вкусное."
 	gender = PLURAL
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "eel_ringlets"
 	list_reagents = list("nutriment" = 4, "protein" = 6)
 	bitesize = 3
@@ -140,7 +138,7 @@
 /obj/item/reagent_containers/food/snacks/lavaland/thali_lazis_bacon
 	name = "thali lazis bacon part"
 	desc = "Небольшая порция бекона, взятая из тарелки Тали Лазис."
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "thali_lazis_bacon"
 	overlay_sprite = "thali_lazis_bacon_overlay"
 	foodtype = MEAT
@@ -158,7 +156,7 @@
 /obj/item/reagent_containers/food/snacks/lavaland/thali_lazis_cacti
 	name = "thali lazis cacti part"
 	desc = "Небольшой кактус, взятый из тарелки Тали Лазис."
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "thali_lazis_cacti"
 	overlay_sprite = "thali_lazis_cacti_overlay"
 	foodtype = FRUIT
@@ -176,7 +174,7 @@
 /obj/item/reagent_containers/food/snacks/lavaland/thali_lazis_wing
 	name = "thali lazis wing part"
 	desc = "Небольшое крыло, взятое из тарелки Тали Лазис."
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "thali_lazis_wing"
 	overlay_sprite = "thali_lazis_wing_overlay"
 	foodtype = MEAT
@@ -194,7 +192,7 @@
 /obj/item/reagent_containers/food/snacks/lavaland/thali_lazis_fish
 	name = "thali lazis fish part"
 	desc = "Небольшая порция рыбы, взятая из тарелки Тали Лазис."
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "thali_lazis_fish"
 	overlay_sprite = "thali_lazis_fish_overlay"
 	foodtype = MEAT
@@ -212,7 +210,7 @@
 /obj/item/reagent_containers/food/snacks/lavaland/thali_lazis_crunchie
 	name = "thali lazis crunchie part"
 	desc = "Небольшая хрустящая порция, взятая из тарелки Тали Лазис."
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "thali_lazis_crunchie"
 	overlay_sprite = "thali_lazis_crunchie_overlay"
 	foodtype = MEAT
@@ -230,7 +228,7 @@
 /obj/item/reagent_containers/food/snacks/lavaland/thali_lazis_bungus
 	name = "thali lazis bungus part"
 	desc = "Небольшая порция грибов, взятая из тарелки Тали Лазис."
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "thali_lazis_bungus"
 	overlay_sprite = "thali_lazis_bungus_overlay"
 	foodtype = VEGETABLES
@@ -248,8 +246,7 @@
 /obj/item/reagent_containers/food/snacks/lavaland_food
 	name = "generic lavaland food"
 	desc = "самое обычное блюдо. Если вы это видите, то Зюзя напортачил"
-	gender = NEUTER
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "fine_meal"
 	lefthand_file = 'icons/mob/inhands/lavaland/food_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/lavaland/food_righthand.dmi'
@@ -274,7 +271,6 @@
 	name = "fine meal"
 	desc = "Мясо Голиафа, обжаренное в соку кактусового фрукта. Невероятно вкусное и питательное."
 	gender = FEMALE
-	icon_state = "fine_meal"
 	list_reagents = list("vitfro" = 6, "protein" = 7, "vitamin" = 3)
 	tastes = list("сбалансированной еды" = 1)
 	foodtype = MEAT|FRUIT
@@ -299,7 +295,6 @@
 	desc = "Многие народы галактики расценивают поедание себе подобных как ужасающее преступление. Однако эти стопы вышли уж слишком питательными..."
 	icon_state = "freaky_leg"
 	tastes = list("тяжёлых времён" = 1)
-	foodtype = MEAT
 
 /obj/item/reagent_containers/food/snacks/lavaland_food/freaky_leg/get_ru_names()
 	return list(
@@ -324,7 +319,7 @@
 	tastes = list("трав" = 1)
 	foodtype = FRUIT|VEGETABLES
 
-/obj/item/reagent_containers/food/snacks/lavaland_food/veggie_meal/get_ru_names()	
+/obj/item/reagent_containers/food/snacks/lavaland_food/veggie_meal/get_ru_names()
 	return list(
 		NOMINATIVE = "вегетарианское блюдо Лазиса",
 		GENITIVE = "вегетарианского блюда Лазиса",
@@ -373,7 +368,6 @@
 		INSTRUMENTAL = "блюдом \"Ям-Граб\"",
 		PREPOSITIONAL = "блюде \"Ям-Граб\"",
 	)
-
 
 /obj/item/reagent_containers/food/snacks/lavaland_food/ashie_kebab
 	name = "ashie-kebab"
@@ -689,7 +683,7 @@
 	name = "thali lazis plate"
 	desc = "Большой поднос, сделанный из дерева. Предназначен для хранения огромного количества съестного."
 	gender = MALE
-	icon = 'icons/obj/lavaland/ashie_food.dmi'
+	icon = 'icons/obj/lavaland/lavaland_food.dmi'
 	icon_state = "thali_lazis_plate"
 	flags = NONE
 	materials = null
@@ -704,7 +698,6 @@
 	display_contents_with_number = TRUE
 	storage_slots = 12
 	max_combined_w_class = 30
-	slot_flags = NONE
 
 /obj/item/storage/lava_tray/get_ru_names()
 	return list(

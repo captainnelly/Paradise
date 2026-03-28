@@ -21,11 +21,6 @@
 /datum/proc/deserialize(list/data)
 	return
 
-/atom
-	// This var isn't actually used for anything, but is present so that
-	// DM's map reader doesn't forfeit on reading a JSON-serialized map
-	var/map_json_data
-
 // This is so specific atoms can override these, and ignore certain ones
 /atom/proc/vars_to_save()
 	return list("color","dir","icon","icon_state","name","pixel_x","pixel_y")
@@ -49,13 +44,11 @@
 			data[thing] = vars[thing]
 	return data
 
-
 /atom/deserialize(list/data)
 	for(var/thing in vars_to_save())
 		if(thing in data)
 			vars[thing] = data[thing]
 	..()
-
 
 /*
 Whoops, forgot to put documentation here.
@@ -76,12 +69,12 @@ in their list
 
 /proc/list_to_object(list/data, loc)
 	if(!islist(data))
-		throw EXCEPTION("You didn't give me a list, bucko")
+		CRASH("You didn't give me a list, bucko")
 	if(!("type" in data))
-		throw EXCEPTION("No 'type' field in the data")
+		CRASH("No 'type' field in the data")
 	var/path = text2path(data["type"])
 	if(!path)
-		throw EXCEPTION("Path not found: [path]")
+		CRASH("Path not found: [path]")
 
 	var/atom/movable/thing = new path(loc)
 	thing.deserialize(data)

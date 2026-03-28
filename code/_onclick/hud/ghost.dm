@@ -60,7 +60,7 @@
 	M.Turn(-90)
 
 	cut_overlays()
-	var/image/img = image('icons/mob/actions/actions.dmi', src, (hud && hud.inventory_shown) ? "hide" : "show")
+	var/image/img = image('icons/mob/actions/actions.dmi', src, (hud?.inventory_shown) ? "hide" : "show")
 	img.transform = M
 	add_overlay(img)
 
@@ -92,7 +92,6 @@
 	GLOB.paiController.recruitWindow(G)
 
 /datum/hud/ghost
-	inventory_shown = FALSE
 
 /datum/hud/ghost/New(mob/owner)
 	..()
@@ -133,14 +132,9 @@
 
 /datum/hud/ghost/show_hud(version = 0, mob/viewmob)
 	// don't show this HUD if observing; show the HUD of the observee
-	var/mob/dead/observer/observe = mymob
-	if(istype(observe) && observe.orbiting)
+	var/mob/dead/observer/observer = mymob
+	if(istype(observer) && observer.orbiting)
 		plane_masters_update()
 		return FALSE
 
-	var/mob/screenmob = viewmob || mymob
-
-	screenmob.client.screen = list()
-	screenmob.client.screen += static_inventory
-
-	..()
+	. = ..()

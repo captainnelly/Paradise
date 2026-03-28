@@ -15,7 +15,7 @@ using /datum/datacore/proc/manifest_inject(), or manifest_insert()
 GLOBAL_LIST_EMPTY(PDA_Manifest)
 
 /datum/datacore/proc/get_manifest_json()
-	if(GLOB.PDA_Manifest.len)
+	if(length(GLOB.PDA_Manifest))
 		return
 	var/heads[0]
 	var/pro[0]
@@ -39,50 +39,50 @@ GLOBAL_LIST_EMPTY(PDA_Manifest)
 			heads[++heads.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
 			department = 1
 			depthead = 1
-			if(real_rank == JOB_TITLE_CAPTAIN && heads.len != 1)
-				heads.Swap(1,  heads.len)
+			if(real_rank == JOB_TITLE_CAPTAIN && length(heads) != 1)
+				heads.Swap(1,  length(heads))
 
-		if((real_rank == JOB_TITLE_JUDGE) || (real_rank == JOB_TITLE_LAWYER) || (real_rank == JOB_TITLE_REPRESENTATIVE))
+		if((real_rank == JOB_TITLE_MAGISTRATE) || (real_rank == JOB_TITLE_LAWYER) || (real_rank == JOB_TITLE_REPRESENTATIVE))
 			pro[++pro.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
 			department = 1
-			if((real_rank == JOB_TITLE_JUDGE) && pro.len != 1)
-				pro.Swap(1,  pro.len)
+			if((real_rank == JOB_TITLE_MAGISTRATE) && length(pro) != 1)
+				pro.Swap(1,  length(pro))
 
 		if(real_rank in GLOB.security_positions)
 			sec[++sec.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
 			department = 1
-			if(depthead && sec.len != 1)
-				sec.Swap(1, sec.len)
+			if(depthead && length(sec) != 1)
+				sec.Swap(1, length(sec))
 
 		if(real_rank in GLOB.engineering_positions)
 			eng[++eng.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
 			department = 1
-			if(depthead && eng.len != 1)
-				eng.Swap(1, eng.len)
+			if(depthead && length(eng) != 1)
+				eng.Swap(1, length(eng))
 
 		if(real_rank in GLOB.medical_positions)
 			med[++med.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
 			department = 1
-			if(depthead && med.len != 1)
-				med.Swap(1, med.len)
+			if(depthead && length(med) != 1)
+				med.Swap(1, length(med))
 
 		if(real_rank in GLOB.science_positions)
 			sci[++sci.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
 			department = 1
-			if(depthead && sci.len != 1)
-				sci.Swap(1, sci.len)
+			if(depthead && length(sci) != 1)
+				sci.Swap(1, length(sci))
 
 		if(real_rank in GLOB.service_positions)
 			ser[++ser.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
 			department = 1
-			if(depthead && ser.len != 1)
-				ser.Swap(1, ser.len)
+			if(depthead && length(ser) != 1)
+				ser.Swap(1, length(ser))
 
 		if(real_rank in GLOB.supply_positions)
 			sup[++sup.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
 			department = 1
-			if(depthead && sup.len != 1)
-				sup.Swap(1, sup.len)
+			if(depthead && length(sup) != 1)
+				sup.Swap(1, length(sup))
 
 		if(real_rank in GLOB.nonhuman_positions)
 			bot[++bot.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
@@ -90,7 +90,6 @@ GLOBAL_LIST_EMPTY(PDA_Manifest)
 
 		if(!department && !(name in heads))
 			misc[++misc.len] = list("name" = name, "rank" = rank, "real_rank" = real_rank, "active" = isactive)
-
 
 	GLOB.PDA_Manifest = list(\
 		"heads" = heads,\
@@ -106,14 +105,12 @@ GLOBAL_LIST_EMPTY(PDA_Manifest)
 		)
 	return
 
-
-
 /datum/datacore/proc/manifest()
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		manifest_inject(H)
 
 /datum/datacore/proc/manifest_modify(name, rank, assignment)
-	if(GLOB.PDA_Manifest.len)
+	if(length(GLOB.PDA_Manifest))
 		GLOB.PDA_Manifest.Cut()
 	var/datum/data/record/foundrecord
 
@@ -124,12 +121,12 @@ GLOBAL_LIST_EMPTY(PDA_Manifest)
 				break
 
 	if(foundrecord)
-		foundrecord.fields["rank"] = assignment
+		foundrecord.fields["rank"] = get_job_title_ru(assignment)
 		foundrecord.fields["real_rank"] = rank
 
 GLOBAL_VAR_INIT(record_id_num, 1001)
 /datum/datacore/proc/manifest_inject(mob/living/carbon/human/H)
-	if(GLOB.PDA_Manifest.len)
+	if(length(GLOB.PDA_Manifest))
 		GLOB.PDA_Manifest.Cut()
 
 	if(H.mind && (H.mind.assigned_role != H.mind.special_role))
@@ -145,13 +142,12 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 
 		var/id = num2hex(GLOB.record_id_num++, 6)
 
-
 		//General Record
 		var/datum/data/record/G = new()
 		G.fields["id"]			= id
 		G.fields["name"]		= H.real_name
 		G.fields["real_rank"]	= H.mind.assigned_role
-		G.fields["rank"]		= assignment
+		G.fields["rank"]		= get_job_title_ru(assignment)
 		G.fields["age"]			= H.age
 		G.fields["fingerprint"]	= md5(H.dna.uni_identity)
 		G.fields["p_stat"]		= "Активный"
@@ -278,7 +274,7 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 	if(H.dna.species.bodyflags & HAS_TAIL_MARKINGS)
 		var/tail_marking = H.m_styles["tail"]
 		var/datum/sprite_accessory/tail_marking_style = GLOB.marking_styles_list[tail_marking]
-		if(tail_marking_style && tail_marking_style.species_allowed)
+		if(tail_marking_style?.species_allowed)
 			t_marking_s = new/icon("icon" = tail_marking_style.icon, "icon_state" = "[tail_marking_style.icon_state]_s")
 			t_marking_s.Blend(H.m_colours["tail"], ICON_ADD)
 			if(!(H.body_accessory && istype(H.body_accessory, /datum/body_accessory/body)))
@@ -297,7 +293,7 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 		var/icon/hair_s = new/icon("icon" = hair_style.icon, "icon_state" = "[hair_style.icon_state]_s")
 		// I'll want to make a species-specific proc for this sooner or later
 		// But this'll do for now
-		if(istype(head_organ.dna.species, /datum/species/slime))
+		if(isslimeperson(head_organ.dna.species))
 			hair_s.Blend("[H.skin_colour]A0", ICON_AND) //A0 = 160 alpha.
 		else
 			hair_s.Blend(head_organ.hair_colour, ICON_ADD)
@@ -313,15 +309,15 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 	//Head Accessory
 	if(head_organ.dna.species.bodyflags & HAS_HEAD_ACCESSORY)
 		var/datum/sprite_accessory/head_accessory_style = GLOB.head_accessory_styles_list[head_organ.ha_style]
-		if(head_accessory_style && head_accessory_style.species_allowed)
+		if(head_accessory_style?.species_allowed)
 			var/icon/head_accessory_s = new/icon("icon" = head_accessory_style.icon, "icon_state" = "[head_accessory_style.icon_state]_s")
 			head_accessory_s.Blend(head_organ.headacc_colour, ICON_ADD)
 			face_s.Blend(head_accessory_s, ICON_OVERLAY)
 
 	var/datum/sprite_accessory/facial_hair_style = GLOB.facial_hair_styles_list[head_organ.f_style]
-	if(facial_hair_style && facial_hair_style.species_allowed)
+	if(facial_hair_style?.species_allowed)
 		var/icon/facial_s = new/icon("icon" = facial_hair_style.icon, "icon_state" = "[facial_hair_style.icon_state]_s")
-		if(istype(head_organ.dna.species, /datum/species/slime))
+		if(isslimeperson(head_organ.dna.species))
 			facial_s.Blend("[H.skin_colour]A0", ICON_ADD) //A0 = 160 alpha.
 		else
 			facial_s.Blend(head_organ.facial_colour, ICON_ADD)
@@ -339,20 +335,19 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 		if(H.dna.species.bodyflags & HAS_BODY_MARKINGS) //Body markings.
 			var/body_marking = H.m_styles["body"]
 			var/datum/sprite_accessory/body_marking_style = GLOB.marking_styles_list[body_marking]
-			if(body_marking_style && body_marking_style.species_allowed)
+			if(body_marking_style?.species_allowed)
 				var/icon/b_marking_s = new/icon("icon" = body_marking_style.icon, "icon_state" = "[body_marking_style.icon_state]_s")
 				b_marking_s.Blend(H.m_colours["body"], ICON_ADD)
 				face_s.Blend(b_marking_s, ICON_OVERLAY)
 		if(H.dna.species.bodyflags & HAS_HEAD_MARKINGS) //Head markings.
 			var/head_marking = H.m_styles["head"]
 			var/datum/sprite_accessory/head_marking_style = GLOB.marking_styles_list[head_marking]
-			if(head_marking_style && head_marking_style.species_allowed)
+			if(head_marking_style?.species_allowed)
 				var/icon/h_marking_s = new/icon("icon" = head_marking_style.icon, "icon_state" = "[head_marking_style.icon_state]_s")
 				h_marking_s.Blend(H.m_colours["head"], ICON_ADD)
 				face_s.Blend(h_marking_s, ICON_OVERLAY)
 
 	preview_icon.Blend(face_s, ICON_OVERLAY)
-
 
 	var/icon/clothes_s = null
 	var/job_clothes = null
@@ -372,7 +367,7 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "jackboots"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/hands.dmi', "swat_gl"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/suit.dmi', "blueshield"), ICON_OVERLAY)
-		if(JOB_TITLE_JUDGE)
+		if(JOB_TITLE_MAGISTRATE)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "really_black_suit_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "laceups"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/suit.dmi', "judge"), ICON_OVERLAY)
@@ -409,7 +404,7 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 		if(JOB_TITLE_MINING_MEDIC)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "mining_medic_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "brown"), ICON_UNDERLAY)
-		if("Lawyer")
+		if(JOB_TITLE_LAWYER)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "internalaffairs_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "brown"), ICON_UNDERLAY)
 		if(JOB_TITLE_CHAPLAIN)
@@ -423,7 +418,7 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "science_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "white"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/suit.dmi', "labcoat_tox_open"), ICON_OVERLAY)
-		if(JOB_TITLE_SCIENTIST_STUDENT)
+		if(JOB_TITLE_SCIENCE_STUDENT)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "student_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "white"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/suit.dmi', "labcoat_tox_open"), ICON_OVERLAY)
@@ -458,7 +453,7 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 		if(JOB_TITLE_PARAMEDIC)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "paramedic_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "black"), ICON_UNDERLAY)
-		if(JOB_TITLE_INTERN)
+		if(JOB_TITLE_MEDICAL_INTERN)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "intern_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "white"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/suit.dmi', "labcoat_open"), ICON_OVERLAY)
@@ -486,7 +481,7 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 		if(JOB_TITLE_OFFICER)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "security_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "jackboots"), ICON_UNDERLAY)
-		if(JOB_TITLE_CHIEF)
+		if(JOB_TITLE_CHIEF_ENGINEER)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "chief_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "brown"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/belt.dmi', "utility"), ICON_OVERLAY)
@@ -498,7 +493,7 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "atmos_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "black"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/belt.dmi', "utility"), ICON_OVERLAY)
-		if(JOB_TITLE_MECHANIC)
+		if(JOB_TITLE_SPACEPOD_TECHNICIAN)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "mechanic_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "orange"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/belt.dmi', "utility"), ICON_OVERLAY)
@@ -510,14 +505,14 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "robotics_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "black"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/suit.dmi', "labcoat_open"), ICON_OVERLAY)
-		if("Syndicate Agent")
+		if(JOB_TITLE_SYNDICATE_AGENT)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "syndicate_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "black"), ICON_UNDERLAY)
-		if(JOB_TITLE_SYNDICATE)
+		if(JOB_TITLE_SYNDICATE_OFFICER)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "syndicate_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "jackboots"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/hands.dmi', "swat_gl"), ICON_UNDERLAY)
-		if("Syndicate Nuclear Operative")
+		if(JOB_TITLE_SYNDICATE_OPERATIVE)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "syndicate_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "jackboots"), ICON_UNDERLAY)
 			clothes_s.Blend(new /icon('icons/mob/clothing/hands.dmi', "swat_gl"), ICON_UNDERLAY)
@@ -533,12 +528,13 @@ GLOBAL_VAR_INIT(record_id_num, 1001)
 		if(JOB_TITLE_TEAM3)
 			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "blue_s")
 			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "blue"), ICON_UNDERLAY)
-		else if(H.mind && (H.mind.assigned_role in get_all_centcom_jobs()))
-			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "officer_s")
-			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "laceups"), ICON_UNDERLAY)
 		else
-			clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "grey_s")
-			clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "black"), ICON_UNDERLAY)
+			if(H.mind && (H.mind.assigned_role in get_all_centcom_jobs()))
+				clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "officer_s")
+				clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "laceups"), ICON_UNDERLAY)
+			else
+				clothes_s = new /icon('icons/mob/clothing/uniform.dmi', "grey_s")
+				clothes_s.Blend(new /icon('icons/mob/clothing/feet.dmi', "black"), ICON_UNDERLAY)
 
 	preview_icon.Blend(face_s, ICON_OVERLAY) // Why do we do this twice
 	if(clothes_s)

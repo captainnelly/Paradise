@@ -18,7 +18,6 @@
 	item_state = "facehugger"
 	w_class = WEIGHT_CLASS_TINY //note: can be picked up by aliens unlike most other items of w_class below 4
 	throw_range = 5
-	throwforce = 0
 	tint = 3
 	clothing_flags = AIRTIGHT
 	flags_cover = MASKCOVERSMOUTH|MASKCOVERSEYES
@@ -33,6 +32,7 @@
 
 	clothing_traits = list(TRAIT_NO_BREATH)
 
+	cares_about_temperature = TRUE
 
 	var/stat = CONSCIOUS //UNCONSCIOUS is the idle state in this case
 
@@ -49,7 +49,7 @@
 		DATIVE = "лицехвату",
 		ACCUSATIVE = "лицехвата",
 		INSTRUMENTAL = "лицехватом",
-		PREPOSITIONAL = "лицехвате"
+		PREPOSITIONAL = "лицехвате",
 	)
 
 /obj/item/clothing/mask/facehugger/Initialize(mapload, mob/hugger)
@@ -71,10 +71,8 @@
 /obj/item/clothing/mask/facehugger/allowed_for_alien()
 	return TRUE
 
-
 /obj/item/clothing/mask/facehugger/attackby(obj/item/I, mob/user, params)
 	return I.attack_obj(src, user, params)
-
 
 /obj/item/clothing/mask/facehugger/attack_alien(mob/user) //can be picked up by aliens
 	return attack_hand(user)
@@ -88,30 +86,27 @@
 		return FALSE
 	. = ..()
 
-
 /obj/item/clothing/mask/facehugger/attack(mob/living/target, mob/living/user, params, def_zone, skip_attack_anim = FALSE)
 	if(user.drop_item_ground(src) && Attach(target))
 		user.do_attack_animation(target, used_item = src)
 		return ATTACK_CHAIN_BLOCKED_ALL
 	return ..()
 
-
 /obj/item/clothing/mask/facehugger/examine(mob/user)
 	. = ..()
 	if(real)//So that giant red text about probisci doesn't show up for fake ones
 		switch(stat)
 			if(DEAD,UNCONSCIOUS)
-				. += span_boldannounceic("[capitalize(declent_ru(NOMINATIVE))] не двигается.")
+				. += span_boldannounceic("[DECLENT_RU_CAP(src, NOMINATIVE)] не двигается.")
 			if(CONSCIOUS)
-				. += span_boldannounceic("[capitalize(declent_ru(NOMINATIVE))] кажется, активен!")
+				. += span_boldannounceic("[DECLENT_RU_CAP(src, NOMINATIVE)] кажется, активен!")
 		if(sterile)
-			. += span_boldannounceic("Похоже хоботок [genderize_ru(gender, "eго", "её", "его", "их")] удалили.")
+			. += span_boldannounceic("Похоже хоботок [GEND_HIS_HER(src)] удалили.")
 
-/obj/item/clothing/mask/facehugger/temperature_expose(datum/gas_mixture/air, exposed_temperature, exposed_volume)
+/obj/item/clothing/mask/facehugger/temperature_expose(exposed_temperature, exposed_volume)
 	..()
 	if(exposed_temperature > 300)
 		Die()
-
 
 /obj/item/clothing/mask/facehugger/equipped(mob/living/user, slot, initial = FALSE)
 	if(slot_flags && slot && !sterile)
@@ -123,7 +118,6 @@
 		return
 	. = ..()
 
-
 /obj/item/clothing/mask/facehugger/dropped(mob/living/user, slot, silent, mob/living/carbon/alien/alien)
 	. = ..()
 	addtimer(CALLBACK(src, PROC_REF(check_mob_inside)), 0.1 SECONDS)
@@ -132,7 +126,6 @@
 	SIGNAL_HANDLER
 
 	HasProximity(arrived)
-
 
 /obj/item/clothing/mask/facehugger/on_found(mob/finder)
 	if(stat != DEAD)
@@ -205,7 +198,7 @@
 	if(loc == attached_mob)
 		return FALSE
 
-	var/text_name = capitalize(declent_ru(NOMINATIVE))
+	var/text_name = DECLENT_RU_CAP(src, NOMINATIVE)
 
 	if(!sterile)
 		attached_mob.apply_damage(strength, BRUTE, BODY_ZONE_HEAD, forced = TRUE, silent = TRUE)
@@ -258,7 +251,6 @@
 
 	return TRUE
 
-
 /obj/item/clothing/mask/facehugger/proc/impregnate_check(mob/living/attached_mob)
 	if(attached_mob.get_int_organ(/obj/item/organ/internal/xenos/hivenode))
 		return FALSE
@@ -301,7 +293,7 @@
 		if(!H.check_has_mouth())
 			return
 
-	var/text_name = capitalize(declent_ru(NOMINATIVE))
+	var/text_name = DECLENT_RU_CAP(src, NOMINATIVE)
 	if(!sterile)
 
 		target.visible_message(span_danger("[text_name] отпускает лицо [target.declent_ru(GENITIVE)] после долгого контакта!"), \
@@ -361,7 +353,7 @@
 		holdered_mob?.death()
 	if(iscarbon(loc))
 		remove_clothing_traits(loc)
-	visible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] сворачивается в клубок!"))
+	visible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] сворачивается в клубок!"))
 
 /proc/CanHug(mob/living/hugged_mob)
 	if(!istype(hugged_mob))
@@ -391,7 +383,6 @@
 	name = "Lamarr"
 	desc = "В худшем случае она попытается... спариться с вашей головой." //hope we don't get sued over a harmless reference, rite?
 	sterile = 1
-	gender = FEMALE
 	holder_flags = ALIEN_HOLDER | HUMAN_HOLDER
 
 /obj/item/clothing/mask/facehugger/lamarr/get_ru_names()
@@ -401,7 +392,7 @@
 		DATIVE = "ламарр",
 		ACCUSATIVE = "ламарр",
 		INSTRUMENTAL = "ламарр",
-		PREPOSITIONAL = "ламарр"
+		PREPOSITIONAL = "ламарр",
 	)
 
 /obj/item/clothing/mask/facehugger/lamarr/Initialize(mapload, hugger)

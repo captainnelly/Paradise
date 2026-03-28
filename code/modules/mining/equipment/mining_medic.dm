@@ -4,10 +4,8 @@ Almost every mining medic related stuff
 
 /obj/machinery/camera/portable/no_ai
 
-
 /obj/machinery/camera/portable/no_ai/can_AI_see(ai)
 	return FALSE
-
 
 /obj/item/clothing/accessory/camera
 	name = "mining camera"
@@ -40,13 +38,12 @@ Almost every mining medic related stuff
 		DATIVE = "шахтёрской видеокамере",
 		ACCUSATIVE = "шахтёрскую видеокамеру",
 		INSTRUMENTAL = "шахтёрской видеокамерой",
-		PREPOSITIONAL = "шахтёрской видеокамере"
+		PREPOSITIONAL = "шахтёрской видеокамере",
 	)
 
 /obj/item/clothing/accessory/camera/Destroy()
-	GLOB.active_video_cameras -= src
-
 	if(camera) // null until we activate
+		GLOB.active_entertainment_cameras -= camera
 		camera.c_tag = null
 		QDEL_NULL(camera)
 
@@ -89,13 +86,13 @@ Almost every mining medic related stuff
 /obj/item/clothing/accessory/camera/proc/update_camera_state(mob/living/carbon/user, force = FALSE)
 	if(on)
 		if(news_feed)
-			GLOB.active_video_cameras -= src
+			GLOB.active_entertainment_cameras -= camera
 		camera.c_tag = null
 		QDEL_NULL(camera)
 	else
 		if(news_feed)
 			camera = new(src, list(feed, "news"), user.name)
-			GLOB.active_video_cameras |= src
+			GLOB.active_entertainment_cameras |= camera
 		else
 			camera = new(src, list(feed), user.name)
 	on = !on
@@ -125,13 +122,12 @@ Almost every mining medic related stuff
 
 /obj/item/clothing/accessory/camera/security
 	name = "security camera"
-	desc = "Небольшая нагрудная камера с логотипом НаноТрейзен. Окрашена в чёрные цвета. Позволяет демонстрировать ваше пренебрежение законом в прямом эфире. \
+	desc = "Небольшая нагрудная камера с логотипом \"Нанотрейзен\". Окрашена в чёрные цвета. Позволяет демонстрировать ваше пренебрежение законом в прямом эфире. \
 			Данный тип камер позволяет вести трансляцию как на планшет службы безопасности, так и в развлекательную сеть станции."
 	icon_state = "sec_camera"
 	item_state = "sec_camera"
 	slot = ACCESSORY_SLOT_DECOR //No one will remove their holster for a camera
 	feed = "secfeed"
-	multiz = TRUE //maybe change that, for now true
 
 /obj/item/clothing/accessory/camera/security/get_ru_names()
 	return list(
@@ -140,7 +136,7 @@ Almost every mining medic related stuff
 		DATIVE = "нагрудной видеокамере",
 		ACCUSATIVE = "нагрудную видеокамеру",
 		INSTRUMENTAL = "нагрудной видеокамерой",
-		PREPOSITIONAL = "нагрудной видеокамере"
+		PREPOSITIONAL = "нагрудной видеокамере",
 	)
 
 /obj/item/storage/box/mining_cameras
@@ -150,7 +146,7 @@ Almost every mining medic related stuff
 	storage_slots =  12
 	max_combined_w_class = INFINITY
 	can_hold = list(
-		/obj/item/clothing/accessory/camera
+		/obj/item/clothing/accessory/camera,
 	)
 
 /obj/item/storage/box/mining_cameras/get_ru_names()
@@ -160,7 +156,7 @@ Almost every mining medic related stuff
 		DATIVE = "коробке с шахтёрскими видеокамерами",
 		ACCUSATIVE = "коробку с шахтёрскими видеокамерами",
 		INSTRUMENTAL = "коробкой с шахтёрскими видеокамерами",
-		PREPOSITIONAL = "коробке с шахтёрскими видеокамерами"
+		PREPOSITIONAL = "коробке с шахтёрскими видеокамерами",
 	)
 
 /obj/item/storage/box/mining_cameras/populate_contents()
@@ -179,7 +175,7 @@ Almost every mining medic related stuff
 		DATIVE = "коробке с нагрудными видеокамерами",
 		ACCUSATIVE = "коробку с нагрудными видеокамерами",
 		INSTRUMENTAL = "коробкой с нагрудными видеокамерами",
-		PREPOSITIONAL = "коробке с нагрудными видеокамерами"
+		PREPOSITIONAL = "коробке с нагрудными видеокамерами",
 	)
 
 /obj/item/storage/box/sec_cameras/populate_contents()
@@ -202,7 +198,7 @@ Almost every mining medic related stuff
 		DATIVE = "шахтёрскому монитору видеокамер",
 		ACCUSATIVE = "шахтёрский монитор видеокамер",
 		INSTRUMENTAL = "шахтёрским монитором видеокамер",
-		PREPOSITIONAL = "шахтёрском мониторе видеокамер"
+		PREPOSITIONAL = "шахтёрском мониторе видеокамер",
 	)
 
 /obj/item/camera_bug/mining/Initialize(mapload)
@@ -225,7 +221,7 @@ Almost every mining medic related stuff
 		DATIVE = "офицерскому монитору видеокамер",
 		ACCUSATIVE = "офицерский монитор видеокамер",
 		INSTRUMENTAL = "офицерским монитором видеокамер",
-		PREPOSITIONAL = "офицерском мониторе видеокамер"
+		PREPOSITIONAL = "офицерском мониторе видеокамер",
 	)
 
 /obj/item/camera_bug/security/Initialize(mapload)

@@ -10,6 +10,7 @@
 	var/light_intensity = 2
 	light_color = LIGHT_COLOR_BLUE
 	resistance_flags = FLAMMABLE
+	custom_price = PAYCHECK_MIN * 0.1
 
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/get_ru_names()
 	return list(
@@ -18,7 +19,7 @@
 		DATIVE = "рюмке",
 		ACCUSATIVE = "рюмку",
 		INSTRUMENTAL = "рюмкой",
-		PREPOSITIONAL = "рюмке"
+		PREPOSITIONAL = "рюмке",
 	)
 
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/on_reagent_change()
@@ -26,18 +27,17 @@
 		extinguish()
 	update_appearance(UPDATE_NAME|UPDATE_OVERLAYS)
 
-
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/update_name()
 	. = ..()
 	if(reagents.total_volume)
 		name = "shot glass of " + reagents.get_master_reagent_name() //No matter what, the glass will tell you the reagent's name. Might be too abusable in the future.
 		ru_names = list(
-			NOMINATIVE = "рюмка - " + reagents.get_master_reagent_name(),
-			GENITIVE = "рюмки - " + reagents.get_master_reagent_name(),
-			DATIVE = "рюмке - " + reagents.get_master_reagent_name(),
-			ACCUSATIVE = "рюмку - " + reagents.get_master_reagent_name(),
-			INSTRUMENTAL = "рюмкой - " + reagents.get_master_reagent_name(),
-			PREPOSITIONAL = "рюмке - " +reagents.get_master_reagent_name()
+			NOMINATIVE = "рюмка — " + reagents.get_master_reagent_name(),
+			GENITIVE = "рюмки — " + reagents.get_master_reagent_name(),
+			DATIVE = "рюмке — " + reagents.get_master_reagent_name(),
+			ACCUSATIVE = "рюмку — " + reagents.get_master_reagent_name(),
+			INSTRUMENTAL = "рюмкой — " + reagents.get_master_reagent_name(),
+			PREPOSITIONAL = "рюмке — " + reagents.get_master_reagent_name(),
 		)
 		if(resistance_flags & ON_FIRE)
 			name = "flaming [name]"
@@ -56,9 +56,8 @@
 			DATIVE = "рюмке",
 			ACCUSATIVE = "рюмку",
 			INSTRUMENTAL = "рюмкой",
-			PREPOSITIONAL = "рюмке"
+			PREPOSITIONAL = "рюмке",
 		)
-
 
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/update_overlays()
 	. = ..()
@@ -76,12 +75,11 @@
 		filling.icon += mix_color_from_reagents(reagents.reagent_list)
 		. += filling
 
-
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/proc/clumsilyDrink(mob/living/carbon/human/user) //Clowns beware
 	if(!(resistance_flags & ON_FIRE))
 		return ATTACK_CHAIN_PROCEED
 	user.visible_message(
-		span_warning("[user] пролива[pluralize_ru(user.gender, "ет", "ют")] содержимое [declent_ru(GENITIVE)] на себя!"),
+		span_warning("[user] пролива[PLUR_ET_YUT(user)] содержимое [declent_ru(GENITIVE)] на себя!"),
 		span_danger("Вы проливаете содержимое [declent_ru(GENITIVE)] на себя!"),
 		span_italics("Вы слышите \"Ух!\" и последующее шипение."),
 	)
@@ -91,7 +89,6 @@
 	user.IgniteMob()
 	return ATTACK_CHAIN_PROCEED_SUCCESS
 
-
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/proc/isShotFlammable()
 	var/datum/reagent/R = reagents.get_master_reagent()
 	if(istype(R, /datum/reagent/consumable/ethanol))
@@ -99,38 +96,35 @@
 		if(A.volume >= 5 && A.alcohol_perc >= 0.35) //Only an approximation to if something's flammable but it will do
 			return TRUE
 
-/obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume, global_overlay = FALSE)
+/obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/fire_act(exposed_temperature, exposed_volume)
 	if(!isShotFlammable() || (resistance_flags & ON_FIRE)) //You can't light a shot that's not flammable!
 		return
 	..()
 	set_light_range_power_color(light_intensity, 1, light_color)
 	set_light_on(TRUE)
-	visible_message(span_notice("[capitalize(declent_ru(NOMINATIVE))] начинает гореть синим пламенем!"))
+	visible_message(span_notice("[DECLENT_RU_CAP(src, NOMINATIVE)] начинает гореть синим пламенем!"))
 	update_appearance(UPDATE_NAME|UPDATE_OVERLAYS)
 
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/extinguish(silent = FALSE)
 	..()
 	set_light_on(FALSE)
 	if(!silent)
-		visible_message(span_notice("[capitalize(declent_ru(NOMINATIVE))] перестаёт гореть!"))
+		visible_message(span_notice("[DECLENT_RU_CAP(src, NOMINATIVE)] перестаёт гореть!"))
 	update_appearance(UPDATE_NAME|UPDATE_OVERLAYS)
 
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/burn() //Let's override fire deleting the reagents inside the shot
 	return
-
 
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/attack(mob/living/target, mob/living/user, params, def_zone, skip_attack_anim = FALSE)
 	if(HAS_TRAIT(user, TRAIT_CLUMSY) && prob(50) && (resistance_flags & ON_FIRE))
 		return clumsilyDrink(user)
 	return ..()
 
-
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/attackby(obj/item/I, mob/user, params)
 	. = ..()
 
 	if(!ATTACK_CHAIN_CANCEL_CHECK(.) && I.get_heat())
 		fire_act()
-
 
 /obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/attack_hand(mob/user, pickupfireoverride = TRUE)
 	..()
@@ -142,12 +136,11 @@
 	if(HAS_TRAIT(user, TRAIT_CLUMSY) && prob(50))
 		clumsilyDrink(user)
 	else
-		user.visible_message(span_notice("[user] накрыва[pluralize_ru(user.gender, "ет", "ют")] [declent_ru(ACCUSATIVE)] рукой, чтобы потушить огонь!"),
+		user.visible_message(span_notice("[user] накрыва[PLUR_ET_YUT(user)] [declent_ru(ACCUSATIVE)] рукой, чтобы потушить огонь!"),
 								span_notice("Вы накрываете [declent_ru(ACCUSATIVE)] рукой, чтобы потушить огонь!"))
 		extinguish()
 
-
-/obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/MouseDrop(mob/living/carbon/human/user, src_location, over_location, src_control, over_control, params)
+/obj/item/reagent_containers/food/drinks/drinkingglass/shotglass/mouse_drop_dragged(atom/over_object, mob/user, src_location, over_location, params)
 	if(!ishuman(user) || usr.incapacitated() || HAS_TRAIT(usr, TRAIT_HANDS_BLOCKED))
 		return ..()
 

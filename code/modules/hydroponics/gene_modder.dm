@@ -53,12 +53,13 @@
 
 /obj/machinery/plantgenes/RefreshParts() // Comments represent the max you can set per tier, respectively. seeds.dm [219] clamps these for us but we don't want to mislead the viewer.
 	for(var/obj/item/stock_parts/manipulator/M in component_parts)
-		if(M.rating > 4)
+		var/rating = M.rating
+		if(rating > 4)
 			max_potency = 100
-		else if(M.rating > 3)
+		else if(rating > 3)
 			max_potency = 95
 		else
-			max_potency = initial(max_potency) + (M.rating**3) // 51,58,77,95,100	 Clamps at 100
+			max_potency = initial(max_potency) + (POW3(rating)) // 51,58,77,95,100	 Clamps at 100
 
 		max_yield = min(initial(max_yield) + (M.rating*2), 10) // 4,6,8,10	Clamps at 10
 
@@ -96,7 +97,6 @@
 	if(panel_open)
 		. += "dnamod-open"
 
-
 /obj/machinery/plantgenes/attackby(obj/item/I, mob/user, params)
 	if(user.a_intent == INTENT_HARM)
 		return ..()
@@ -120,7 +120,7 @@
 			var/obj/item/reagent_containers/spray/cleaner/cleaner = I
 			if(cleaner.reagents.total_volume >= cleaner.amount_per_transfer_from_this)
 				cleaning = TRUE
-		else if(istype(I, /obj/item/soap))
+		else if(issoap(I))
 			cleaning = TRUE
 		if(!cleaning)
 			return ATTACK_CHAIN_PROCEED
@@ -139,16 +139,13 @@
 
 	return ..()
 
-
 /obj/machinery/plantgenes/screwdriver_act(mob/living/user, obj/item/I)
 	. = default_deconstruction_screwdriver(user, "dnamod", "dnamod", I)
 	if(.)
 		update_icon(UPDATE_OVERLAYS)
 
-
 /obj/machinery/plantgenes/crowbar_act(mob/living/user, obj/item/I)
 	return default_deconstruction_crowbar(user, I)
-
 
 /obj/machinery/plantgenes/proc/add_seed(obj/item/seeds/new_seed, mob/user)
 	add_fingerprint(user)
@@ -162,7 +159,6 @@
 	to_chat(user, span_notice("You add [new_seed] to the machine."))
 	ui_interact(user)
 
-
 /obj/machinery/plantgenes/proc/add_disk(obj/item/disk/plantgene/new_disk, mob/user)
 	add_fingerprint(user)
 	if(disk)
@@ -174,7 +170,6 @@
 	disk = new_disk
 	to_chat(user, span_notice("You add [new_disk] to the machine."))
 	ui_interact(user)
-
 
 /obj/machinery/plantgenes/attack_hand(mob/user)
 	if(..())
@@ -332,7 +327,6 @@
 				repaint_seed()
 				// this doesnt need a modal, its easy enough to just remove the inserted gene
 
-
 /obj/machinery/plantgenes/proc/gene_remove()
 	if(istype(target, /datum/plant_gene/core))
 		return
@@ -355,7 +349,7 @@
 		else
 			core_gene.value = min(core_gene.value, genemod_var)
 
-	disk.update_name()
+	disk.update_appearance(UPDATE_NAME)
 	QDEL_NULL(seed)
 	update_icon(UPDATE_OVERLAYS)
 	update_genes()
@@ -445,14 +439,14 @@
 				cleaning = TRUE
 			else
 				return ATTACK_CHAIN_PROCEED
-		if(istype(W, /obj/item/soap))
+		if(issoap(W))
 			cleaning = TRUE
 
 		if(!cleaning)
 			return ATTACK_CHAIN_PROCEED
-		user.visible_message("<span class='notice'>[user] starts to clean the ooze off the disc.</span>", "<span class='notice'>You start to clean the ooze off the disk.</span>")
+		user.visible_message(span_notice("[user] starts to clean the ooze off the disc."), span_notice("You start to clean the ooze off the disk."))
 		if(do_after(user, 5 SECONDS, src))
-			user.visible_message("<span class='notice'>[user] cleans the ooze off [src].</span>", "<span class='notice'>You clean the ooze off [src].</span>")
+			user.visible_message(span_notice("[user] cleans the ooze off [src]."), span_notice("You clean the ooze off [src]."))
 			REMOVE_TRAIT(src, TRAIT_CMAGGED, CMAGGED)
 			update_appearance(UPDATE_NAME|UPDATE_DESC|UPDATE_ICON)
 	..()
@@ -498,11 +492,11 @@
 	if(HAS_TRAIT(src, TRAIT_CMAGGED))
 		return
 	read_only = !read_only
-	to_chat(user, "<span class='notice'>You flip the write-protect tab to [read_only ? "protected" : "unprotected"].</span>")
+	to_chat(user, span_notice("You flip the write-protect tab to [read_only ? "protected" : "unprotected"]."))
 
 /obj/item/disk/plantgene/cmag_act(mob/user)
 	if(!HAS_TRAIT(src, TRAIT_CMAGGED))
-		to_chat(user, "<span class='warning'>The bananium ooze flips a couple bits on the plant disk's display, making it look just like the..!</span>")
+		to_chat(user, span_warning("The bananium ooze flips a couple bits on the plant disk's display, making it look just like the..!"))
 		ADD_TRAIT(src, TRAIT_CMAGGED, CMAGGED)
 		update_appearance(UPDATE_NAME|UPDATE_DESC|UPDATE_ICON)
 		playsound(src, SFX_SPARKS, 75, TRUE, SHORT_RANGE_SOUND_EXTRARANGE)
@@ -513,4 +507,4 @@
 		. += "The write-protect tab is set to [read_only ? "protected" : "unprotected"]."
 		return
 	if((user.mind.assigned_role == "Captain" || user.mind.special_role == SPECIAL_ROLE_NUKEOPS) && (user.Adjacent(src)))
-		. += "<span class='warning'>... Wait. This isn't the nuclear authentication disk! It's a clever forgery!</span>"
+		. += span_warning("... Wait. This isn't the nuclear authentication disk! It's a clever forgery!")

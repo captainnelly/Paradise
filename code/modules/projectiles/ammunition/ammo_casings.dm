@@ -5,6 +5,7 @@
 	projectile_type = /obj/projectile/bullet
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_STRONG
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/rubber9mm
 	desc = "A 9mm rubber bullet casing."
@@ -12,12 +13,14 @@
 	materials = list(MAT_METAL = 650)
 	caliber = CALIBER_9MM
 	projectile_type = /obj/projectile/bullet/weakbullet4
+	bullet_type = BULLET_TYPE_RUBBER
 
 /obj/item/ammo_casing/fortynr
 	desc = "A 40nr bullet casing."
 	materials = list(MAT_METAL = 1100)
 	caliber = CALIBER_40NR
 	projectile_type = /obj/projectile/bullet/weakbullet3/fortynr
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/a762
 	desc = "A 7.62x54mm bullet casing."
@@ -27,6 +30,7 @@
 	projectile_type = /obj/projectile/bullet
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_STRONG
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_STRONG
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/a762/enchanted
 	materials = list(MAT_METAL = 1000)
@@ -40,6 +44,7 @@
 	projectile_type = /obj/projectile/bullet/ftt762
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_STRONG
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/a50
 	desc = "A .50AE bullet casing."
@@ -48,6 +53,7 @@
 	projectile_type = /obj/projectile/bullet/desert_eagle
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_STRONG
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/c38
 	desc = "A .38 bullet casing."
@@ -57,12 +63,14 @@
 	projectile_type = /obj/projectile/bullet/weakbullet2
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_RUBBER
 
 /obj/item/ammo_casing/c38/hp
 	desc = "A .38 Hollow-Point bullet casing."
 	icon_state = "rhp-casing"
 	materials = list(MAT_METAL = 5000)
 	projectile_type = /obj/projectile/bullet/hp38
+	bullet_type = BULLET_TYPE_EXPANSIVE
 
 /obj/item/ammo_casing/c38/invisible
 	projectile_type = /obj/projectile/bullet/weakbullet2/invisible
@@ -75,6 +83,7 @@
 	desc = "A .36 bullet casing."
 	caliber = CALIBER_DOT_36
 	projectile_type = /obj/projectile/bullet/midbullet2
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/c10mm
 	desc = "A 10mm bullet casing."
@@ -83,31 +92,36 @@
 	projectile_type = /obj/projectile/bullet/midbullet3
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/c10mm/ap
 	materials = list(MAT_METAL = 2000, MAT_SILVER = 200)
 	projectile_type = /obj/projectile/bullet/midbullet3/ap
+	bullet_type = BULLET_TYPE_ARMOR_PIERCING
 
 /obj/item/ammo_casing/c10mm/fire
 	materials = list(MAT_METAL = 2000, MAT_SILVER = 200, MAT_PLASMA = 300)
 	projectile_type = /obj/projectile/bullet/midbullet3/fire
 	muzzle_flash_color = LIGHT_COLOR_FIRE
+	bullet_type = BULLET_TYPE_FIRE
 
 /obj/item/ammo_casing/c10mm/hp
 	materials = list(MAT_METAL = 2000, MAT_SILVER = 200)
 	projectile_type = /obj/projectile/bullet/midbullet3/hp
+	bullet_type = BULLET_TYPE_EXPANSIVE
 
 /obj/item/ammo_casing/c9mm
 	desc = "A 9mm bullet casing."
 	caliber = CALIBER_9MM
 	materials = list(MAT_METAL = 1000)
 	projectile_type = /obj/projectile/bullet/weakbullet3
-	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_WEAK
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/c9mm/ap
 	materials = list(MAT_METAL = 1500, MAT_SILVER = 150)
 	projectile_type = /obj/projectile/bullet/armourpiercing
+	bullet_type = BULLET_TYPE_ARMOR_PIERCING
 
 /obj/item/ammo_casing/c9mm/tox
 	materials = list(MAT_METAL = 1500, MAT_SILVER = 150, MAT_URANIUM = 200)
@@ -117,35 +131,37 @@
 	materials = list(MAT_METAL = 1500, MAT_SILVER = 150, MAT_PLASMA = 200)
 	projectile_type = /obj/projectile/bullet/incendiary/firebullet
 	muzzle_flash_color = LIGHT_COLOR_FIRE
+	bullet_type = BULLET_TYPE_FIRE
 
 /obj/item/ammo_casing/c46x30mm
 	desc = "A 4.6x30mm bullet casing."
-	materials = list(MAT_METAL = 500)
+	materials = list(MAT_METAL = 580)
 	caliber = CALIBER_4_DOT_6X30MM
 	projectile_type = /obj/projectile/bullet/weakbullet3/foursix
-	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_WEAK
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_PLAIN
 
-/obj/item/ammo_casing/c9mmte
-	desc = "A 9mm TE bullet casing."
+/obj/item/ammo_casing/c45nr
+	desc = "A 45 N&R bullet casing."
 	materials = list(MAT_METAL = 500)
-	caliber = CALIBER_9MM_TE
-	projectile_type = /obj/projectile/bullet/weakbullet4/c9mmte
-	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_WEAK
-	muzzle_flash_range = MUZZLE_FLASH_RANGE_WEAK
+	caliber = CALIBER_45NR
+	projectile_type = /obj/projectile/bullet/weakbullet4/c45nr
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/c46x30mm/ap
-	materials = list(MAT_METAL = 1500, MAT_SILVER = 150)
+	materials = list(MAT_METAL = 700, MAT_SILVER = 50)
 	projectile_type = /obj/projectile/bullet/weakbullet3/foursix/ap
+	bullet_type = BULLET_TYPE_ARMOR_PIERCING
 
 /obj/item/ammo_casing/c46x30mm/tox
-	materials = list(MAT_METAL = 1500, MAT_SILVER = 150, MAT_URANIUM = 200)
+	materials = list(MAT_METAL = 700, MAT_SILVER = 50, MAT_URANIUM = 75)
 	projectile_type = /obj/projectile/bullet/weakbullet3/foursix/tox
 
 /obj/item/ammo_casing/c46x30mm/inc
-	materials = list(MAT_METAL = 1500, MAT_SILVER = 150, MAT_PLASMA = 200)
+	materials = list(MAT_METAL = 700, MAT_SILVER = 50, MAT_PLASMA = 50)
 	projectile_type = /obj/projectile/bullet/incendiary/foursix
 	muzzle_flash_color = LIGHT_COLOR_FIRE
+	bullet_type = BULLET_TYPE_FIRE
 
 /obj/item/ammo_casing/rubber45
 	desc = "A .45 rubber bullet casing."
@@ -155,6 +171,7 @@
 	projectile_type = /obj/projectile/bullet/midbullet_r
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_RUBBER
 
 /obj/item/ammo_casing/c45
 	desc = "A .45 bullet casing."
@@ -163,10 +180,39 @@
 	projectile_type = /obj/projectile/bullet/midbullet
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/c45/nostamina
 	materials = list(MAT_METAL = 1500)
 	projectile_type = /obj/projectile/bullet/midbullet3
+
+/obj/item/ammo_casing/c45colt
+	desc = "A .45 Colt bullet casing."
+	materials = list(MAT_METAL = 1000)
+	caliber = CALIBER_DOT_45_COLT
+	projectile_type = /obj/projectile/bullet/c45colt
+	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
+	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_PLAIN
+
+/obj/item/ammo_casing/c45colt/rubber
+	desc = "A .45 Colt rubber bullet casing."
+	icon_state = "r-casing"
+	materials = list(MAT_METAL = 650)
+	projectile_type = /obj/projectile/bullet/rubber45colt
+	bullet_type = BULLET_TYPE_RUBBER
+
+/obj/item/ammo_casing/c45colt/hp //
+	desc = "A .45 Colt expansive bullet casing."
+	materials = list(MAT_METAL = 1500, MAT_SILVER = 100)
+	projectile_type = /obj/projectile/bullet/c45colt/hp
+	bullet_type = BULLET_TYPE_EXPANSIVE
+
+/obj/item/ammo_casing/c45colt/ap
+	desc = "A .45 Colt armor piercing bullet casing."
+	materials = list(MAT_METAL = 1150)
+	projectile_type = /obj/projectile/bullet/c45colt/ap
+	bullet_type = BULLET_TYPE_ARMOR_PIERCING
 
 /obj/item/ammo_casing/revolver/improvised
 	name = "improvised shell"
@@ -177,6 +223,7 @@
 	projectile_type = /obj/projectile/bullet/weakbullet3/c257
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/revolver/improvised/phosphorus
 	desc = "Full metal shell leaking oil and phosphorous. This is clearly an unreliable bullet."
@@ -190,6 +237,7 @@
 	projectile_type = /obj/projectile/bullet
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_STRONG
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/caseless/magspear
 	name = "magnetic spear"
@@ -206,6 +254,7 @@
 	desc = "An 84mm High Explosive rocket. Fire at people and pray."
 	caliber = CALIBER_84MM
 	w_class = WEIGHT_CLASS_NORMAL //thats the rocket!
+	icon = 'icons/obj/weapons/guns/projectiles.dmi'
 	icon_state = "84mm-he"
 	projectile_type = /obj/projectile/bullet/a84mm_he
 	casing_drop_sound = 'sound/weapons/gun_interactions/shotgun_fall.ogg'	// better than default casing but not ideal
@@ -252,7 +301,7 @@
 		DATIVE = "патрону для убийства",
 		ACCUSATIVE = "патрон для убийства",
 		INSTRUMENTAL = "патроном для убийства",
-		PREPOSITIONAL = "патроне для убийства"
+		PREPOSITIONAL = "патроне для убийства",
 	)
 
 /obj/item/ammo_casing/shotgun/buckshot/magnum
@@ -280,11 +329,9 @@
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
 	can_be_box_inserted = FALSE
 
-
 /obj/item/ammo_casing/shotgun/dart/Initialize(mapload)
 	. = ..()
 	create_reagents(30)
-
 
 /obj/item/ammo_casing/shotgun/beanbag
 	name = "beanbag slug"
@@ -350,7 +397,6 @@
 	projectile_type = /obj/projectile/bullet/incendiary/shell/dragonsbreath
 	pellets = 4
 	variance = 25
-	muzzle_flash_color = LIGHT_COLOR_FIRE
 
 /obj/item/ammo_casing/shotgun/incendiary/dragonsbreath/napalm
 	projectile_type = /obj/projectile/bullet/incendiary/shell/dragonsbreath/napalm
@@ -369,6 +415,27 @@
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
 	muzzle_flash_color = LIGHT_COLOR_BLUE
 
+/obj/item/ammo_casing/enforcer/laser
+	desc = "Лазерный патрон для пистолета \"Блюститель\"."
+	icon_state = "laser-casing"
+	caliber = CALIBER_9MM
+	materials = list(MAT_METAL = 1150)
+	projectile_type = /obj/projectile/beam/specter/laser
+	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	muzzle_flash_color = COLOR_SOFT_RED
+	fire_sound = 'sound/weapons/gunshots/1laser7.ogg'
+	bullet_type = BULLET_TYPE_LASER
+
+/obj/item/ammo_casing/enforcer/disable
+	desc = "Парализующий патрон для пистолета \"Блюститель\"."
+	icon_state = "stam-casing"
+	caliber = CALIBER_9MM
+	materials = list(MAT_METAL = 800)
+	projectile_type = /obj/projectile/beam/specter/disabler
+	muzzle_flash_color = LIGHT_COLOR_BLUE
+	fire_sound = 'sound/weapons/plasma_cutter.ogg'
+	bullet_type = BULLET_TYPE_DISABLER
+
 /obj/item/ammo_casing/shotgun/laserslug
 	name = "laser slug"
 	desc = "An advanced shotgun shell that uses a micro laser to replicate the effects of a laser weapon in a ballistic package."
@@ -377,24 +444,6 @@
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
 	muzzle_flash_color = COLOR_SOFT_RED
-
-/obj/item/ammo_casing/specter/laser
-	desc = "Лазерный патрон для пистолета \"Спектр\"."
-	icon_state = "laser-casing"
-	caliber = CALIBER_SPECTER
-	materials = list(MAT_METAL = 1000)
-	projectile_type = /obj/projectile/beam/specter/laser
-	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_WEAK
-	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
-	muzzle_flash_color = COLOR_SOFT_RED
-
-/obj/item/ammo_casing/specter/disable
-	desc = "Парализующий патрон для пистолета \"Спектр\"."
-	icon_state = "stam-casing"
-	caliber = CALIBER_SPECTER
-	materials = list(MAT_METAL = 800)
-	projectile_type = /obj/projectile/beam/specter/disabler
-	muzzle_flash_color = LIGHT_COLOR_BLUE
 
 /obj/item/ammo_casing/shotgun/lasershot
 	name = "laser shot"
@@ -466,6 +515,7 @@
 	projectile_type = /obj/projectile/bullet/heavybullet
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/a545
 	desc = "A 5.45x39mm bullet casing."
@@ -473,13 +523,13 @@
 	projectile_type = /obj/projectile/bullet/midbullet3
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_NORMAL
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
+	bullet_type = BULLET_TYPE_PLAIN
 
 /obj/item/ammo_casing/a545/fusty
 	desc = "A fusty 5.45x39mm bullet casing."
 	materials = list(MAT_METAL = 1000)
 	projectile_type = /obj/projectile/bullet/f545
 	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_STRONG
-	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
 
 /obj/item/ammo_casing/rocket
 	name = "rocket shell"
@@ -527,7 +577,6 @@
 	var/modified = FALSE
 	harmful = FALSE
 
-
 /obj/item/ammo_casing/caseless/foam_dart/update_icon_state()
 	if(modified)
 		icon_state = "foamdart_empty"
@@ -538,11 +587,9 @@
 		if(BB)
 			BB.icon_state = initial(BB.icon_state)
 
-
 /obj/item/ammo_casing/caseless/foam_dart/update_desc(updates)
 	. = ..()
 	desc = modified ? "Its nerf or nothing! ... Although, this one doesn't look too safe." : initial(desc)
-
 
 /obj/item/ammo_casing/caseless/foam_dart/attackby(obj/item/I, mob/user, params)
 	if(is_pen(I))
@@ -570,7 +617,6 @@
 
 	return ..()
 
-
 /obj/item/ammo_casing/caseless/foam_dart/screwdriver_act(mob/living/user, obj/item/I)
 	. = TRUE
 	if(!BB)
@@ -586,7 +632,6 @@
 	modified = TRUE
 	BB.damage_type = BRUTE
 	update_icon()
-
 
 /obj/item/ammo_casing/caseless/foam_dart/attack_self(mob/living/user)
 	var/obj/projectile/bullet/reusable/foam_dart/FD = BB
@@ -612,7 +657,6 @@
 	caliber = CALIBER_FOAM_FORCE_SNIPER
 	projectile_type = /obj/projectile/bullet/reusable/foam_dart/sniper
 
-
 /obj/item/ammo_casing/caseless/foam_dart/sniper/update_icon_state()
 	if(modified)
 		icon_state = "foamdartsniper_empty"
@@ -623,18 +667,15 @@
 		if(BB)
 			BB.icon_state = initial(BB.icon_state)
 
-
 /obj/item/ammo_casing/caseless/foam_dart/sniper/update_desc(updates)
 	. = ..()
 	desc = modified ? "Its nerf or nothing! ... Although, this one doesn't look too safe." : initial(desc)
-
 
 /obj/item/ammo_casing/caseless/foam_dart/sniper/riot
 	name = "riot foam sniper dart"
 	desc = "For the bigger brother of the crowd control toy. Ages 18 and up."
 	icon_state = "foamdartsniper_riot"
 	materials = list(MAT_METAL = 1800)
-	caliber = CALIBER_FOAM_FORCE_SNIPER
 	projectile_type = /obj/projectile/bullet/reusable/foam_dart/sniper/riot
 
 /obj/item/ammo_casing/cap
@@ -648,10 +689,10 @@
 /obj/item/ammo_casing/laser
 	desc = "An experimental laser casing."
 	icon_state = "lasercasing"
-	materials = list(MAT_METAL = 2000, MAT_PLASMA = 200)
+	materials = list(MAT_METAL = 1000)
 	caliber = CALIBER_LASER
 	projectile_type = /obj/projectile/beam/laser
 	muzzle_flash_effect = /obj/effect/temp_visual/target_angled/muzzle_flash/energy
-	muzzle_flash_strength = MUZZLE_FLASH_STRENGTH_WEAK
 	muzzle_flash_range = MUZZLE_FLASH_RANGE_NORMAL
 	muzzle_flash_color = COLOR_SOFT_RED
+	bullet_type = BULLET_TYPE_LASER

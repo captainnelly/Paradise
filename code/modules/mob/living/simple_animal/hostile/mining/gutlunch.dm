@@ -17,7 +17,6 @@
 	obj_damage = 0
 	environment_smash = ENVIRONMENT_SMASH_NONE
 	move_to_delay = 15
-	response_help  = "гладит"
 	response_disarm = "аккуратно отодвигает"
 	response_harm   = "шлёпает"
 	friendly = "щиплет"
@@ -26,7 +25,6 @@
 	gold_core_spawnable = FRIENDLY_SPAWN
 	stat_attack = UNCONSCIOUS
 	gender = NEUTER
-	stop_automated_movement = FALSE
 	stop_automated_movement_when_pulled = TRUE
 	stat_exclusive = TRUE
 	robust_searching = TRUE
@@ -48,7 +46,7 @@
 		DATIVE = "кишкожору",
 		ACCUSATIVE = "кишкожора",
 		INSTRUMENTAL = "кишкожором",
-		PREPOSITIONAL = "кишкожоре"
+		PREPOSITIONAL = "кишкожоре",
 	)
 
 /mob/living/simple_animal/hostile/asteroid/gutlunch/Initialize(mapload)
@@ -69,15 +67,14 @@
 	if(udder.reagents.total_volume == udder.reagents.maximum_volume)
 		add_overlay("gl_full")
 
-
 /mob/living/simple_animal/hostile/asteroid/gutlunch/attackby(obj/item/I, mob/user, params)
 	if(user.a_intent == INTENT_HARM)
 		return ..()
 
-	if(istype(I, /obj/item/reagent_containers/glass))
+	if(isglassreagentcontainer(I))
 		add_fingerprint(user)
 		if(stat != CONSCIOUS)
-			to_chat(user, span_warning("[capitalize(declent_ru(NOMINATIVE))] выглядит нездоровым."))
+			to_chat(user, span_warning("[DECLENT_RU_CAP(src, NOMINATIVE)] выглядит нездоровым."))
 			return ATTACK_CHAIN_PROCEED
 		if(udder.milkAnimal(I, user))
 			regenerate_icons()
@@ -88,7 +85,7 @@
 
 /mob/living/simple_animal/hostile/asteroid/gutlunch/ListTargetsLazy(check_z)//override to include wanted_objects as valid targets
 	. = ..()
-	for(var/atom/movable/movable as anything in view(vision_range, loc))
+	for(var/atom/movable/movable in view(vision_range, loc))
 		if(wanted_objects[movable.type])
 			if(isturf(movable.loc))
 				. += movable
@@ -119,7 +116,7 @@
 	if(is_type_in_typecache(target,wanted_objects)) //we eats
 		udder.generateMilk()
 		regenerate_icons()
-		visible_message(span_notice("[capitalize(declent_ru(NOMINATIVE))] с хлюпаньем поглощает [target.declent_ru(ACCUSATIVE)]."))
+		visible_message(span_notice("[DECLENT_RU_CAP(src, NOMINATIVE)] с хлюпаньем поглощает [target.declent_ru(ACCUSATIVE)]."))
 		qdel(target)
 		return
 	return ..()
@@ -134,7 +131,7 @@
 		DATIVE = "питательному мешку",
 		ACCUSATIVE = "питательный мешок",
 		INSTRUMENTAL = "питательным мешком",
-		PREPOSITIONAL = "питательном мешке"
+		PREPOSITIONAL = "питательном мешке",
 	)
 
 /obj/item/udder/gutlunch/Initialize(mapload)
@@ -157,7 +154,7 @@
 		DATIVE = "жирохрюну",
 		ACCUSATIVE = "жирохрюна",
 		INSTRUMENTAL = "жирохрюном",
-		PREPOSITIONAL = "жирохрюне"
+		PREPOSITIONAL = "жирохрюне",
 	)
 
 /mob/living/simple_animal/hostile/asteroid/gutlunch/gubbuck/Initialize(mapload)
@@ -177,7 +174,7 @@
 		DATIVE = "квохтуну",
 		ACCUSATIVE = "квохтуна",
 		INSTRUMENTAL = "квохтуном",
-		PREPOSITIONAL = "квохтуне"
+		PREPOSITIONAL = "квохтуне",
 	)
 
 /mob/living/simple_animal/hostile/asteroid/gutlunch/guthen/Life()
@@ -197,14 +194,14 @@
 	gold_core_spawnable = NO_SPAWN
 	var/growth = 0
 
-/mob/living/simple_animal/hostile/asteroid/gutlunch/grublunch/get_ru_names()	
+/mob/living/simple_animal/hostile/asteroid/gutlunch/grublunch/get_ru_names()
 	return list(
 		NOMINATIVE = "червожор",
 		GENITIVE = "червожора",
 		DATIVE = "червожору",
 		ACCUSATIVE = "червожора",
 		INSTRUMENTAL = "червожором",
-		PREPOSITIONAL = "червожоре"
+		PREPOSITIONAL = "червожоре",
 	)
 
 //Baby gutlunch
@@ -228,5 +225,5 @@
 	mind?.transfer_to(L)
 	L.faction = faction.Copy()
 	L.setDir(dir)
-	visible_message(span_notice("[capitalize(declent_ru(NOMINATIVE))] вырастает в [L.declent_ru(ACCUSATIVE)]."))
+	visible_message(span_notice("[DECLENT_RU_CAP(src, NOMINATIVE)] вырастает в [L.declent_ru(ACCUSATIVE)]."))
 	qdel(src)

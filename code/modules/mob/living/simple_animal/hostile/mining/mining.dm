@@ -1,5 +1,6 @@
 //the base mining mob
 /mob/living/simple_animal/hostile/asteroid
+	abstract_type = /mob/living/simple_animal/hostile/asteroid
 	vision_range = 2
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_tox" = 0, "max_tox" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	faction = list("mining")
@@ -7,10 +8,8 @@
 	obj_damage = 30
 	environment_smash = ENVIRONMENT_SMASH_WALLS
 	response_help = "гладит"
-	response_disarm = "толкает"
 	response_harm = "бьёт"
 	status_flags = 0
-	a_intent = INTENT_HARM
 	AI_delay_max = 0.5 SECONDS
 	var/jewelry_loot
 	var/crusher_loot

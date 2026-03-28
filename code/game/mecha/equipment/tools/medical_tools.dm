@@ -2,10 +2,9 @@
 
 /obj/item/mecha_parts/mecha_equipment/medical
 
-/obj/item/mecha_parts/mecha_equipment/medical/New()
-	..()
+/obj/item/mecha_parts/mecha_equipment/medical/Initialize(mapload)
+	. = ..()
 	START_PROCESSING(SSobj, src)
-
 
 /obj/item/mecha_parts/mecha_equipment/medical/can_attach(obj/mecha/M)
 	if(..())
@@ -43,7 +42,6 @@
 	icon_state = "sleeper"
 	origin_tech = "engineering=3;biotech=3;plasmatech=2"
 	energy_drain = 20
-	range = MECHA_MELEE
 	equip_cooldown = 2 SECONDS
 	var/mob/living/carbon/patient = null
 	var/inject_amount = 10
@@ -235,15 +233,14 @@
 	var/max_volume = 75 //max reagent volume
 	var/synth_speed = 5 //[num] reagent units per cycle
 	energy_drain = 10
-	var/emagged = FALSE
 	/// Toggler for alternative "analyze reagents" mode.
 	var/mode = FIRE_SYRINGE_MODE
 	range = MECHA_MELEE | MECHA_RANGED
 	equip_cooldown = 1 SECONDS
 	origin_tech = "materials=3;biotech=4;magnets=4"
 
-/obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/New()
-	..()
+/obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/Initialize(mapload)
+	. = ..()
 	create_reagents(max_volume)
 	reagents.set_reacting(FALSE)
 	syringes = new
@@ -275,7 +272,7 @@
 /obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/get_snowflake_data()
 	var/list/analyzed_reagents = list() // we need to make this list because .tsk wont map over an indexed array
 
-	for(var/i = 1 to known_reagents.len)
+	for(var/i = 1 to length(known_reagents))
 		var/enabled = FALSE
 		if(known_reagents[i] in processed_reagents)
 			enabled = TRUE
@@ -296,7 +293,7 @@
 	return data
 
 /obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/proc/synthesize(reagent)
-	if(processed_reagents.len >= synth_speed)
+	if(length(processed_reagents) >= synth_speed)
 		occupant_message("Достигнут максимум одновременных реагентов.")
 		return
 
@@ -306,7 +303,7 @@
 
 	processed_reagents += reagent
 
-	if(processed_reagents.len != 1)
+	if(length(processed_reagents) != 1)
 		return
 
 	START_PROCESSING(SSobj, src)
@@ -323,7 +320,7 @@
 		if("purge_reagent")
 			reagents.del_reagent(params["reagent"])
 			return TRUE
-		if("toggle_reagent" )
+		if("toggle_reagent")
 			var/switch_reagent = params["reagent"]
 			if(switch_reagent in processed_reagents)
 				processed_reagents -= switch_reagent
@@ -336,7 +333,7 @@
 /obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/action(atom/movable/target)
 	if(!action_checks(target))
 		return FALSE
-	if(istype(target, /obj/item/reagent_containers/syringe) || isstorage(target))
+	if(issyringe(target) || isstorage(target))
 		if(get_dist(src, target) < 2)
 			for(var/obj/structure/D in target.loc)//Basic level check for structures in the way (Like grilles and windows)
 				if(!(D.CanPass(target, get_dir(D, loc))))
@@ -351,7 +348,7 @@
 		return analyze_reagents(target)
 	if(!is_faced_target(target))
 		return FALSE
-	if(!syringes.len)
+	if(!length(syringes))
 		occupant_message(span_alert("No syringes loaded."))
 		return FALSE
 	if(reagents.total_volume<=0)
@@ -367,7 +364,6 @@
 	playsound(chassis, 'sound/items/syringeproj.ogg', 50, TRUE)
 	start_cooldown()
 	INVOKE_ASYNC(src, PROC_REF(async_syringe_gun_action), mechsyringe, target_turf)
-
 
 /obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/proc/async_syringe_gun_action(obj/item/reagent_containers/syringe/mechsyringe, turf/target_turf)
 	var/mob/originaloccupant = chassis.occupant
@@ -414,7 +410,7 @@
 		playsound(loc, 'sound/effects/sparks4.ogg', 50, TRUE)
 
 /obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/proc/load_syringe(obj/item/reagent_containers/syringe/syringe)
-	if(syringes.len >= max_syringes)
+	if(length(syringes) >= max_syringes)
 		occupant_message("The [src] syringe chamber is full.")
 		return FALSE
 	syringe.reagents.trans_to(src, syringe.reagents.total_volume)
@@ -424,7 +420,7 @@
 
 /obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/proc/start_syringe_loading(obj/item/ammunition)
 	var/lock_n_load = 0
-	if(istype(ammunition, /obj/item/reagent_containers/syringe))
+	if(issyringe(ammunition))
 		if(!load_syringe(ammunition))
 			return FALSE
 	else
@@ -443,12 +439,12 @@
 	if(get_dist(src, A) >= 4)
 		occupant_message("The object is too far away.")
 		return FALSE
-	if(!A.reagents || istype(A,/mob))
+	if(!A.reagents || ismob(A))
 		occupant_message(span_alert("No reagent info gained from [A]."))
 		return FALSE
 	occupant_message("Analyzing reagents...")
 	for(var/datum/reagent/R in A.reagents.reagent_list)
-		if((emagged && (R.id in strings("chemistry_tools.json", "traitor_poison_bottle")) || R.can_synth) && add_known_reagent(R.id, R.name))
+		if((emagged && (R.id in strings(CHEMISTRY_TOOLS_FILE, "traitor_poison_bottle")) || R.can_synth) && add_known_reagent(R.id, R.name))
 			occupant_message("Reagent analyzed, identified as [R.name] and added to database.")
 	occupant_message("Analyzis complete.")
 
@@ -462,9 +458,9 @@
 /obj/item/mecha_parts/mecha_equipment/medical/syringe_gun/process()
 	if(..())
 		return
-	if(!processed_reagents.len || reagents.total_volume >= reagents.maximum_volume || !chassis.has_charge(energy_drain))
+	if(!length(processed_reagents) || reagents.total_volume >= reagents.maximum_volume || !chassis.has_charge(energy_drain))
 		occupant_message(span_alert("Синтезирование реагентов остановлено."))
-		processed_reagents.len = 0
+		processed_reagents.Cut()
 		STOP_PROCESSING(SSobj, src)
 		return
 	var/amount = synth_speed / processed_reagents.len
@@ -475,7 +471,6 @@
 /obj/item/mecha_parts/mecha_equipment/medical/syringe_gun_upgrade
 	name = "additional system for the reproduction of reagents"
 	desc = "Upgrade for the syringe gun. Increases synthesis speed and maximum capacity of reagents. Requires installation of the syringe gun system."
-	icon = 'icons/obj/mecha/mecha_equipment.dmi'
 	icon_state = "beaker_upgrade"
 	origin_tech = "materials=5;engineering=5;biotech=6"
 	energy_drain = 10
@@ -505,11 +500,9 @@
 	name = "rescue jaw"
 	desc = "Emergency rescue jaws, designed to help first responders reach their patients. Opens doors and removes obstacles."
 	icon_state = "mecha_clamp"	//can work, might use a blue resprite later but I think it works for now
-	origin_tech = "materials=2;engineering=2"	//kind of sad, but identical to jaws of life
 	equip_cooldown = 1.5 SECONDS
 	energy_drain = 10
 	var/dam_force = 20
-
 
 /obj/item/mecha_parts/mecha_equipment/medical/rescue_jaw/action(atom/target)
 	if(!action_checks(target))
@@ -547,7 +540,7 @@
 
 /obj/item/mecha_parts/mecha_equipment/medical/rescue_jaw/can_attach(obj/mecha/M)
 	if(istype(M, /obj/mecha/medical) || istype(M, /obj/mecha/working/ripley/firefighter) || istype(M, /obj/mecha/combat/lockersyndie))	//Odys or firefighters or syndielocker
-		if(M.equipment.len < M.max_equip)
+		if(length(M.equipment) < M.max_equip)
 			return TRUE
 	return FALSE
 
@@ -568,7 +561,7 @@
 		DATIVE = "Медицинской Лучпушке",
 		ACCUSATIVE = "Медицинскую Лучпушку",
 		INSTRUMENTAL = "Медицинской Лучпушкой",
-		PREPOSITIONAL = "Медицинская Лучпушке"
+		PREPOSITIONAL = "Медицинская Лучпушке",
 	)
 
 /obj/item/mecha_parts/mecha_equipment/medical/beamgun/Initialize(mapload)

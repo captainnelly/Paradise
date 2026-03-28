@@ -1,24 +1,25 @@
 /obj/projectile/shrapnel
 	name = "shrapnel"
 	icon = 'icons/obj/shards.dmi'
-	throw_speed =  EMBED_THROWSPEED_THRESHOLD
+	icon_state = null
+	throw_speed = EMBED_THROWSPEED_THRESHOLD
 	sharp = TRUE
-	damage = 10
 	range = 20
 	armour_penetration = 30
 	dismemberment = 5
-	ricochets_max = 2
+	tile_dropoff = 0.5
 	ricochet_chance = 70
-	hitsound = 'sound/weapons/pierce.ogg'
-	ru_names = list(
+	var/embedded_type = /obj/item/embedded/shrapnel
+
+/obj/projectile/shrapnel/get_ru_names()
+	return list(
 		NOMINATIVE = "шрапнель",
 		GENITIVE = "шрапнели",
 		DATIVE = "шрапнели",
 		ACCUSATIVE = "шрапнель",
 		INSTRUMENTAL = "шрапнелью",
-		PREPOSITIONAL = "шрапнели"
+		PREPOSITIONAL = "шрапнели",
 	)
-	var/embedded_type = /obj/item/embedded/shrapnel
 
 /obj/projectile/shrapnel/Initialize(mapload)
 	. = ..()
@@ -36,25 +37,36 @@
 	target.hitby(shrapnel, skipcatch = TRUE)
 	qdel(src)
 
+/obj/projectile/shrapnel/grenade
+	range = 6
+
+/obj/projectile/shrapnel/m80mm
+	range = 8
+
+/obj/projectile/shrapnel/short_range
+	range = 5
+
 /obj/item/embedded/shrapnel
 	name = "shrapnel"
-	ru_names = list(
+	icon = 'icons/obj/shards.dmi'
+	throwforce = 10
+	throw_speed = EMBED_THROWSPEED_THRESHOLD
+	embed_chance = 70
+	embedded_fall_chance = 1
+	w_class = WEIGHT_CLASS_SMALL
+	sharp = TRUE
+	hitsound = 'sound/weapons/pierce.ogg'
+
+/obj/item/embedded/shrapnel/get_ru_names()
+	return list(
 		NOMINATIVE = "шрапнель",
 		GENITIVE = "шрапнели",
 		DATIVE = "шрапнели",
 		ACCUSATIVE = "шрапнель",
 		INSTRUMENTAL = "шрапнелью",
-		PREPOSITIONAL = "шрапнели"
+		PREPOSITIONAL = "шрапнели",
 	)
-	icon = 'icons/obj/shards.dmi'
-	throwforce = 10
-	throw_speed =  EMBED_THROWSPEED_THRESHOLD
-	embed_chance = 100
-	embedded_fall_chance = 0
-	w_class = WEIGHT_CLASS_SMALL
-	sharp = TRUE
-	hitsound = 'sound/weapons/pierce.ogg'
 
-/obj/item/embedded/shrapnel/New()
-	..()
+/obj/item/embedded/shrapnel/Initialize(mapload)
+	. = ..()
 	icon_state = pick("shrapnel1", "shrapnel2", "shrapnel3")

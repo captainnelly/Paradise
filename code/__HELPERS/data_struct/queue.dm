@@ -17,6 +17,11 @@
 	/// Number of elements in queue
 	var/count = 0
 
+/queue/Destroy(force)
+	head = null
+	tail = null
+	. = ..()
+
 /*
 * Adding an element to the end of the queue
 */
@@ -24,7 +29,7 @@
 	var/node/new_node = new
 	new_node.value = value
 
-	if (!tail)
+	if(!tail)
 		head = new_node
 		tail = new_node
 	else
@@ -36,14 +41,14 @@
  * Retrieving an element from the head of the queue
  */
 /queue/proc/dequeue()
-	if (!head)
+	if(!head)
 		return null
 
 	var/value = head.value
 	var/node/old_head = head
 
 	head = head.next
-	if (head)
+	if(head)
 		head.prev = null
 	else
 		tail = null
@@ -55,7 +60,7 @@
 * Returns an element from the beginning of the queue without removing it
 */
 /queue/proc/peek()
-	if (!head)
+	if(!head)
 		return null
 	return head.value
 

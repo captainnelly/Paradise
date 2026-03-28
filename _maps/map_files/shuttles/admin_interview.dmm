@@ -104,8 +104,7 @@
 "hG" = (
 /obj/structure/shuttle/engine/heater{
 	dir = 4;
-	icon_state = "heater3x3_side_inv";
-	tag = "icon-heater (NORTH)"
+	icon_state = "heater3x3_side_inv"
 	},
 /obj/structure/shuttle/engine/platform{
 	dir = 4;
@@ -223,8 +222,7 @@
 "mZ" = (
 /obj/structure/shuttle/engine/heater{
 	dir = 4;
-	icon_state = "heater3x3";
-	tag = "icon-heater (NORTH)"
+	icon_state = "heater3x3"
 	},
 /obj/structure/shuttle/engine/platform{
 	dir = 4;
@@ -279,7 +277,7 @@
 	rank = "Special Reaction Team Member";
 	registered_name = "Special Reaction Team Member"
 	},
-/obj/item/storage/box/responseteam,
+/obj/item/storage/box/survival/responseteam,
 /obj/item/clothing/under/fluff/jay_turtleneck{
 	desc = null;
 	name = "SRT uniform"
@@ -351,9 +349,7 @@
 /area/shuttle/administration)
 "rp" = (
 /obj/structure/table/reinforced,
-/obj/structure/window/reinforced{
-	layer = 2.9
-	},
+/obj/structure/window/reinforced,
 /turf/simulated/floor/plasteel{
 	icon_state = "dark"
 	},
@@ -393,7 +389,6 @@
 	},
 /obj/structure/window/reinforced{
 	dir = 8;
-	layer = 4.2;
 	pixel_x = -4
 	},
 /turf/simulated/floor/plasteel{
@@ -422,6 +417,13 @@
 /area/shuttle/administration)
 "sq" = (
 /turf/simulated/floor/wood/fancy/cherry,
+/area/shuttle/administration)
+"sv" = (
+/obj/structure/window/full/reinforced{
+	armor = list("melee"=80,"bullet"=80,"laser"=0,"energy"=0,"bomb"=80,"bio"=100,"fire"=80,"acid"=100)
+	},
+/obj/structure/flora/ausbushes/genericbush,
+/turf/simulated/floor/grass,
 /area/shuttle/administration)
 "sG" = (
 /turf/simulated/floor/plasteel{
@@ -477,9 +479,7 @@
 "wl" = (
 /obj/structure/table/reinforced,
 /obj/machinery/atmospherics/pipe/simple/hidden,
-/obj/structure/window/reinforced{
-	layer = 2.9
-	},
+/obj/structure/window/reinforced,
 /obj/machinery/computer/secure_data/laptop,
 /turf/simulated/floor/plasteel{
 	icon_state = "dark"
@@ -495,14 +495,6 @@
 "ye" = (
 /obj/structure/grille,
 /obj/structure/window/full/shuttle,
-/obj/machinery/door/poddoor/shutters{
-	density = 0;
-	dir = 1;
-	icon_state = "open";
-	id_tag = "adminshuttleshutters";
-	name = "Blast Shutters";
-	opacity = 0
-	},
 /obj/machinery/door/poddoor/shutters{
 	density = 0;
 	dir = 1;
@@ -652,19 +644,6 @@
 	color = "#444444"
 	},
 /turf/simulated/floor/wood/fancy/cherry,
-/area/shuttle/administration)
-"FC" = (
-/obj/structure/grille,
-/obj/structure/window/full/shuttle,
-/obj/machinery/door/poddoor/shutters{
-	density = 0;
-	dir = 1;
-	icon_state = "open";
-	id_tag = "adminshuttleshutters";
-	name = "Blast Shutters";
-	opacity = 0
-	},
-/turf/simulated/floor/plating,
 /area/shuttle/administration)
 "Gs" = (
 /obj/item/twohanded/required/kirbyplants,
@@ -937,8 +916,7 @@
 "SE" = (
 /obj/structure/shuttle/engine/heater{
 	dir = 4;
-	icon_state = "heater3x3_side";
-	tag = "icon-heater (NORTH)"
+	icon_state = "heater3x3_side"
 	},
 /obj/structure/shuttle/engine/platform{
 	dir = 4;
@@ -1015,7 +993,7 @@
 	rank = "Special Reaction Team Member";
 	registered_name = "Special Reaction Team Member"
 	},
-/obj/item/storage/box/responseteam,
+/obj/item/storage/box/survival/responseteam,
 /obj/item/clothing/under/fluff/jay_turtleneck{
 	desc = null;
 	name = "SRT uniform"
@@ -1058,14 +1036,6 @@
 /turf/simulated/floor/plasteel{
 	icon_state = "dark"
 	},
-/area/shuttle/administration)
-"VE" = (
-/obj/structure/window/full/reinforced{
-	armor = list("melee"=80,"bullet"=80,"laser"=0,"energy"=0,"bomb"=80,"bio"=100,"rad"=100,"fire"=80,"acid"=100);
-	layer = 5
-	},
-/obj/structure/flora/ausbushes/genericbush,
-/turf/simulated/floor/grass,
 /area/shuttle/administration)
 "VV" = (
 /turf/simulated/floor/shuttle{
@@ -1154,7 +1124,7 @@
 	rank = "Special Reaction Team Member";
 	registered_name = "Special Reaction Team Member"
 	},
-/obj/item/storage/box/responseteam,
+/obj/item/storage/box/survival/responseteam,
 /obj/item/clothing/under/fluff/jay_turtleneck{
 	desc = null;
 	name = "SRT uniform"
@@ -1315,7 +1285,7 @@ hA
 "}
 (7,1,1) = {"
 Ca
-Ir
+Sq
 Tl
 Tl
 Tl
@@ -1355,7 +1325,7 @@ Ti
 "}
 (9,1,1) = {"
 Ca
-Sq
+Ir
 Tl
 sg
 sg
@@ -1398,8 +1368,8 @@ Ti
 hA
 yW
 hA
-VE
-VE
+sv
+sv
 hA
 QT
 Tl
@@ -1414,7 +1384,7 @@ jH
 lX
 "}
 (12,1,1) = {"
-FC
+ye
 Xb
 Tl
 IQ
@@ -1434,7 +1404,7 @@ jH
 Ti
 "}
 (13,1,1) = {"
-FC
+ye
 bQ
 Tl
 Tl

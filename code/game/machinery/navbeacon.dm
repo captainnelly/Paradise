@@ -12,7 +12,7 @@
 	plane = FLOOR_PLANE
 	anchored = TRUE
 	max_integrity = 500
-	armor = list(melee = 70, bullet = 70, laser = 70, energy = 70, bomb = 0, bio = 0, rad = 0, fire = 80, acid = 80)
+	armor = list(melee = 70, bullet = 70, laser = 70, energy = 70, bomb = 0, bio = 0, fire = 80, acid = 80)
 	var/open = 0		// true if cover is open
 	var/locked = 1		// true if controls are locked
 	var/location = ""	// location response text
@@ -29,8 +29,8 @@
 	var/turf/T = loc
 	if(!T.transparent_floor)
 		hide(T.intact)
-	if(!codes || !codes.len)
-		log_runtime(EXCEPTION("Empty codes datum at ([x],[y],[z])"), src, list("codes_txt: '[codes_txt]'"))
+	if(!codes || !length(codes))
+		stack_trace("Empty codes datum at ([x],[y],[z]) (codes_txt: [codes_txt])")
 	if("patrol" in codes)
 		if(!GLOB.navbeacons["[z]"])
 			GLOB.navbeacons["[z]"] = list()
@@ -71,20 +71,17 @@
 		else
 			codes[e] = "1"
 
-
 // called when turf state changes
 // hide the object if turf is intact
 /obj/machinery/navbeacon/hide(intact)
 	invisibility = intact ? INVISIBILITY_MAXIMUM : 0
 	update_icon(UPDATE_ICON_STATE)
 
-
 // update the icon_state
 /obj/machinery/navbeacon/update_icon_state()
 	// if invisible, set icon to faded version
 	// in case revealed by T-scanner
 	icon_state = "navbeacon[open][invisibility ? "-f" : ""]"
-
 
 /obj/machinery/navbeacon/attackby(obj/item/I, mob/user, params)
 	var/turf/our_turf = loc
@@ -109,7 +106,6 @@
 
 	return ..()
 
-
 /obj/machinery/navbeacon/screwdriver_act(mob/living/user, obj/item/I)
 	var/turf/T = get_turf(src)
 	if(T.intact)
@@ -121,7 +117,6 @@
 	)
 	update_icon(UPDATE_ICON_STATE)
 	return TRUE
-
 
 /obj/machinery/navbeacon/attack_ai(mob/user)
 	interact(user, 1)
@@ -138,7 +133,6 @@
 	if(!open && !ai)	// can't alter controls if not open, unless you're an AI
 		to_chat(user, span_warning("The beacon's control cover is closed!"))
 		return
-
 
 	var/t
 
@@ -226,7 +220,6 @@ Transponder Codes:<ul>"}
 			codes[newkey] = newval
 
 			updateDialog()
-
 
 /obj/machinery/navbeacon/invisible
 	invisibility = INVISIBILITY_ABSTRACT

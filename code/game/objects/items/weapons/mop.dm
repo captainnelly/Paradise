@@ -8,8 +8,6 @@
 	force = 3
 	throwforce = 5
 	throw_speed = 3
-	throw_range = 7
-	w_class = WEIGHT_CLASS_NORMAL
 	attack_verb = list("ударил", "огрел")
 	resistance_flags = FLAMMABLE
 	var/mopping = 0
@@ -30,7 +28,6 @@
 	GLOB.janitorial_equipment -= src
 	return ..()
 
-
 /obj/item/mop/proc/wet_mop(obj/target, mob/user)
 	if(user.a_intent == INTENT_GRAB)
 		. = FALSE
@@ -49,7 +46,6 @@
 	to_chat(user, span_notice("You wet [src] in [target]."))
 	playsound(loc, 'sound/effects/slosh.ogg', 25, TRUE)
 
-
 /obj/item/mop/proc/clean(turf/simulated/atom)
 	if(!reagents.has_reagent("water", 1) && !reagents.has_reagent("cleaner", 1) && !reagents.has_reagent("holywater", 1))
 		reagents.reaction(atom, REAGENT_TOUCH, 10) //10 is the multiplier for the reaction effect. probably needed to wet the floor properly.
@@ -66,7 +62,6 @@
 	SEND_SIGNAL(atom, COMSIG_COMPONENT_CLEAN_ACT, 5)
 	reagents.reaction(atom, REAGENT_TOUCH, 10) //10 is the multiplier for the reaction effect. probably needed to wet the floor properly.
 	reagents.remove_any(1)			//reaction() doesn't use up the reagents
-
 
 /obj/item/mop/afterattack(atom/atom, mob/user, proximity, params)
 	if(!proximity || iseffect(atom))
@@ -85,11 +80,11 @@
 
 	var/clicked_turf = get_turf(atom)
 	var/list/turf/turfs = get_mopping_turfs(user, clicked_turf)
-	if(!turfs.len)
+	if(!length(turfs))
 		return
 
 	user.visible_message(
-		"[user] начина[pluralize_ru(user.gender, "ет", "ют")] возить по полу [declent_ru(INSTRUMENTAL)].",
+		"[user] начина[PLUR_ET_YUT(user)] возить по полу [declent_ru(INSTRUMENTAL)].",
 		ignored_mobs = user
 	)
 	user.balloon_alert(user, "мытьё пола...")
@@ -109,7 +104,6 @@
 
 	QDEL_LAZYLIST(bubbles)
 
-
 /obj/item/mop/proc/get_mopping_turfs(mob/user, turf/click_turf)
 	var/turf/user_turf = get_turf(user)
 	if(user_turf == click_turf)
@@ -127,7 +121,6 @@
 
 	return turfs
 
-
 /obj/item/mop/proc/janicart_insert(mob/user, obj/structure/janitorialcart/cart)
 	if(cart.mymop)
 		to_chat(user, span_notice("There is already [cart.mymop] in [cart]."))
@@ -138,7 +131,6 @@
 		cart.updateUsrDialog()
 		cart.update_icon(UPDATE_OVERLAYS)
 
-
 /obj/item/mop/proc/mopbucket_insert(mob/user, obj/structure/mopbucket/bucket)
 	if(bucket.mymop)
 		to_chat(user, span_notice("There is already [bucket.mymop] in [bucket]."))
@@ -148,10 +140,9 @@
 		bucket.mymop = src
 		bucket.update_icon(UPDATE_OVERLAYS)
 
-
 /obj/item/mop/wash(mob/user, atom/source)
 	reagents.add_reagent("water", 5)
-	to_chat(user, "<span class='notice'>You wet [src] in [source].</span>")
+	to_chat(user, span_notice("You wet [src] in [source]."))
 	playsound(loc, 'sound/effects/slosh.ogg', 25, TRUE)
 	return 1
 
@@ -181,7 +172,7 @@
 		START_PROCESSING(SSobj, src)
 	else
 		STOP_PROCESSING(SSobj, src)
-	to_chat(user, "<span class='notice'>You set the condenser switch to the '[refill_enabled ? "ON" : "OFF"]' position.</span>")
+	to_chat(user, span_notice("You set the condenser switch to the '[refill_enabled ? "ON" : "OFF"]' position."))
 	playsound(user, 'sound/machines/click.ogg', 30, TRUE)
 
 /obj/item/mop/advanced/process()
@@ -191,7 +182,7 @@
 
 /obj/item/mop/advanced/examine(mob/user)
 	. = ..()
-	. += "<span class='notice'>The condenser switch is set to <b>[refill_enabled ? "ON" : "OFF"]</b>.</span>"
+	. += span_notice("The condenser switch is set to <b>[refill_enabled ? "ON" : "OFF"]</b>.")
 
 /obj/item/mop/advanced/Destroy()
 	if(refill_enabled)

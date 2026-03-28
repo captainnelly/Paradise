@@ -47,11 +47,10 @@
 	var/list/params[0]		// what to send to the main object to indicate which sensor
 	var/trigger_limit = 5	// number of time we're allowed to trigger per ptick
 
-
 /obj/effect/portal_sensor/Initialize(mapload, owner, ...)
 	. = ..()
 	src.owner = owner
-	if(args.len >= 3)
+	if(length(args) >= 3)
 		params = args.Copy(3)
 	START_PROCESSING(SSobj, src)
 	trigger()
@@ -61,23 +60,19 @@
 	)
 	AddElement(/datum/element/connect_loc, loc_connections)
 
-
 /obj/effect/portal_sensor/Destroy()
 	STOP_PROCESSING(SSobj, src)
 	return ..()
-
 
 /obj/effect/portal_sensor/proc/on_entered(datum/source, atom/movable/arrived, atom/old_loc, list/atom/old_locs)
 	SIGNAL_HANDLER
 
 	INVOKE_ASYNC(src, PROC_REF(trigger))
 
-
 /obj/effect/portal_sensor/proc/on_exited(datum/source, atom/movable/departed, atom/newLoc)
 	SIGNAL_HANDLER
 
 	INVOKE_ASYNC(src, PROC_REF(trigger))
-
 
 /obj/effect/portal_sensor/process()
 	// check_light()
@@ -112,7 +107,7 @@
 
 // for second floor showing floor below
 /turf/simulated/floor/indestructible/upperlevel
-	icon = 'icons/turf/areas.dmi'
+	icon = 'icons/area/areas.dmi'
 	icon_state = "dark128"
 	layer = AREA_LAYER + 0.5
 	appearance_flags = TILE_BOUND|KEEP_TOGETHER|LONG_GLIDE
@@ -122,7 +117,7 @@
 /turf/simulated/floor/indestructible/upperlevel/New()
 	..()
 	var/obj/effect/levelref/R = locate() in get_area(src)
-	if(R && R.other)
+	if(R?.other)
 		init(R)
 
 /turf/simulated/floor/indestructible/upperlevel/Destroy()
@@ -135,12 +130,15 @@
 		sensor = new(lower_turf, src)
 
 /turf/simulated/floor/indestructible/upperlevel/Entered(atom/movable/arrived, atom/old_loc, list/atom/old_locs)
-	if(ismovable(arrived))
-		if(isliving(arrived))
-			var/mob/living/mob = arrived
-			mob.emote("scream")
-			mob.SpinAnimation(5, 1)
-		arrived.forceMove(lower_turf)
+	. = ..()
+	if(!ismovable(arrived))
+		return
+
+	if(isliving(arrived))
+		var/mob/living/mob = arrived
+		mob.emote("scream")
+		mob.SpinAnimation(5, 1)
+	arrived.forceMove(lower_turf)
 
 /turf/simulated/floor/indestructible/upperlevel/attack_ghost(mob/user)
 	user.forceMove(lower_turf)
@@ -155,8 +153,8 @@
 		var/atom/A = X
 		if(A && A.invisibility <= SEE_INVISIBLE_LIVING)
 			var/image/I = image(A, layer = AREA_LAYER + A.layer * 0.01, dir = A.dir)
-			I.pixel_x = A.pixel_x
-			I.pixel_y = A.pixel_y
+			I.pixel_w = A.pixel_x
+			I.pixel_z = A.pixel_y
 			underlays += I
 
 /obj/effect/visual_portal
@@ -166,7 +164,6 @@
 	icon_state = "arrow"
 	opacity = TRUE
 	density = TRUE
-	anchored = TRUE
 	appearance_flags = TILE_BOUND|KEEP_TOGETHER|LONG_GLIDE
 	plane = ABOVE_GAME_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
@@ -232,7 +229,6 @@
 		for(var/i in 1 to distance)
 			T2 = get_step(T2, dir)
 		viewing_turfs = block(T1, T2)
-
 
 	if(reset_view)
 		vis_contents.Cut()

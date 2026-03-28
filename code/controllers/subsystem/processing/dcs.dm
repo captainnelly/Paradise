@@ -1,6 +1,6 @@
 PROCESSING_SUBSYSTEM_DEF(dcs)
 	name = "Datum Component System"
-	flags = SS_NO_INIT
+	flags = SS_NO_INIT|SS_HIBERNATE
 	ss_id = "datum_component_system"
 
 	var/list/elements_by_type = list()
@@ -40,19 +40,19 @@ PROCESSING_SUBSYSTEM_DEF(dcs)
 
 		if(istext(key))
 			var/value = arguments[key]
-			if (isnull(value))
+			if(isnull(value))
 				fullid += key
 			else
-				if (!istext(value) && !isnum(value))
+				if(!istext(value) && !isnum(value))
 					value = isdatum(value)? UID_of(value) : "\ref[value]"
 
-				if (!named_arguments)
+				if(!named_arguments)
 					named_arguments = list()
 
 				named_arguments[key] = value
 			continue
 
-		if (isnum(key))
+		if(isnum(key))
 			fullid += key
 		else if(isdatum(key))
 			fullid += UID_of(key)

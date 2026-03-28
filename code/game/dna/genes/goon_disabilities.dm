@@ -15,11 +15,9 @@
 	instability = -GENE_INSTABILITY_MODERATE
 	traits_to_add = list(TRAIT_MUTE)
 
-
 /datum/dna/gene/disability/mute/New()
 	..()
 	block = GLOB.muteblock
-
 
 /datum/dna/gene/disability/mute/OnSay(mob/M, message)
 	return ""
@@ -34,30 +32,30 @@
 	activation_message = list("Вы чувствуете, как странное недомогание пронизывает всё ваше тело.")
 	deactivation_message = list("Вы больше не чувствуете себя ужасно больным.")
 	instability = -GENE_INSTABILITY_MAJOR
-
+	COOLDOWN_DECLARE(last_radioactive_pulse)
 
 /datum/dna/gene/disability/radioactive/New()
 	..()
 	block = GLOB.radblock
-
 
 /datum/dna/gene/disability/radioactive/can_activate(mob/living/mutant, flags)
 	if(HAS_TRAIT(mutant, TRAIT_RADIMMUNE) && !(flags & MUTCHK_FORCED))
 		return FALSE
 	return TRUE
 
+/datum/dna/gene/disability/radioactive/OnMobLife(mob/living/owner)
+	if(!COOLDOWN_FINISHED(src, last_radioactive_pulse))
+		return
 
-/datum/dna/gene/disability/radioactive/OnMobLife(mob/living/mutant)
-	var/radiation_amount = abs(min(mutant.radiation - 20, 0))
-	mutant.apply_effect(radiation_amount, IRRADIATE)
-	for(var/mob/living/victim in (view(1, get_turf(src)) - src))
-		to_chat(victim, span_danger("Вас окутывает мягкое зелёное свечение, исходящее от [mutant]."))
-		victim.apply_effect(5, IRRADIATE)
-
+	COOLDOWN_START(src, last_radioactive_pulse, 5 SECONDS)
+	radiation_pulse(
+		owner,
+		max_range = 3,
+		threshold = RAD_MEDIUM_INSULATION,
+	)
 
 /datum/dna/gene/disability/radioactive/OnDrawUnderlays(mob/M, g)
 	return "rads_s"
-
 
 ////////////////////////////////////////
 // Other disabilities
@@ -72,11 +70,9 @@
 	instability = -GENE_INSTABILITY_MINOR
 	traits_to_add = list(TRAIT_OBESITY)
 
-
 /datum/dna/gene/disability/obesity/New()
 	..()
 	block = GLOB.obesityblock
-
 
 // WAS: /datum/bioEffect/chav
 // WAS: /datum/dna/gene/disability/speech/chav
@@ -99,12 +95,10 @@
 	var/static/regex/consonant_regexp = regex("([consonant.Join("|")])(?=\\s|,|-|!|\\?|$)", "g")
 	var/static/regex/consonant_big_regexp = regex("([consonant_big.Join("|")])(?=\\s|,|-|!|\\?|$)", "g")
 
-
 // /datum/dna/gene/disability/speech/auld_imperial/New()
 /datum/dna/gene/disability/speech/auld_imperial/New()
 	..()
 	block = GLOB.auld_imperial_block
-
 
 // /datum/dna/gene/disability/speech/auld_imperial/OnSay(mob/M, message)
 /datum/dna/gene/disability/speech/auld_imperial/OnSay(mob/M, message)
@@ -175,18 +169,14 @@
 
 	return message
 
-
 /datum/dna/gene/disability/speech/auld_imperial/proc/add_slovoers(matched)
 	return "[matched]-съ"
-
 
 /datum/dna/gene/disability/speech/auld_imperial/proc/add_er(matched)
 	return "[matched]ъ"
 
-
 /datum/dna/gene/disability/speech/auld_imperial/proc/replace_speech(matched, first, second)
 	return "[first][low_cultural_words[second]]"
-
 
 // WAS: /datum/bioEffect/swedish
 /datum/dna/gene/disability/speech/swedish
@@ -195,11 +185,9 @@
 	activation_message = list("Вы ощущаете внутреннюю шведскость. Кажется, сработало.")
 	deactivation_message = list("Внутреннее ощущение шведскости проходит.")
 
-
 /datum/dna/gene/disability/speech/swedish/New()
 	..()
 	block = GLOB.swedeblock
-
 
 /datum/dna/gene/disability/speech/swedish/OnSay(mob/M, message)
 	// svedish
@@ -240,7 +228,6 @@
 		message += " Bork[pick("",", bork",", bork, bork")]!"
 	return message
 
-
 // WAS: /datum/bioEffect/unintelligable
 /datum/dna/gene/disability/unintelligable
 	name = "Косноязычие"
@@ -249,11 +236,9 @@
 	deactivation_message = list("Ваши мысли становятся более ясными.")
 	instability = -GENE_INSTABILITY_MINOR
 
-
 /datum/dna/gene/disability/unintelligable/New()
 	..()
 	block = GLOB.scrambleblock
-
 
 /datum/dna/gene/disability/unintelligable/OnSay(mob/M, message)
 	var/prefix = copytext(message,1,2)
@@ -267,7 +252,7 @@
 
 	var/list/words = splittext(message," ")
 	var/list/rearranged = list()
-	for(var/i=1;i<=words.len;i++)
+	for(var/i=1;i<=length(words);i++)
 		var/cword = pick(words)
 		words.Remove(cword)
 		var/suffix = copytext(cword,length(cword)-1,length(cword))
@@ -277,7 +262,6 @@
 		if(length(cword))
 			rearranged += cword
 	return "[prefix][uppertext(jointext(rearranged," "))]!!"
-
 
 //////////////////
 // USELESS SHIT //
@@ -290,15 +274,12 @@
 	activation_message = list("Из вашей головы вырываются рога.")
 	deactivation_message = list("Ваши рога рассыпаются в прах.")
 
-
 /datum/dna/gene/disability/horns/New()
 	..()
 	block = GLOB.hornsblock
 
-
 /datum/dna/gene/disability/horns/OnDrawUnderlays(mob/M, g)
 	return "horns_s"
-
 
 ////////////////////////////////////////////////////////////////////////
 // WAS: /datum/bioEffect/immolate
@@ -309,30 +290,25 @@
 	deactivation_messages = list("Вы больше не чувствуете дискомфортного жара.")
 	spelltype = /obj/effect/proc_holder/spell/immolate
 
-
 /datum/dna/gene/basic/grant_spell/immolate/New()
 	..()
 	block = GLOB.immolateblock
-
 
 /obj/effect/proc_holder/spell/immolate
 	name = "Incendiary Mitochondria"
 	desc = "Субъект приобретает способность преобразовывать избыточную клеточную энергию в тепловую."
 	base_cooldown = 60 SECONDS
 	clothes_req = FALSE
-	stat_allowed = CONSCIOUS
 	var/list/compatible_mobs = list(/mob/living/carbon/human)
 	action_icon_state = "genetic_incendiary"
-
 
 /obj/effect/proc_holder/spell/immolate/create_new_targeting()
 	return new /datum/spell_targeting/self
 
-
 /obj/effect/proc_holder/spell/immolate/cast(list/targets, mob/living/user = usr)
 	var/mob/living/carbon/L = user
 	L.adjust_fire_stacks(0.5)
-	L.visible_message(span_danger("[L.name] внезапно вспыхива[pluralize_ru(L.gender, "ет", "ют")] пламенем!"))
+	L.visible_message(span_danger("[L.name] внезапно вспыхива[PLUR_ET_YUT(L)] пламенем!"))
 	L.IgniteMob()
 	playsound(L.loc, 'sound/effects/bamf.ogg', 50, FALSE)
 

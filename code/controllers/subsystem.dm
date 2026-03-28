@@ -40,6 +40,9 @@
 	///Bitmap of what game states can this subsystem fire at. See [RUNLEVELS_DEFAULT] for more details.
 	var/runlevels = RUNLEVELS_DEFAULT //points of the game at which the SS can fire
 
+	///A list of var names present on this subsystem to be checked during CheckQueue. See [SS_HIBERNATE] for usage.
+	var/list/hibernate_checks
+
 	/*
 	 * The following variables are managed by the MC and should not be modified directly.
 	 */
@@ -56,6 +59,9 @@
 	/// Scheduled world.time for next fire()
 	var/next_fire = 0
 
+	/// The subsystem had no work during CheckQueue and was not queued.
+	var/hibernating
+
 	/// Running average of the amount of milliseconds it takes the subsystem to complete a run (including all resumes but not the time spent paused)
 	var/cost = 0
 
@@ -64,6 +70,9 @@
 
 	/// Running average of the amount of tick usage (in percents of a game tick) the subsystem has spent past its allocated time without pausing
 	var/tick_overrun = 0
+
+	/// Flat list of usage and time, every odd index is a log time, every even index is a usage
+	var/list/rolling_usage = list()
 
 	/// How much of a tick (in percents of a tick) were we allocated last fire.
 	var/tick_allocation_last = 0
@@ -109,16 +118,14 @@
 	//Do not blindly add vars here to the bottom, put it where it goes above
 	//If your var only has two values, put it in as a flag.
 
-
 //Do not override
 ///datum/controller/subsystem/New()
 
-// Used to initialize the subsystem BEFORE the map has loaded
-// Called AFTER Recover if that is called
-// Prefer to use Initialize if possible
+/// Used to initialize the subsystem BEFORE the map has loaded
+/// Called AFTER Recover if that is called
+/// Prefer to use Initialize if possible
 /datum/controller/subsystem/proc/PreInit()
 	return
-
 
 /**
  * Used to initialize the subsystem. This is expected to be overriden by subtypes.
@@ -126,6 +133,9 @@
 /datum/controller/subsystem/Initialize()
 	return SS_INIT_NONE
 
+/// Returns what to display as the ms cost for this subsystem.
+/datum/controller/subsystem/proc/get_cost()
+	return round(cost, 1)
 
 /datum/controller/subsystem/Destroy()
 	dequeue()
@@ -134,7 +144,6 @@
 	if(Master)
 		Master.subsystems -= src
 	return ..()
-
 
 ///This is used so the mc knows when the subsystem sleeps. do not override.
 /datum/controller/subsystem/proc/ignite(resumed = FALSE)
@@ -158,12 +167,13 @@
 		state = SS_PAUSED
 		queued_time = QT
 
-
 /// Called after the config has been loaded or reloaded.
 /datum/controller/subsystem/proc/OnConfigLoad()
+	return
 
 /// Called after the MC has been loaded or reloaded
 /datum/controller/subsystem/proc/OnMasterLoad()
+	return
 
 ///previously, this would have been named 'process()' but that name is used everywhere for different things!
 ///fire() seems more suitable. This is the procedure that gets called every 'wait' deciseconds.
@@ -171,7 +181,6 @@
 /datum/controller/subsystem/proc/fire(resumed = FALSE)
 	flags |= SS_NO_FIRE
 	CRASH("Subsystem [src]([type]) does not fire() but did not set the SS_NO_FIRE flag. Please add the SS_NO_FIRE flag to any subsystem that doesn't fire so it doesn't get added to the processing list and waste cpu.")
-
 
 /** Update next_fire for the next run.
  *  reset_time (bool) - Ignore things that would normally alter the next fire, like tick_overrun, and last_fire. (also resets postpone)
@@ -196,11 +205,12 @@
 	else
 		next_fire = queued_time + wait + (world.tick_lag * (tick_overrun/100))
 
-
 ///Queue it to run.
 /// (we loop thru a linked list until we get to the end or find the right point)
 /// (this lets us sort our run order correctly without having to re-sort the entire already sorted list)
 /datum/controller/subsystem/proc/enqueue()
+	hibernating = FALSE
+
 	var/SS_priority = priority
 	var/SS_flags = flags
 	var/datum/controller/subsystem/queue_node
@@ -257,7 +267,6 @@
 		queue_prev = queue_node.queue_prev
 		queue_node.queue_prev = src
 
-
 /datum/controller/subsystem/proc/dequeue()
 	if(queue_next)
 		queue_next.queue_prev = queue_prev
@@ -271,7 +280,6 @@
 	if(state == SS_QUEUED)
 		state = SS_IDLE
 
-
 /datum/controller/subsystem/proc/pause()
 	. = 1
 	switch(state)
@@ -280,25 +288,25 @@
 		if(SS_SLEEPING)
 			state = SS_PAUSING
 
-
 /// Gets extra details for the subsystem stat panes
 /datum/controller/subsystem/proc/get_stat_details()
 	return
-
 
 /// Hook for printing stats to the "MC" statuspanel for admins to see performance and related stats etc.
 /datum/controller/subsystem/stat_entry(msg)
 	var/ss_info = get_stat_details()
 
 	if(can_fire && !(SS_NO_FIRE & flags) && init_stage <= Master.init_stage_completed)
-		msg = "[round(cost, 1)]ms | [round(tick_usage, 1)]%([round(tick_overrun, 1)]%) | [round(ticks, 0.1)]\t[ss_info]"
+		msg = "[get_cost()]ms | [round(tick_usage, 1)]%([round(tick_overrun, 1)]%) | [round(ticks, 0.1)]\t[ss_info]"
 	else
 		msg = "OFFLINE\t[ss_info]"
 
 	return ..()
 
-
 /datum/controller/subsystem/proc/state_letter()
+	if(hibernating)
+		return "H"
+
 	switch(state)
 		if(SS_RUNNING)
 			. = "R"
@@ -311,8 +319,10 @@
 		if(SS_IDLE)
 			. = " "
 
-
 /datum/controller/subsystem/proc/state_colour()
+	if(hibernating) // If its hibernating, colour it grey
+		return "<font color='#808080'>"
+
 	switch(state)
 		if(SS_RUNNING) // If its actively processing, colour it green
 			. = "<font color='#32a852'>"
@@ -325,17 +335,24 @@
 		if(SS_IDLE) // Leave it default if the SS is idle
 			. = "<font>"
 
-
 /// Causes the next "cycle" fires to be missed. Effect is accumulative but can reset by calling update_nextfire(reset_time = TRUE)
 /datum/controller/subsystem/proc/postpone(cycles = 1)
 	if(can_fire && cycles >= 1)
 		postponed_fires += cycles
 
+/// Prunes out of date entries in our rolling usage list
+/datum/controller/subsystem/proc/prune_rolling_usage()
+	var/list/rolling_usage = src.rolling_usage
+	var/cut_to = 0
+	while(cut_to + 2 <= length(rolling_usage) && rolling_usage[cut_to + 1] < DS2TICKS(world.time - Master.rolling_usage_length))
+		cut_to += 2
+	if(cut_to)
+		rolling_usage.Cut(1, cut_to + 1)
 
 /// Usually called via datum/controller/subsystem/New() when replacing a subsystem (i.e. due to a recurring crash)
 /// Should attempt to salvage what it can from the old instance of subsystem
 /datum/controller/subsystem/Recover()
-
+	return
 
 /datum/controller/subsystem/vv_edit_var(var_name, var_value)
 	switch(var_name)
@@ -346,7 +363,6 @@
 		if(NAMEOF(src, queued_priority)) //editing this breaks things.
 			return FALSE
 	. = ..()
-
 
 /**
  * Returns the metrics for the subsystem.

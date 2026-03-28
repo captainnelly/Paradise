@@ -1,3 +1,6 @@
+/// List of all guardians currently extant
+GLOBAL_LIST_EMPTY(parasites)
+
 /mob/living/simple_animal/hostile/guardian
 	name = "Guardian Spirit"
 	real_name = "Guardian Spirit"
@@ -13,7 +16,6 @@
 	icon_living = "magicOrange"
 	icon_dead = "magicOrange"
 	speed = 0
-	a_intent = INTENT_HARM
 	can_change_intents = 0
 	stop_automated_movement = 1
 	universal_speak = TRUE
@@ -23,7 +25,6 @@
 	maxHealth = INFINITY //The spirit itself is invincible
 	health = INFINITY
 	environment_smash = 0
-	obj_damage = 40
 	melee_damage_lower = 15
 	melee_damage_upper = 15
 	move_resist = MOVE_FORCE_STRONG
@@ -52,16 +53,21 @@
 		DATIVE = "Духу-Хранителю",
 		ACCUSATIVE = "Духа-Хранителя",
 		INSTRUMENTAL = "Духом-Хранителем",
-		PREPOSITIONAL = "Духе-Хранителе"
+		PREPOSITIONAL = "Духе-Хранителе",
 	)
 
 /mob/living/simple_animal/hostile/guardian/Initialize(mapload, mob/living/host)
 	. = ..()
+	GLOB.parasites += src
 	AddElement(/datum/element/simple_flying)
 	if(!host)
 		return
 	summoner = host
 	host.grant_guardian_actions(src)
+
+/mob/living/simple_animal/hostile/guardian/Destroy()
+	GLOB.parasites -= src
+	return ..()
 
 /mob/living/simple_animal/hostile/guardian/ComponentInitialize()
 	AddComponent( \
@@ -72,17 +78,15 @@
 
 /mob/living/simple_animal/hostile/guardian/med_hud_set_health()
 	if(summoner)
-		var/image/holder = hud_list[HEALTH_HUD]
-		holder.icon_state = "hud[RoundHealth(summoner)]"
+		set_hud_image_state(HEALTH_HUD, "hud[RoundHealth(summoner)]")
 
 /mob/living/simple_animal/hostile/guardian/med_hud_set_status()
 	if(summoner)
-		var/image/holder = hud_list[STATUS_HUD]
-		holder.pixel_y = get_cached_height() - ICON_SIZE_Y
+		var/pixel_y = get_cached_height() - ICON_SIZE_Y
 		if(summoner.stat == DEAD)
-			holder.icon_state = STATUS_HUD_DEAD
+			set_hud_image_state(STATUS_HUD, STATUS_HUD_DEAD, y_offset = pixel_y)
 		else
-			holder.icon_state = STATUS_HUD_HEALTHY
+			set_hud_image_state(STATUS_HUD, STATUS_HUD_HEALTHY, y_offset = pixel_y)
 
 /mob/living/simple_animal/hostile/guardian/Life(seconds, times_fired)
 	..()
@@ -105,7 +109,7 @@
 		if(get_dist(get_turf(summoner),get_turf(src)) <= range)
 			return
 		else
-			to_chat(src, span_holoparasite("Вас откинуло назад, так как превышена дальность связи! Ваша дальность всего [range] метр[declension_ru(range,"","а","ов")] от [summoner.real_name]!"))
+			to_chat(src, span_holoparasite("Вас откинуло назад, так как превышена дальность связи! Ваша дальность всего [range] метр[DECL_CREDIT(range)] от [summoner.real_name]!"))
 			visible_message(span_danger("[src] вернулся к носителю."))
 			if(iseffect(summoner.loc))
 				Recall(TRUE)
@@ -138,7 +142,6 @@
 	to_chat(summoner, span_danger("Ваш [name] как-то умер!"))
 	summoner.death()
 
-
 /mob/living/simple_animal/hostile/guardian/update_health_hud()
 	if(summoner)
 		var/resulthealth
@@ -167,9 +170,9 @@
 		return .
 
 	to_chat(summoner, span_danger("Вашего хранителя [name] атакуют! Вы получаете урон!"))
-	summoner.visible_message(span_danger("Кровь хлещет из [summoner] ибо [src.declent_ru(NOMINATIVE)] получает урон!"))
+	summoner.visible_message(span_danger("Кровь хлещет из [summoner] ибо [declent_ru(NOMINATIVE)] получает урон!"))
 	if(summoner.stat == UNCONSCIOUS)
-		to_chat(summoner, span_danger("Ваше тело не выдерживает нагрузки от поддержания [src.declent_ru(ACCUSATIVE)] в таком состоянии, оно начинает разрушаться!"))
+		to_chat(summoner, span_danger("Ваше тело не выдерживает нагрузки от поддержания [declent_ru(ACCUSATIVE)] в таком состоянии, оно начинает разрушаться!"))
 		summoner.adjustCloneLoss(amount / 2)
 
 /mob/living/simple_animal/hostile/guardian/adjustStaminaLoss(
@@ -238,13 +241,11 @@
 
 	// Show the message to any ghosts/dead players.
 	for(var/mob/M in GLOB.dead_mob_list)
-		if(M && M.client && M.stat == DEAD && !isnewplayer(M))
-			to_chat(M, span_alien("<i>Сообщение Стража <b>[src]</b> ([ghost_follow_link(src, ghost=M)]): [input]</i>"))
-
+		if(M?.client && M.stat == DEAD && !isnewplayer(M))
+			to_chat(M, span_alien("([ghost_follow_link(src, ghost = M)]) <i>Сообщение Стража <b>[src]</b>: [input]</i>"))
 
 /mob/living/simple_animal/hostile/guardian/proc/ToggleMode()
 	to_chat(src, span_danger("У вас нет другого режима!"))
-
 
 /mob/living/simple_animal/hostile/guardian/proc/ToggleLight()
 	set_light_on(!light_on)
@@ -253,12 +254,11 @@
 	else
 		to_chat(src, span_notice("Вы выключили свет."))
 
-
 ////////Creation
 
 /obj/item/guardiancreator
 	name = "колода карт Таро"
-	desc = "Зачарованная колода карт, по слухам - источник невероятной силы. "
+	desc = "Зачарованная колода карт, по слухам — источник невероятной силы. "
 	icon = 'icons/obj/toy.dmi'
 	icon_state = "deck_syndicate_full"
 	var/used = FALSE
@@ -287,7 +287,7 @@
 		DATIVE = "колоде карт Таро",
 		ACCUSATIVE = "колоду карт Таро",
 		INSTRUMENTAL = "колодой карт Таро",
-		PREPOSITIONAL = "колоде карт Таро"
+		PREPOSITIONAL = "колоде карт Таро",
 	)
 
 /obj/item/guardiancreator/attack_self(mob/living/user)
@@ -322,9 +322,13 @@
 			return
 
 	var/list/mob/dead/observer/candidates = SSghost_spawns.poll_candidates("Вы хотите поиграть за [mob_name] ([guardian_type]) у [user.real_name]?", ROLE_GUARDIAN, FALSE, 10 SECONDS, source = src, role_cleanname = "[mob_name] ([guardian_type])")
+
+	if(QDELETED(user))
+		return
+
 	var/mob/dead/observer/theghost = null
 
-	if(candidates.len)
+	if(length(candidates))
 		theghost = pick(candidates)
 		log_game("[user](ckey: [user.key]) has successfully spawned [guardian_type] type guardian(ckey: [theghost.key])")
 		spawn_guardian(user, theghost.key, guardian_type)
@@ -371,11 +375,11 @@
 
 	var/mob/living/simple_animal/hostile/guardian/G = new pickedtype(user, user)
 	G.summoned = TRUE
-	G.key = key
+	G.possess_by_player(key)
 	SSticker.mode.guardians |= G.mind
 	to_chat(G, "Вы [mob_name], обязанный служить [user.real_name].")
 	to_chat(G, "Вы можете появляться или возвращаться к вашему хозяину с помощью кнопок на панели Стража. Там же вы найдете кнопку связи с хозяином.")
-	to_chat(G, "Хотя вы лично неуязвимы, ваша жизнь зависит от [user.real_name]. Если [genderize_ru(user.gender,"он","она","оно","они")] погибн[pluralize_ru(user.gender,"ет","ут")] — умрёте и вы. Кроме того, любой полученный вами урон будет передан [genderize_ru(user.gender,"ему","ей","ему","им")], так как вы существуете за счёт [genderize_ru(user.gender,"его","её","его","их")] жизненной силы.")
+	to_chat(G, "Хотя вы лично неуязвимы, ваша жизнь зависит от [user.real_name]. Если [GEND_HE_SHE(user)] погибн[PLUR_ET_UT(user)] — умрёте и вы. Кроме того, любой полученный вами урон будет передан [GEND_HIM_HER(user)], так как вы существуете за счёт [GEND_HIS_HER(user)] жизненной силы.")
 	to_chat(G, "[G.playstyle_string]")
 	G.faction = user.faction
 
@@ -394,7 +398,6 @@
 	to_chat(user, "[G.magic_fluff_string].")
 
 /obj/item/guardiancreator/choose
-	random = FALSE
 
 /obj/item/guardiancreator/tech
 	name = "инъектор голопаразитов"
@@ -428,7 +431,7 @@
 		DATIVE = "инъектору голопаразитов",
 		ACCUSATIVE = "инъектор голопаразитов",
 		INSTRUMENTAL = "инъектором голопаразитов",
-		PREPOSITIONAL = "инъекторе голопаразитов"
+		PREPOSITIONAL = "инъекторе голопаразитов",
 	)
 
 /obj/item/guardiancreator/tech/create_theme(mob/living/simple_animal/hostile/guardian/G, mob/living/user, picked_name, color)
@@ -444,7 +447,6 @@
 	return !used
 
 /obj/item/guardiancreator/tech/choose
-	random = FALSE
 
 /obj/item/guardiancreator/biological
 	name = "скопление яиц скарабеев"
@@ -477,7 +479,7 @@
 		DATIVE = "скоплению яиц скарабеев",
 		ACCUSATIVE = "скопление яиц скарабеев",
 		INSTRUMENTAL = "скоплением яиц скарабеев",
-		PREPOSITIONAL = "скоплении яиц скарабеев"
+		PREPOSITIONAL = "скоплении яиц скарабеев",
 	)
 
 /obj/item/guardiancreator/biological/create_theme(mob/living/simple_animal/hostile/guardian/G, mob/living/user, picked_name, color)
@@ -491,8 +493,6 @@
 	G.speak_emote = list("щебечет")
 
 /obj/item/guardiancreator/biological/choose
-	random = FALSE
-
 
 /obj/item/paper/guardian
 	name = "Справочник по голопаразитам"
@@ -521,7 +521,6 @@
 
 /obj/item/paper/guardian/update_icon_state()
 	return
-
 
 /obj/item/storage/box/syndie_kit/guardian
 	name = "Набор инжектора голопаразита"

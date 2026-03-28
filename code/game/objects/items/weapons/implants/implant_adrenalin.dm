@@ -4,7 +4,6 @@
 	icon_state = "adrenal_old"
 	implant_state = "implant-syndicate"
 	origin_tech = "materials=2;biotech=4;combat=3;syndicate=2"
-	activated = BIOCHIP_ACTIVATED_ACTIVE
 	implant_data = /datum/implant_fluff/adrenaline
 	actions_types = null
 	base_cooldown = 120 SECONDS
@@ -17,6 +16,10 @@
 /obj/item/implant/adrenalin/Destroy()
 	. = ..()
 	QDEL_NULL(action)
+
+/obj/item/implant/adrenalin/implant(mob/living/carbon/human/source, mob/user, force)
+	add_item_action(action)
+	. = ..()
 
 /obj/item/implant/adrenalin/create_new_cooldown()
 	var/datum/implant_cooldown/charges/C = new
@@ -58,10 +61,9 @@
 	imp_in.apply_status_effect(/datum/status_effect/adrenaline)
 
 	imp_in.AdjustBlood(-67.2)
-	imp_in.adjust_nutrition(-150)
+	imp_in.adjust_nutrition(-50)
 
 	return TRUE
-
 
 /obj/item/implanter/adrenalin
 	name = "bio-chip implanter (adrenalin)"
@@ -98,7 +100,7 @@
 	imp_in.reagents.add_reagent("stimulative_agent", 5)
 	imp_in.reagents.add_reagent("adrenaline", 3)
 
-	imp_in.apply_status_effect(/datum/status_effect/adrenaline)
+	imp_in.apply_status_effect(/datum/status_effect/adrenaline/prototype)
 
 	if(!uses)
 		qdel(src)
@@ -112,3 +114,7 @@
 	desc = "A glass case containing a prototype adrenalin bio-chip."
 	imp = /obj/item/implant/adrenalin/prototype
 
+/obj/item/implant/adrenalin/prototype/create_new_cooldown()
+	var/datum/implant_cooldown/i_cooldown = new
+	i_cooldown.recharge_duration = base_cooldown
+	return i_cooldown

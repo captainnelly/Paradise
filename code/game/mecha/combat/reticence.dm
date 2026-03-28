@@ -7,14 +7,13 @@
 	dir_in = 1 //Facing North.
 	max_integrity = 150
 	deflect_chance = 30
-	armor = list(MELEE = 25, BULLET = 20, LASER = 30, ENERGY = 15, BOMB = 0, BIO = 0, RAD = 0, FIRE = 100, ACID = 100)
+	armor = list(MELEE = 25, BULLET = 20, LASER = 30, ENERGY = 15, BOMB = 0, BIO = 0, FIRE = 100, ACID = 100)
 	max_temperature = 15000
 	wreckage = /obj/structure/mecha_wreckage/reticence
 	operation_req_access = list(ACCESS_MIME)
 	maint_access = TRUE
 	id_lock_on = FALSE
 	internal_damage_threshold = 60
-	max_equip = 3
 	step_energy_drain = 3
 	normal_step_energy_drain = 3
 	stepsound = null
@@ -25,8 +24,8 @@
 
 	ui_theme = "ntos_lightmode"
 
-/obj/mecha/combat/reticence/loaded/New()
-	..()
+/obj/mecha/combat/reticence/loaded/Initialize(mapload)
+	. = ..()
 	var/obj/item/mecha_parts/mecha_equipment/ME = new /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/carbine/silenced
 	ME.attach(src)
 	ME = new /obj/item/mecha_parts/mecha_equipment/mimercd //HAHA IT MAKES WALLS GET IT

@@ -10,11 +10,10 @@
 	desc = "Money money money."
 	icon = 'icons/goonstation/objects/money.dmi'
 	icon_state = "cashgreen"
-	hitsound = "swing_hit"
+	hitsound = SFX_SWING_HIT
 	force = 1
 	throwforce = 1
 	throw_speed = 1
-	throw_range = 7
 	w_class = WEIGHT_CLASS_TINY
 	full_w_class = WEIGHT_CLASS_TINY
 	resistance_flags = FLAMMABLE
@@ -58,6 +57,9 @@
 			if(CASHMAX to INFINITY)
 				throwforce = 10
 	. = ..()
+
+/obj/item/stack/spacecash/get_item_credit_value()
+	return amount
 
 /obj/item/stack/spacecash/after_throw(datum/callback/callback)
 	throwforce = initial(throwforce)

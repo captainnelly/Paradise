@@ -26,10 +26,8 @@ SUBSYSTEM_DEF(dbcore)
 
 	offline_implications = "The server will no longer check for undeleted SQL Queries. No immediate action is needed."
 
-
 /datum/controller/subsystem/dbcore/get_stat_details()
 	return "A: [length(active_queries)]"
-
 
 // This is in Initialize() so that its actually seen in chat
 /datum/controller/subsystem/dbcore/Initialize()
@@ -106,8 +104,8 @@ SUBSYSTEM_DEF(dbcore)
  */
 /datum/controller/subsystem/dbcore/proc/CheckSchemaVersion()
 	if(CONFIG_GET(flag/sql_enabled))
-		// The unit tests have their own version of this check, which wont hold the server up infinitely, so this is disabled if we are running unit tests
-		#ifndef UNIT_TESTS
+		// The game tests have their own version of this check, which wont hold the server up infinitely, so this is disabled if we are running game tests
+		#ifndef GAME_TESTS
 		if(CONFIG_GET(flag/sql_enabled) && CONFIG_GET(number/db_version) != SQL_VERSION)
 			CONFIG_SET(flag/sql_enabled, FALSE)
 			schema_valid = FALSE
@@ -217,7 +215,6 @@ SUBSYSTEM_DEF(dbcore)
 		return FALSE
 	return json_decode(rustg_sql_connected(connection))["status"] == "online"
 
-
 /**
  * Error Message Helper
  *
@@ -239,7 +236,6 @@ SUBSYSTEM_DEF(dbcore)
  */
 /datum/controller/subsystem/dbcore/proc/ReportError(error)
 	last_error = error
-
 
 /**
  * New Query Invoker
@@ -268,23 +264,23 @@ SUBSYSTEM_DEF(dbcore)
  * the erroneous row(s) aren't inserted and there isn't really any way to know why or why errored
 */
 /datum/controller/subsystem/dbcore/proc/MassInsert(table, list/rows, duplicate_key = FALSE, ignore_errors = FALSE, warn = FALSE, async = TRUE, special_columns = null)
-	if (!table || !rows || !istype(rows))
+	if(!table || !rows || !istype(rows))
 		return
 
 	// Prepare column list
 	var/list/columns = list()
 	var/list/has_question_mark = list()
-	for (var/list/row in rows)
-		for (var/column in row)
+	for(var/list/row in rows)
+		for(var/column in row)
 			columns[column] = "?"
 			has_question_mark[column] = TRUE
-	for (var/column in special_columns)
+	for(var/column in special_columns)
 		columns[column] = special_columns[column]
 		has_question_mark[column] = findtext(special_columns[column], "?")
 
 	// Prepare SQL query full of placeholders
 	var/list/query_parts = list("INSERT")
-	if (ignore_errors)
+	if(ignore_errors)
 		query_parts += " IGNORE"
 	query_parts += " INTO "
 	query_parts += table
@@ -292,16 +288,16 @@ SUBSYSTEM_DEF(dbcore)
 
 	var/list/arguments = list()
 	var/has_row = FALSE
-	for (var/list/row in rows)
-		if (has_row)
+	for(var/list/row in rows)
+		if(has_row)
 			query_parts += ","
 		query_parts += "\n  ("
 		var/has_col = FALSE
-		for (var/column in columns)
-			if (has_col)
+		for(var/column in columns)
+			if(has_col)
 				query_parts += ", "
-			if (has_question_mark[column])
-				var/name = "p[arguments.len]"
+			if(has_question_mark[column])
+				var/name = "p[length(arguments)]"
 				query_parts += replacetext(columns[column], "?", ":[name]")
 				arguments[name] = row[column]
 			else
@@ -310,16 +306,16 @@ SUBSYSTEM_DEF(dbcore)
 		query_parts += ")"
 		has_row = TRUE
 
-	if (duplicate_key == TRUE)
+	if(duplicate_key == TRUE)
 		var/list/column_list = list()
-		for (var/column in columns)
+		for(var/column in columns)
 			column_list += "[column] = VALUES([column])"
 		query_parts += "\nON DUPLICATE KEY UPDATE [column_list.Join(", ")]"
-	else if (duplicate_key != FALSE)
+	else if(duplicate_key != FALSE)
 		query_parts += duplicate_key
 
 	var/datum/db_query/Query = NewQuery(query_parts.Join(), arguments)
-	if (warn)
+	if(warn)
 		. = Query.warn_execute(async)
 	else
 		. = Query.Execute(async)
@@ -364,7 +360,7 @@ SUBSYSTEM_DEF(dbcore)
 			query = querys[thing]
 		else
 			query = thing
-		UNTIL(!query.in_progress)
+		query.sync()
 		if(qdel)
 			qdel(query)
 
@@ -429,7 +425,6 @@ SUBSYSTEM_DEF(dbcore)
 	// go away
 	return FALSE
 
-
 /**
  * Activity Update Handler
  *
@@ -452,6 +447,10 @@ SUBSYSTEM_DEF(dbcore)
  * * log_error - Do we want to log errors this creates? Disable this if you are running sensitive queries where you dont want errors logged in plain text (EG: Auth token stuff)
  */
 /datum/db_query/proc/warn_execute(async = TRUE, log_error = TRUE)
+	// Don't try to run queries, if the database is not enabled.
+	if(!CONFIG_GET(flag/sql_enabled))
+		return
+
 	. = Execute(async, log_error)
 	if(!.)
 		SSdbcore.total_errors++
@@ -529,10 +528,9 @@ SUBSYSTEM_DEF(dbcore)
 			last_error = "offline"
 			return FALSE
 
-// Just tells the admins if a query timed out, and asks if the server hung to help error reporting
+/// Just tells the admins if a query timed out, and asks if the server hung to help error reporting
 /datum/db_query/proc/slow_query_check()
 	message_admins("HEY! A database query timed out. Did the server just hang? <a href='byond://?_src_=holder;slowquery=yes'>\[YES\]</a>|<a href='byond://?_src_=holder;slowquery=no'>\[NO\]</a>")
-
 
 /**
  * Proc to get the next row in a DB query
@@ -549,38 +547,41 @@ SUBSYSTEM_DEF(dbcore)
 	else
 		return FALSE
 
-// Simple helper to get the last error a query had
+/// Simple helper to get the last error a query had
 /datum/db_query/proc/ErrorMsg()
 	return last_error
 
-// Simple proc to null out data to aid GC
+/// Simple proc to null out data to aid GC
 /datum/db_query/proc/Close()
 	rows = null
 	item = null
 
+/// Sleeps until execution of the query has finished.
+/datum/db_query/proc/sync()
+	while(in_progress)
+		stoplag()
+
 // Verb that lets admins force reconnect the DB
-/client/proc/reestablish_db_connection()
-	set category = "Debug"
-	set name = "Reestablish DB Connection"
+ADMIN_VERB(reestablish_db_connection, R_ADMIN, "Reestablish DB Connection", "Force a reconnection to the database.", ADMIN_CATEGORY_DEBUG)
 	if(!CONFIG_GET(flag/sql_enabled))
-		to_chat(usr, span_warning("The Database is not enabled in the server configuration!"))
+		to_chat(user, span_warning("The Database is not enabled in the server configuration!"))
 		return
 
 	if(SSdbcore.IsConnected())
-		if(!check_rights(R_ADMIN, FALSE) || !check_rights(R_DEBUG, FALSE)) //we dont want coders to deal with db
-			to_chat(usr, span_warning("The database is already connected! (Only those with +DEBUG can force a reconnection)"))
+		if(!check_rights_client(R_DEBUG|R_ADMIN, FALSE, user)) //we dont want coders to deal with db
+			to_chat(user, span_warning("The database is already connected! (Only those with +DEBUG can force a reconnection)"))
 			return
 
-		var/reconnect = alert("The database is already connected! If you *KNOW* that this is incorrect, you can force a reconnection", "The database is already connected!", "Force Reconnect", "Cancel")
+		var/reconnect = alert(user, "The database is already connected! If you *KNOW* that this is incorrect, you can force a reconnection", "The database is already connected!", "Force Reconnect", "Cancel")
 		if(reconnect != "Force Reconnect")
 			return
 
 		SSdbcore.Disconnect()
-		log_admin("[key_name(usr)] has forced the database to disconnect")
-		message_admins("[key_name_admin(usr)] has <b>forced</b> the database to disconnect!!!")
+		log_admin("[key_name(user)] has forced the database to disconnect")
+		message_admins("[key_name_admin(user)] has <b>forced</b> the database to disconnect!!!")
 
-	log_admin("[key_name(usr)] is attempting to re-establish the DB Connection")
-	message_admins("[key_name_admin(usr)] is attempting to re-establish the DB Connection")
+	log_admin("[key_name(user)] is attempting to re-establish the DB Connection")
+	message_admins("[key_name_admin(user)] is attempting to re-establish the DB Connection")
 	BLACKBOX_LOG_ADMIN_VERB("Force Reconnect DB")
 
 	SSdbcore.failed_connections = 0 // Reset this
@@ -588,3 +589,4 @@ SUBSYSTEM_DEF(dbcore)
 		message_admins("Database connection failed: [SSdbcore.ErrorMsg()]")
 	else
 		message_admins("Database connection re-established")
+

@@ -12,7 +12,6 @@
 	GLOB.dna_activity_bounds[assigned] = activity_bounds
 	return assigned
 
-
 /proc/setupgenetics()
 
 	if(prob(50))
@@ -125,7 +124,6 @@
 	for(var/datum/dna/gene/gene as anything in GLOB.dna_genes)
 		GLOB.assigned_gene_blocks[gene.block] = gene
 
-
 /proc/setupcult()
 	var/static/datum/cult_info/picked_cult // Only needs to get picked once
 
@@ -136,6 +134,6 @@
 	picked_cult = new random_cult()
 
 	if(!picked_cult)
-		log_runtime(EXCEPTION("Cult datum creation failed"))
+		stack_trace("Cult datum creation failed")
 	//todo:add adminonly datum var, check for said var here...
 	return picked_cult

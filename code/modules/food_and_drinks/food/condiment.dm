@@ -15,7 +15,6 @@
 	container_type = OPENCONTAINER
 	possible_transfer_amounts = list(1, 5)
 	visible_transfer_rate = TRUE
-	volume = 50
 	//Possible_states has the reagent id as key and a list of, in order, the icon_state, the name and the desc as values. Used in the on_reagent_change() to change names, descs and sprites.
 	var/list/possible_states = list(
 		"ketchup" = list("ketchup", "ketchup bottle", "You feel more American already."),
@@ -33,15 +32,6 @@
 
 /obj/item/reagent_containers/food/condiment/attack_self(mob/user)
 	return
-
-/obj/item/reagent_containers/food/condiment/set_APTFT()
-	set hidden = FALSE
-	..()
-
-/obj/item/reagent_containers/food/condiment/empty()
-	set hidden = FALSE
-	..()
-
 
 /obj/item/reagent_containers/food/condiment/attack(mob/living/carbon/target, mob/living/user, params, def_zone, skip_attack_anim = FALSE)
 	if(!iscarbon(target))
@@ -81,38 +71,37 @@
 	playsound(target.loc,'sound/items/drink.ogg', rand(10,50), TRUE)
 	return .|ATTACK_CHAIN_SUCCESS
 
-
 /obj/item/reagent_containers/food/condiment/afterattack(obj/target, mob/user, proximity, params)
 	if(!proximity)
 		return
 	if(istype(target, /obj/structure/reagent_dispensers)) //A dispenser. Transfer FROM it TO us.
 
 		if(!target.reagents.total_volume)
-			to_chat(user, "<span class='warning'>[target] is empty!</span>")
+			to_chat(user, span_warning("[target] is empty!"))
 			return
 
 		if(reagents.total_volume >= reagents.maximum_volume)
-			to_chat(user, "<span class='warning'>[src] is full!</span>")
+			to_chat(user, span_warning("[src] is full!"))
 			return
 
 		var/trans = target.reagents.trans_to(src, amount_per_transfer_from_this)
-		to_chat(user, "<span class='notice'>You fill [src] with [trans] units of the contents of [target].</span>")
+		to_chat(user, span_notice("You fill [src] with [trans] units of the contents of [target]."))
 
 	//Something like a glass or a food item. Player probably wants to transfer TO it.
 	else if(target.is_drainable() || istype(target, /obj/item/reagent_containers/food/snacks))
 		if(!reagents.total_volume)
-			to_chat(user, "<span class='warning'>[src] is empty!</span>")
+			to_chat(user, span_warning("[src] is empty!"))
 			return
 		if(target.reagents.total_volume >= target.reagents.maximum_volume)
-			to_chat(user, "<span class='warning'>you can't add anymore to [target]!</span>")
+			to_chat(user, span_warning("you can't add anymore to [target]!"))
 			return
 		var/trans = reagents.trans_to(target, amount_per_transfer_from_this)
-		to_chat(user, "<span class='notice'>You transfer [trans] units of the condiment to [target].</span>")
+		to_chat(user, span_notice("You transfer [trans] units of the condiment to [target]."))
 
 /obj/item/reagent_containers/food/condiment/on_reagent_change()
-	if(!possible_states.len)
+	if(!length(possible_states))
 		return
-	if(reagents.reagent_list.len > 0)
+	if(length(reagents.reagent_list) > 0)
 		var/main_reagent = reagents.get_master_reagent_id()
 		if(main_reagent in possible_states)
 			var/list/temp_list = possible_states[main_reagent]
@@ -155,7 +144,7 @@
 	possible_states = list()
 
 /obj/item/reagent_containers/food/condiment/saltshaker/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] begins to swap forms with the salt shaker! It looks like [user.p_theyre()] trying to commit suicide.</span>")
+	user.visible_message(span_suicide("[user] begins to swap forms with the salt shaker! It looks like [user.p_theyre()] trying to commit suicide."))
 	var/newname = "[name]"
 	name = "[user.name]"
 	user.name = newname
@@ -226,7 +215,7 @@
 		DATIVE = "элитарному соусу шефа",
 		ACCUSATIVE = "элитарный соус шефа",
 		INSTRUMENTAL = "элитарным соусом шефа",
-		PREPOSITIONAL = "элитарном соусе шефа"
+		PREPOSITIONAL = "элитарном соусе шефа",
 	)
 
 //Tomato sauce
@@ -303,33 +292,33 @@
 		"blackpepper" = list("condi_pepper", "Pepper Mill", "Often used to flavor food or make people sneeze"),
 		"cornoil" = list("condi_cornoil", "Corn Oil", "A delicious oil used in cooking. Made from corn"),
 		"oliveoil" = list("condi_oliveoil", "Olive Oil", "A delicious oil used in cooking. Made from olives"),
-		"sugar" = list("condi_sugar", "Sugar", "Tasty spacey sugar!")
+		"sugar" = list("condi_sugar", "Sugar", "Tasty spacey sugar!"),
+		"aspartame" = list("condi_aspartame", "Aspartame", "The sweetness of a thousand sugars but none of the calories."),
+		"cream" = list("condi_creamer", "Creamer", "Better not think about what they're making this from."),
+		"chocolate_sprinkle" = list("condi_chocolate", "Chocolate sprinkle", "The amount of sugar that's already there wasn't enough for you?"),
 	)
-
 
 /obj/item/reagent_containers/food/condiment/pack/attack(mob/living/target, mob/living/user, params, def_zone, skip_attack_anim = FALSE)
 	return ATTACK_CHAIN_PROCEED	// Can't feed these to people directly.
-
 
 /obj/item/reagent_containers/food/condiment/pack/afterattack(obj/target, mob/user, proximity, params)
 	if(!proximity)
 		return
 
 	//You can tear the bag open above food to put the condiments on it, obviously.
-	if(istype(target, /obj/item/reagent_containers/food/snacks))
+	if(istype(target, /obj/item/reagent_containers/food))
 		if(!reagents.total_volume)
-			to_chat(user, "<span class='warning'>You tear open [src], but there's nothing in it.</span>")
+			to_chat(user, span_warning("You tear open [src], but there's nothing in it."))
 			qdel(src)
 			return
 		if(target.reagents.total_volume >= target.reagents.maximum_volume)
-			to_chat(user, "<span class='warning'>You tear open [src], but [target] is stacked so high that it just drips off!</span>") //Not sure if food can ever be full, but better safe than sorry.
+			to_chat(user, span_warning("You tear open [src], but [target] is stacked so high that it just drips off!")) //Not sure if food can ever be full, but better safe than sorry.
 			qdel(src)
 			return
 		else
-			to_chat(user, "<span class='notice'>You tear open [src] above [target] and the condiments drip onto it.</span>")
+			to_chat(user, span_notice("You tear open [src] above [target] and the condiments drip onto it."))
 			reagents.trans_to(target, amount_per_transfer_from_this)
 			qdel(src)
-
 
 /obj/item/reagent_containers/food/condiment/pack/update_desc(updates = ALL)
 	. = ..()
@@ -343,7 +332,6 @@
 	else
 		desc = "A small condiment pack. It is empty."
 
-
 /obj/item/reagent_containers/food/condiment/pack/update_icon_state()
 	. = ..()
 	if(length(reagents.reagent_list))
@@ -356,23 +344,40 @@
 	else
 		icon_state = "condi_empty"
 
-
 /obj/item/reagent_containers/food/condiment/pack/on_reagent_change()
 	update_appearance(UPDATE_DESC|UPDATE_ICON_STATE)
 
-
-//Ketchup
 /obj/item/reagent_containers/food/condiment/pack/ketchup
 	name = "ketchup pack"
 	originalname = "ketchup"
 	list_reagents = list("ketchup" = 10)
 
-//Hot sauce
+/obj/item/reagent_containers/food/condiment/pack/ketchup/get_ru_names()
+	return list(
+		NOMINATIVE = "пакетик кетчупа",
+		GENITIVE = "пакетика кетчупа",
+		DATIVE = "пакетику кетчупа",
+		ACCUSATIVE = "пакетик кетчупа",
+		INSTRUMENTAL = "пакетиком кетчупа",
+		PREPOSITIONAL = "пакетике кетчупа"
+	)
+
 /obj/item/reagent_containers/food/condiment/pack/hotsauce
 	name = "hotsauce pack"
 	originalname = "hotsauce"
 	list_reagents = list("capsaicin" = 10)
 
+/obj/item/reagent_containers/food/condiment/pack/hotsauce/get_ru_names()
+	return list(
+		NOMINATIVE = "пакетик острого соуса",
+		GENITIVE = "пакетика острого соуса",
+		DATIVE = "пакетику острого соуса",
+		ACCUSATIVE = "пакетик острого соуса",
+		INSTRUMENTAL = "пакетиком острого соуса",
+		PREPOSITIONAL = "пакетике острого соуса"
+	)
+
+// Animal feed
 /obj/item/reagent_containers/food/condiment/animalfeed
 	name = "pet food package"
 	desc = "Корм для домашних животных. Вы же точно не хотите это пробовать?.."
@@ -383,3 +388,79 @@
 
 /obj/item/reagent_containers/food/condiment/animalfeed/on_reagent_change()
 	return
+
+// MARK: Creamer pack
+/obj/item/reagent_containers/food/condiment/pack/creamer
+	name = "creamer pack"
+	originalname = "creamer"
+	list_reagents = list("cream" = 10)
+
+/obj/item/reagent_containers/food/condiment/pack/creamer/get_ru_names()
+	return list(
+		NOMINATIVE = "пакетик сливок",
+		GENITIVE = "пакетика сливок",
+		DATIVE = "пакетику сливок",
+		ACCUSATIVE = "пакетик сливок",
+		INSTRUMENTAL = "пакетиком сливок",
+		PREPOSITIONAL = "пакетике сливок"
+	)
+
+/obj/item/reagent_containers/food/condiment/pack/creamer/ComponentInitialize()
+	. = ..()
+	AddElement(/datum/element/coffeemaker_item_loader, "creamer")
+
+// MARK: Sugar pack
+/obj/item/reagent_containers/food/condiment/pack/sugar
+	name = "sugar pack"
+	originalname = "sugar"
+	list_reagents = list("sugar" = 10)
+
+/obj/item/reagent_containers/food/condiment/pack/sugar/get_ru_names()
+	return list(
+		NOMINATIVE = "пакетик сахара",
+		GENITIVE = "пакетика сахара",
+		DATIVE = "пакетику сахара",
+		ACCUSATIVE = "пакетик сахара",
+		INSTRUMENTAL = "пакетиком сахара",
+		PREPOSITIONAL = "пакетике сахара"
+	)
+
+/obj/item/reagent_containers/food/condiment/pack/sugar/ComponentInitialize()
+	. = ..()
+	AddElement(/datum/element/coffeemaker_item_loader, "sugar")
+
+// MARK: Aspartame pack
+/obj/item/reagent_containers/food/condiment/pack/aspartame
+	name = "aspartame pack"
+	originalname = "aspartame"
+	list_reagents = list("aspartame" = 10)
+
+/obj/item/reagent_containers/food/condiment/pack/aspartame/get_ru_names()
+	return list(
+		NOMINATIVE = "пакетик аспартама",
+		GENITIVE = "пакетика аспартама",
+		DATIVE = "пакетику аспартама",
+		ACCUSATIVE = "пакетик аспартама",
+		INSTRUMENTAL = "пакетиком аспартама",
+		PREPOSITIONAL = "пакетике аспартама"
+	)
+
+/obj/item/reagent_containers/food/condiment/pack/aspartame/ComponentInitialize()
+	. = ..()
+	AddElement(/datum/element/coffeemaker_item_loader, "aspartame")
+
+// MARK: Chocolate sprinkle
+/obj/item/reagent_containers/food/condiment/pack/chocolate
+	name = "chocolate sprinkle pack"
+	originalname = "chocolate sprikle"
+	list_reagents = list("chocolate_sprinkle" = 10)
+
+/obj/item/reagent_containers/food/condiment/pack/chocolate/get_ru_names()
+	return list(
+		NOMINATIVE = "пакетик шоколадной посыпки",
+		GENITIVE = "пакетика шоколадной посыпки",
+		DATIVE = "пакетику шоколадной посыпки",
+		ACCUSATIVE = "пакетик шоколадной посыпки",
+		INSTRUMENTAL = "пакетиком шоколадной посыпки",
+		PREPOSITIONAL = "пакетике шоколадной посыпки"
+	)

@@ -6,7 +6,7 @@
 	The system is made up of two objects. A main core and relays.
 
 	The main core is basically the same as all of the machines from the previous implementation, apart from the relay
-	The core handles recieving and sending messages, logging messages, the NTTC configuration, and serves as the linkage hub for relays
+	The core handles receiving and sending messages, logging messages, the NTTC configuration, and serves as the linkage hub for relays
 
 	Relays function much in the same way as the old ones. They just expand the reach of tcomms from one z-level to another.
 
@@ -18,6 +18,13 @@
 
 /// Global list for all telecomms machines in the world
 GLOBAL_LIST_EMPTY(tcomms_machines)
+
+/proc/find_functional_tcomms_core()
+	for(var/obj/machinery/tcomms/core/core in GLOB.tcomms_machines)
+		if(!core.active)
+			continue
+		return TRUE
+	return FALSE
 
 /**
  * # Telecommunications Device
@@ -34,7 +41,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 	icon_state = "error"
 	density = TRUE
 	anchored = TRUE
-	use_power = IDLE_POWER_USE
 	idle_power_usage = 500
 	/// Network ID used for names + auto linkage
 	var/network_id = "Нет"
@@ -50,7 +56,7 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 		DATIVE = "устройству телекоммуникаций",
 		ACCUSATIVE = "устройство телекоммуникаций",
 		INSTRUMENTAL = "устройством телекоммуникаций",
-		PREPOSITIONAL = "устройстве телекоммуникаций"
+		PREPOSITIONAL = "устройстве телекоммуникаций",
 	)
 
 /**
@@ -99,7 +105,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 	else
 		icon_state = initial(icon_state)
 
-
 // Attack overrides. These are needed so the UIs can be opened up //
 /obj/machinery/tcomms/attack_ai(mob/user)
 	add_hiddenprint(user)
@@ -112,7 +117,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 	if(..(user))
 		return
 	ui_interact(user)
-
 
 // If we do not override the default process(), the machine defaults to not processing, meaning it uses no power.
 /obj/machinery/tcomms/process()
@@ -148,7 +152,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 		// This needs a timer because otherwise its on the shuttle Z and the message is missed
 		addtimer(CALLBACK(src, TYPE_PROC_REF(/atom, visible_message), span_warning("Оборудование радиосвязи на [declent_ru(NOMINATIVE)] было перегружено мощным блюспейс-воздействием. Пожалуйста, перезагрузите устройство.")), 5)
 	update_icon(UPDATE_ICON_STATE)
-
 
 /**
  * Logging helper
@@ -204,8 +207,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 	var/datum/radio_frequency/connection
 	/// Who sent it
 	var/atom/movable/sender
-	/// The radio it was sent from
-	var/obj/item/radio/radio
 	/// The signal data (See defines/radio.dm)
 	var/data
 	/// Verbage used
@@ -230,10 +231,9 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
  */
 /datum/tcomms_message/Destroy()
 	connection = null
-	radio = null
+	sender = null
 	follow_target = null
 	return ..()
-
 
 #define CREW_RADIO_TYPE 0
 #define CENTCOMM_RADIO_TYPE 1
@@ -269,7 +269,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 #undef CENTCOMM_RADIO_TYPE
 #undef SYNDICATE_RADIO_TYPE
 
-
 /**
  * Message Broadcast Proc
  *
@@ -279,7 +278,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
  * * tcm - The tcomms message datum
  */
 /proc/broadcast_message(datum/tcomms_message/tcm)
-
 
 	/* ###### Prepare the radio connection ###### */
 
@@ -331,7 +329,7 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 					radios |= R
 
 	// Get a list of mobs who can hear from the radios we collected.
-	var/list/receive = get_mobs_in_radio_ranges(radios)
+	var/list/receive = get_hearers_in_radio_ranges(radios) | GLOB.permanent_radio_listeners
 
 	/* ###### Organize the receivers into categories for displaying the message ###### */
 
@@ -344,10 +342,9 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 	var/list/heard_garbled	= list() // garbled message (ie "f*c* **u, **i*er!")
 	var/list/heard_gibberish= list() // completely screwed over message (ie "F%! (O*# *#!<>&**%!")
 
-	for(var/M in receive)
-		var/mob/R = M
+	for(var/mob/R in receive)
 
-	  /* --- Loop through the receivers and categorize them --- */
+		/* --- Loop through the receivers and categorize them --- */
 
 		if(is_admin(R) && !R.get_preference(PREFTOGGLE_CHAT_RADIO)) //Adminning with 80 people on can be fun when you're trying to talk and all you can hear is radios.
 			continue
@@ -372,7 +369,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 			// - Just display a garbled message -
 			heard_garbled += R
 
-
 	/* ###### Begin formatting and sending the message ###### */
 	if(length(heard_masked) || length(heard_normal) || length(heard_voice) || length(heard_garbled) || length(heard_gibberish))
 
@@ -389,7 +385,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 		SSblackbox.LogBroadcast(display_freq)
 
 	/* ###### Send the message ###### */
-
 
 		/* --- Process all the mobs that heard a masked voice (understood) --- */
 
@@ -420,7 +415,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 				var/mob/R = M
 				R.hear_radio(tcm.message_pieces, tcm.verbage, part_a, part_b, tcm.sender, TRUE, tcm.vname, follow_target=tcm.follow_target, check_name_against = tcm.pre_modify_name)
 
-
 		/* --- Complete gibberish. Usually happens when there's a compressed message --- */
 
 		if(length(heard_gibberish))
@@ -429,7 +423,6 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 				R.hear_radio(tcm.message_pieces, tcm.verbage, part_a, part_b, tcm.sender, TRUE, follow_target=tcm.follow_target, check_name_against = tcm.pre_modify_name)
 
 	return TRUE
-
 
 /**
  * # Telecommunications Password Paper
@@ -451,7 +444,7 @@ GLOBAL_LIST_EMPTY(tcomms_machines)
 		DATIVE = "\"Пароль привязки телекоммуникаций\"",
 		ACCUSATIVE = "\"Пароль привязки телекоммуникаций\"",
 		INSTRUMENTAL = "\"Пароль привязки телекоммуникаций\"",
-		PREPOSITIONAL = "\"Пароль привязки телекоммуникаций\""
+		PREPOSITIONAL = "\"Пароль привязки телекоммуникаций\"",
 	)
 
 /**

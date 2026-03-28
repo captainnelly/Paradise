@@ -1,21 +1,3 @@
-/obj/mecha
-	//Action datums
-	var/datum/action/innate/mecha/mech_eject/eject_action = new
-	var/datum/action/innate/mecha/mech_toggle_internals/internals_action = new
-	var/datum/action/innate/mecha/mech_toggle_lights/lights_action = new
-	var/datum/action/innate/mecha/mech_view_stats/stats_action = new
-	var/datum/action/innate/mecha/mech_defence_mode/defense_action = new
-	var/datum/action/innate/mecha/mech_overload_mode/overload_action = new
-	var/datum/action/innate/mecha/mech_toggle_thrusters/thrusters_action = new
-	var/datum/effect_system/fluid_spread/smoke/smoke_system = new //not an action, but trigged by one
-	var/datum/action/innate/mecha/mech_smoke/smoke_action = new
-	var/datum/action/innate/mecha/mech_zoom/zoom_action = new
-	var/datum/action/innate/mecha/mech_toggle_phasing/phasing_action = new
-	var/datum/action/innate/mecha/mech_switch_damtype/switch_damtype_action = new
-	var/datum/action/innate/mecha/mech_energywall/energywall_action = new
-	var/datum/action/innate/mecha/mech_strafe/strafe_action = new
-	var/list/module_actions = list()
-
 /obj/mecha/proc/GrantActions(mob/living/user, human_occupant = 0)
 	if(human_occupant)
 		eject_action.Grant(user, src)
@@ -40,7 +22,7 @@
 
 /datum/action/innate/mecha
 	check_flags = AB_CHECK_HANDS_BLOCKED|AB_CHECK_CONSCIOUS|AB_CHECK_INCAPACITATED
-	icon_icon = 'icons/mob/actions/actions_mecha.dmi'
+	button_icon = 'icons/mob/actions/actions_mecha.dmi'
 	var/obj/mecha/chassis
 
 /datum/action/innate/mecha/Grant(mob/living/L, obj/mecha/M)
@@ -171,7 +153,8 @@
 		button_icon_state = "mech_thrusters_[chassis.thrusters_active ? "on" : "off"]"
 		chassis.occupant_message("<font color='[chassis.thrusters_active ? "blue" : "red"]'>Двигатели [chassis.thrusters_active ? "активны" : "отключены"].</font>")
 	if(chassis.thrusters_active)
-		chassis.icon_state = "[chassis.icon_state]-thruster"
+		if(!chassis.ratvarized || chassis.mech_type == MECH_TYPE_CLARKE)
+			chassis.icon_state = "[chassis.icon_state]-thruster"
 	else
 		chassis.icon_state = splittext(chassis.icon_state, "-")[1]
 
@@ -220,7 +203,6 @@
 	button_icon_state = "mech_phasing_[chassis.phasing ? "on" : "off"]"
 	chassis.occupant_message("<font color=\"[chassis.phasing ? "#00f\">Фазовый переход вкл" : "#f00\">Фазовый переход выкл"]</font>")
 	UpdateButtonIcon()
-
 
 /datum/action/innate/mecha/mech_switch_damtype
 	name = "Смена инструментов"
@@ -311,7 +293,7 @@
 		return FALSE
 	equipment = _equipment
 	name = "Переключить модуль на [equipment.declent_ru(ACCUSATIVE)]"
-	icon_icon = equipment.icon
+	button_icon = equipment.icon
 	button_icon_state = equipment.icon_state
 	. = ..()
 
@@ -327,7 +309,7 @@
 		return FALSE
 	equipment = _equipment
 	name = "Переключить модуль [equipment.declent_ru(ACCUSATIVE)]"
-	icon_icon = equipment.icon
+	button_icon = equipment.icon
 	button_icon_state = equipment.icon_state
 	. = ..()
 

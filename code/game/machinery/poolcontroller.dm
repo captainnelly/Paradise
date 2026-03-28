@@ -1,8 +1,8 @@
-#define FRIGID		80
-#define COOL		290
-#define NORMAL		310
-#define WARM		330
-#define SCALDING	500
+#define FRIGID 80
+#define COOL 290
+#define NORMAL 310
+#define WARM 330
+#define SCALDING 500
 
 /obj/machinery/poolcontroller
 	name = "Pool Controller"
@@ -87,7 +87,7 @@
 /obj/machinery/poolcontroller/proc/processMob()
 	for(var/M in mobinpool) //They're already typecasted when entering the turf
 		// Following two are sanity check. If the mob is no longer in the pool for whatever reason (Looking at you teleport), remove them
-		if(!istype(get_turf(M), /turf/simulated/floor/beach/water) && !istype(get_turf(M), /turf/simulated/floor/indestructible/beach/water)) // Water component when?
+		if(!isbeachwater(get_turf(M)) && !isbeachwater_i(get_turf(M))) // Water component when?
 			mobinpool -= M
 			continue
 		handleTemp(M)	//handles pool temp effects on the swimmers
@@ -148,10 +148,8 @@
 			if(prob(35)) //35% chance to tell them what is going on. They should probably figure it out before then.
 				drownee.visible_message(span_danger("\The [drownee] flails, almost like [drownee.p_they()] [drownee.p_are()] drowning!"),span_userdanger("You're lacking air!")) //*gasp* *gasp* *gasp* *gasp* *gasp*
 
-
-
 /obj/machinery/poolcontroller/proc/miston() //Spawn /obj/effect/mist (from the shower) on all linked pool tiles
-	if(linkedmist.len)
+	if(length(linkedmist))
 		return
 
 	for(var/turf/simulated/floor/beach/water/W in linkedturfs)
@@ -162,7 +160,6 @@
 	for(var/obj/effect/mist/M in linkedmist)
 		qdel(M)
 	linkedmist.Cut()
-
 
 /obj/machinery/poolcontroller/ui_interact(mob/user, datum/tgui/ui = null)
 	ui = SStgui.try_update_ui(user, src, ui)
@@ -184,7 +181,7 @@
 			return "scalding"
 
 /obj/machinery/poolcontroller/proc/set_temp(val)
-	if (val != WARM && val != NORMAL && val != COOL && !(emagged && (val == SCALDING || val == FRIGID)))
+	if(val != WARM && val != NORMAL && val != COOL && !(emagged && (val == SCALDING || val == FRIGID)))
 		return
 
 	if(val == SCALDING)
@@ -193,7 +190,6 @@
 		mistoff()
 
 	temperature = val
-
 
 /obj/machinery/poolcontroller/proc/str_to_temp(str)
 	switch(str)
@@ -213,14 +209,12 @@
 	if(temp)
 		set_temp(temp)
 
-
 /obj/machinery/poolcontroller/ui_data(mob/user)
 	var/list/data = list()
 	data["currentTemp"] = temp_to_str(temperature)
 	data["emagged"] = emagged
 
 	return data
-
 
 /obj/machinery/poolcontroller/ui_act(action, list/params)
 	if(..())

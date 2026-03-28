@@ -3,7 +3,7 @@
 
 SUBSYSTEM_DEF(title)
 	name = "Title Screen"
-	wait = 300
+	wait = 30 SECONDS
 	init_order = INIT_ORDER_TITLE
 	init_stage = INITSTAGE_EARLY
 	runlevels = RUNLEVELS_DEFAULT|RUNLEVEL_LOBBY
@@ -114,7 +114,7 @@ SUBSYSTEM_DEF(title)
  * Show the title screen to specific client.
  */
 /datum/controller/subsystem/title/proc/show_title_screen_to(client/viewer)
-	if(!viewer || !current_title_screen)
+	if(!viewer || !current_title_screen || SEND_SIGNAL(viewer, COMSIG_TILE_MENU_OPEN) & COMPONENT_BLOCK_OPEN)
 		return
 
 	INVOKE_ASYNC(current_title_screen, TYPE_PROC_REF(/datum/title_screen, show_to), viewer)
@@ -165,10 +165,8 @@ SUBSYSTEM_DEF(title)
 /datum/controller/subsystem/title/proc/update_preview(client/viewer)
 	if(!viewer)
 		return
-	if(viewer.byond_version < 516)
-		viewer << output("", "title_browser:update_preview_515")
-	else
-		viewer << output("", "title_browser:update_preview")
+
+	viewer << output("", "title_browser:update_preview")
 
 /datum/controller/subsystem/title/proc/update_servers_list(client/viewer)
 	if(!viewer)
@@ -199,7 +197,6 @@ SUBSYSTEM_DEF(title)
 /datum/controller/subsystem/title/proc/pick_title_image()
 	return pick(title_images_pool)
 
-
 /************************
  *  Title screen datum  *
  ************************/
@@ -219,7 +216,7 @@ SUBSYSTEM_DEF(title)
 /datum/title_screen/New(title_html, notice, screen_image_file)
 	src.title_html = title_html
 	src.notice = notice
-	var/list/phrases = file2list("strings/lobby_phrases.txt")
+	var/list/phrases = world.file2list("strings/lobby_phrases.txt")
 	if(LAZYLEN(phrases))
 		random_phrase = pick(phrases)
 	set_screen_image(screen_image_file)
@@ -287,14 +284,25 @@ SUBSYSTEM_DEF(title)
 	if(!viewer)
 		return
 
-	var/list/html = list(title_html)
+	var/html_text = title_html
+
+	if(viewer?.window_scaling && viewer?.window_scaling != 1 && !(viewer?.prefs.toggles3 & PREFTOGGLE_3_UI_SCALE))
+		var/zoom =  {"
+			<style>
+				body {
+					zoom: [100 / viewer.window_scaling]%;
+				}
+			</style>
+		"}
+		html_text = replacetextEx(html_text, "<!-- zoom -->", zoom)
+
+	var/list/html = list(html_text)
 	var/mob/new_player/player = user
 	var/screen_image_url = SSassets.transport.get_asset_url(asset_cache_item = screen_image)
 	var/icon_url = SSassets.transport.get_asset_url(asset_name = current_icon)
 
 	//hope that client won`t use custom theme
 	html += {"<body class="[current_theme][viewer?.prefs?.toggles2 & PREFTOGGLE_2_PIXELATED_MENU ? " pixelated" : ""]" style="background-image: [screen_image_url ? "url([screen_image_url])" : "" ];">"}
-
 	html += {"<input type="checkbox" id="hide_menu">"}
 	html += {"<input type="checkbox" checked="checked" id="hide_lobby">"}
 
@@ -433,16 +441,11 @@ SUBSYSTEM_DEF(title)
 				charPreview.src = "previewicon.png";
 			}
 
-			function update_preview_515() {
-				charPreview.src = "";
-				setTimeout(update_preview, 100); // TODO: change after 516
-			}
-
 			function update_servers_list() {
 				const args = Array.from(arguments);
 				const servers = \[];
 
-				for (const queryString of args) {
+				for(const queryString of args) {
 					const server = Object.fromEntries(
 							queryString.split('&').map(item => item.split('='))
 						);
@@ -511,23 +514,23 @@ SUBSYSTEM_DEF(title)
 			let pixel_check;
 			function set_theme(which) {
 				pixel_check = document.body.className.indexOf("pixelated") != -1
-				if (which == 'light') {
+				if(which == 'light') {
 					document.body.className = '';
 					document.documentElement.className = 'light';
-				} else if (which == 'dark') {
+				} else if(which == 'dark') {
 					document.body.className = 'dark';
 					document.documentElement.className = 'dark';
-				} else if (which == 'ntos') {
+				} else if(which == 'ntos') {
 					document.body.className = 'ntos';
 					document.documentElement.className = 'ntos';
-				} else if (which == 'paradise') {
+				} else if(which == 'paradise') {
 					document.body.className = 'paradise';
 					document.documentElement.className = 'paradise';
-				} else if (which == 'syndicate') {
+				} else if(which == 'syndicate') {
 					document.body.className = 'syndicate';
 					document.documentElement.className = 'syndicate';
 				}
-				if (pixel_check) set_pixelated();
+				if(pixel_check) set_pixelated();
 			}
 
 			/* Return focus to Byond after click */

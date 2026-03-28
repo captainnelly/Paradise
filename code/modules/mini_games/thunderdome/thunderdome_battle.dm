@@ -15,10 +15,7 @@ GLOBAL_VAR_INIT(tdome_arena_melee, locate(/area/tdome/newtdome/CQC))
 	name = "Thunderdome Melee Challenge"
 	spawn_minimum_limit = MIN_PLAYERS_COUNT
 	spawn_coefficent = SPAWN_COEFFICENT
-	is_going = FALSE
 	maxplayers = MAX_PLAYERS_COUNT
-	time_limit = DEFAULT_TIME_LIMIT
-	role = ROLE_THUNDERDOME
 	var/arena_cooldown = ARENA_COOLDOWN
 	var/cqc_arena_radius = CQC_ARENA_RADIUS
 	var/ranged_arena_radius = RANGED_ARENA_RADIUS
@@ -55,7 +52,7 @@ GLOBAL_VAR_INIT(tdome_arena_melee, locate(/area/tdome/newtdome/CQC))
 	is_going = TRUE
 	add_game_logs("Thunderdome poll voting in [gamemode.name] mode started.")
 	var/image/I = new('icons/mob/thunderdome_previews.dmi', gamemode.preview_icon)
-	var/list/candidates = shuffle(SSghost_spawns.poll_candidates("Желаете записаться на Тандердом? (Режим - [gamemode.name])", \
+	var/list/candidates = shuffle(SSghost_spawns.poll_candidates("Желаете записаться на Тандердом? (Режим — [gamemode.name])", \
 		role, poll_time = voting_poll_time, ignore_respawnability = TRUE, check_antaghud = FALSE, source = I))
 	var/players_count = clamp(CEILING(length(candidates)*spawn_coefficent, 1), 0, maxplayers)
 	if(players_count < spawn_minimum_limit)
@@ -98,7 +95,6 @@ GLOBAL_VAR_INIT(tdome_arena_melee, locate(/area/tdome/newtdome/CQC))
 				M.set_density(FALSE)
 				M.set_opacity(FALSE)
 				M.update_icon()
-
 
 	while(currpoint <= points)
 		if(phi > (2 * PI))
@@ -212,7 +208,6 @@ GLOBAL_VAR_INIT(tdome_arena_melee, locate(/area/tdome/newtdome/CQC))
 
 /obj/minigame_anchor/thunderdome_poller/melee
 	name = "Thunderdome Poller (Melee)"
-	desc = "Желаете стать лучшим бойцом? Опробуйте себя на Тандердоме в роли мастера ближнего боя!"
 	gamemode_type = /datum/thunderdome_gamemode/melee
 
 /obj/minigame_anchor/thunderdome_poller/ranged

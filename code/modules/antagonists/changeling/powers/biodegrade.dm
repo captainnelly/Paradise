@@ -8,11 +8,10 @@
 	chemical_cost = 30 //High cost to prevent spam
 	req_human = TRUE
 
-
 /datum/action/changeling/biodegrade/sting_action(mob/living/carbon/human/user)
 	var/used = FALSE // only one form of shackles removed per use
 
-	if(!HAS_TRAIT(user, TRAIT_RESTRAINED) && !istype(user.loc, /obj/structure/closet) && !istype(user.loc, /obj/structure/spider/cocoon) && !user.pulledby)
+	if(!HAS_TRAIT(user, TRAIT_RESTRAINED) && !iscloset(user.loc) && !istype(user.loc, /obj/structure/spider/cocoon) && !user.pulledby)
 		to_chat(user, span_warning("We are already free!"))
 		return FALSE
 
@@ -63,7 +62,7 @@
 		user.forceMove(get_turf(container))
 		container.prisoner = null
 
-	if(istype(user.loc, /obj/structure/closet) && !used)
+	if(iscloset(user.loc) && !used)
 		var/obj/structure/closet/closet = user.loc
 		if(!istype(closet))
 			return FALSE
@@ -99,7 +98,6 @@
 
 	return TRUE
 
-
 /datum/action/changeling/biodegrade/proc/dissolve_restraint(mob/living/carbon/human/user, obj/restraints)
 	if(QDELETED(user) || QDELETED(restraints))
 		return
@@ -108,7 +106,6 @@
 		user.visible_message(span_warning("[restraints] dissolves into a puddle of sizzling goop."))
 		user.temporarily_remove_item_from_inventory(restraints, force = TRUE)
 		qdel(restraints)
-
 
 /datum/action/changeling/biodegrade/proc/open_closet(mob/living/carbon/human/user, obj/structure/closet/closet)
 	if(QDELETED(user) || QDELETED(closet))
@@ -121,7 +118,6 @@
 		closet.open()
 		closet.visible_message(span_warning("[closet]'s door breaks and opens!"), \
 								span_warning("We open the container restraining us!"))
-
 
 /datum/action/changeling/biodegrade/proc/dissolve_cocoon(mob/living/carbon/human/user, obj/structure/spider/cocoon/cocoon)
 	if(QDELETED(user) || QDELETED(cocoon))

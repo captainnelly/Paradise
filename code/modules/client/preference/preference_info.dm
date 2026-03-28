@@ -75,6 +75,9 @@ GLOBAL_LIST_EMPTY(preferences_info)
 /datum/preference_info/runechat
 	name = "Runechat"
 
+/datum/preference_info/runechat_looc
+	name = "Runechat LOOC"
+
 /datum/preference_info/ghost_death_notifs
 	name = "Ghost Death Notifications"
 
@@ -107,6 +110,9 @@ GLOBAL_LIST_EMPTY(preferences_info)
 
 /datum/preference_info/attack_animations
 	name = "Attack Animations"
+
+/datum/preference_info/auto_aim_medicine
+	name = "Medicine auto targeting"
 
 /datum/preference_info/prayers
 	name = "Prayers"
@@ -153,9 +159,6 @@ GLOBAL_LIST_EMPTY(preferences_info)
 /datum/preference_info/ghost_radio/get_preference_toggle()
 	return GLOB.preference_toggles[/datum/preference_toggle/toggle_ghost_radio]
 
-/datum/preference_info/admin_radio/get_preference_toggle()
-	return GLOB.preference_toggles[/datum/preference_toggle/toggle_admin_radio]
-
 /datum/preference_info/ai_voice_announcements/get_preference_toggle()
 	return GLOB.preference_toggles[/datum/preference_toggle/toggle_ai_voice_annoucements]
 
@@ -201,13 +204,11 @@ GLOBAL_LIST_EMPTY(preferences_info)
 /datum/preference_info/runechat/get_preference_toggle()
 	return GLOB.preference_toggles[/datum/preference_toggle/toggle_runechat]
 
+/datum/preference_info/runechat_looc/get_preference_toggle()
+	return GLOB.preference_toggles[/datum/preference_toggle/toggle_runechat_looc]
+
 /datum/preference_info/ghost_death_notifs/get_preference_toggle()
 	return GLOB.preference_toggles[/datum/preference_toggle/toggle_ghost_death_notifs]
-
-/*
-/datum/preference_info/reverb/get_preference_toggle()
-	return GLOB.preference_toggles[/datum/preference_toggle/toggle_reverb]
-*/
 
 /datum/preference_info/simple_stat_panel/get_preference_toggle()
 	return GLOB.preference_toggles[/datum/preference_toggle/toggle_simple_stat_panel]
@@ -235,6 +236,9 @@ GLOBAL_LIST_EMPTY(preferences_info)
 
 /datum/preference_info/attack_animations/get_preference_toggle()
 	return GLOB.preference_toggles[/datum/preference_toggle/toggle_attack_animations]
+
+/datum/preference_info/auto_aim_medicine/get_preference_toggle()
+	return GLOB.preference_toggles[/datum/preference_toggle/toggle_auto_aim_medicine]
 
 /datum/preference_info/prayers/get_preference_toggle()
 	return GLOB.preference_toggles[/datum/preference_toggle/toggleprayers]

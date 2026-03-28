@@ -26,9 +26,14 @@ SUBSYSTEM_DEF(shuttle)
 	var/emergencyDockTime = SHUTTLE_DOCKTIME	//time taken for emergency shuttle to leave again once it has docked (in deciseconds)
 	var/emergencyEscapeTime = SHUTTLE_ESCAPETIME	//time taken for emergency shuttle to reach a safe distance after leaving station (in deciseconds)
 	var/emergency_sec_level_time = 0 // time sec level was last raised to red or higher
+	var/emergency_refill_time = 30 MINUTES
 	var/area/emergencyLastCallLoc
 	var/emergencyNoEscape
 	var/list/hostile_environment = list()
+	/// Do we prevent the recall of the shuttle?
+	var/emergency_no_recall = FALSE
+	/// Did admins force-prevent the recall of the shuttle?
+	var/admin_emergency_no_recall = FALSE
 
 		//supply shuttle stuff
 	var/obj/docking_port/mobile/supply/supply
@@ -49,19 +54,19 @@ SUBSYSTEM_DEF(shuttle)
 	var/list/hidden_shuttle_turfs = list() //all turfs hidden from navigation computers associated with a list containing the image hiding them and the type of the turf they are pretending to be
 	var/list/hidden_shuttle_turf_images = list() //only the images from the above list
 
-
 /datum/controller/subsystem/shuttle/Initialize()
 	ordernum = rand(1,9000)
 
-	cargo_money_account = GLOB.department_accounts["Cargo"]
+	cargo_money_account = GLOB.department_accounts[STATION_DEPARTMENT_SUPPLY]
 
 	if(!emergency)
-		log_runtime(EXCEPTION("No /obj/docking_port/mobile/emergency placed on the map!"))
-		if(!backup_shuttle)
-			message_admins("There's no emergency docking ports on the map! The game will be unresolvable. To resolve this problem load emergency shuttle template manually, and call register() on the mobile docking port.")
-			log_runtime(EXCEPTION("AND NO /obj/docking_port/mobile/emergency/backup placed on the map!"))
+		WARNING("No /obj/docking_port/mobile/emergency placed on the map!")
+	if(!backup_shuttle)
+		WARNING("AND NO /obj/docking_port/mobile/emergency/backup placed on the map!")
 	if(!supply)
-		log_runtime(EXCEPTION("No /obj/docking_port/mobile/supply placed on the map!"))
+		WARNING("No /obj/docking_port/mobile/supply placed on the map!")
+	if(!emergency && !backup_shuttle)
+		message_admins("There's no emergency docking ports on the map! The game will be unresolvable. To resolve this problem load emergency shuttle template manually, and call register() on the mobile docking port.")
 
 	initial_load()
 
@@ -78,12 +83,10 @@ SUBSYSTEM_DEF(shuttle)
 
 /datum/controller/subsystem/shuttle/Destroy()
 	UnregisterSignal(src, COMSIG_CRYOPOD_DESPAWN)
-	. = ..()
-
+	return ..()
 
 /datum/controller/subsystem/shuttle/get_stat_details()
 	return "M:[length(mobile)] S:[length(stationary)] T:[length(transit)]"
-
 
 /datum/controller/subsystem/shuttle/proc/initial_load()
 	for(var/obj/docking_port/D in world)
@@ -115,7 +118,7 @@ SUBSYSTEM_DEF(shuttle)
 				qdel(T, force=TRUE)
 
 	if(!SSmapping.clearing_reserved_turfs)
-		while(transit_requesters.len)
+		while(length(transit_requesters))
 			var/requester = popleft(transit_requesters)
 			var/success = generate_transit_dock(requester)
 			if(!success) // BACK OF THE QUEUE
@@ -132,13 +135,13 @@ SUBSYSTEM_DEF(shuttle)
 	for(var/obj/docking_port/mobile/M in mobile)
 		if(M.id == id)
 			return M
-	log_runtime(EXCEPTION("couldn't find shuttle with id: [id]"))
+	WARNING("couldn't find shuttle with id: [id]")
 
 /datum/controller/subsystem/shuttle/proc/getDock(id)
 	for(var/obj/docking_port/stationary/S in stationary)
 		if(S.id == id)
 			return S
-	log_runtime(EXCEPTION("couldn't find dock with id: [id]"))
+	WARNING("couldn't find dock with id: [id]")
 
 /datum/controller/subsystem/shuttle/proc/secondsToRefuel()
 	var/elapsed = world.time - SSticker.round_start_time
@@ -147,7 +150,7 @@ SUBSYSTEM_DEF(shuttle)
 
 /datum/controller/subsystem/shuttle/proc/requestEvac(mob/user, call_reason)
 	if(!emergency)
-		log_runtime(EXCEPTION("requestEvac(): There is no emergency shuttle, but the shuttle was called. Using the backup shuttle instead."))
+		WARNING("requestEvac(): There is no emergency shuttle, but the shuttle was called. Using the backup shuttle instead.")
 		message_admins("requestEvac(): There is no emergency shuttle, but the shuttle was called. Using the backup shuttle instead.")
 		if(!backup_shuttle)
 			message_admins("requestEvac(): There is no emergency shuttle, or backup shuttle! The game will be unresolvable. This is possibly a mapping error. To resolve this problem load emergency shuttle template manually, and call register() on the mobile docking port.")
@@ -220,7 +223,7 @@ SUBSYSTEM_DEF(shuttle)
 		return 1
 
 /datum/controller/subsystem/shuttle/proc/canRecall()
-	if(emergency.mode != SHUTTLE_CALL)
+	if(emergency.mode != SHUTTLE_CALL || admin_emergency_no_recall || emergency_no_recall)
 		return
 	if(!emergency.canRecall)
 		return
@@ -235,10 +238,10 @@ SUBSYSTEM_DEF(shuttle)
 	return 1
 
 /datum/controller/subsystem/shuttle/proc/autoEvac()
-	var/callShuttle = 1
+	var/callShuttle = TRUE
 
 	for(var/thing in GLOB.shuttle_caller_list)
-		if(istype(thing, /mob/living/silicon/ai))
+		if(isAI(thing))
 			var/mob/living/silicon/ai/AI = thing
 			if(AI.stat || !AI.client)
 				continue
@@ -251,7 +254,7 @@ SUBSYSTEM_DEF(shuttle)
 
 		var/turf/T = get_turf(thing)
 		if(T && is_station_level(T.z))
-			callShuttle = 0
+			callShuttle = FALSE
 			break
 
 	if(callShuttle)
@@ -277,7 +280,6 @@ SUBSYSTEM_DEF(shuttle)
 			return 2
 	return 0	//dock successful
 
-
 /datum/controller/subsystem/shuttle/proc/moveShuttle(shuttleId, dockId, timed, mob/user)
 	var/obj/docking_port/mobile/mobile = getShuttle(shuttleId)
 	var/obj/docking_port/stationary/dockAt = getDock(dockId)
@@ -299,10 +301,9 @@ SUBSYSTEM_DEF(shuttle)
 	SEND_SOUND(area, hyperspace_mini)
 	return 0	//dock successful
 
-
 /datum/controller/subsystem/shuttle/proc/request_transit_dock(obj/docking_port/mobile/M)
 	if(!istype(M))
-		throw EXCEPTION("[M] is not a mobile docking port")
+		CRASH("[M] is not a mobile docking port")
 
 	if(M.assigned_transit)
 		return
@@ -332,7 +333,6 @@ SUBSYSTEM_DEF(shuttle)
 		if(EAST, WEST)
 			transit_width += M.height
 			transit_height += M.width
-
 
 	var/transit_path = /turf/space/transit
 	switch(travel_dir)
@@ -403,7 +403,6 @@ SUBSYSTEM_DEF(shuttle)
 	M.assigned_transit = new_transit_dock
 	return new_transit_dock
 
-
 /datum/controller/subsystem/shuttle/proc/initial_move()
 	for(var/obj/docking_port/mobile/M in mobile)
 		if(!M.roundstart_move)
@@ -432,7 +431,7 @@ SUBSYSTEM_DEF(shuttle)
 /datum/controller/subsystem/shuttle/proc/get_dock_overlap(x0, y0, x1, y1, z)
 	. = list()
 	var/list/stationary_cache = stationary
-	for(var/i in 1 to stationary_cache.len)
+	for(var/i in 1 to length(stationary_cache))
 		var/obj/docking_port/port = stationary_cache[i]
 		if(!port || port.z != z)
 			continue
@@ -440,7 +439,7 @@ SUBSYSTEM_DEF(shuttle)
 		var/list/overlap = get_overlap(x0, y0, x1, y1, bounds[1], bounds[2], bounds[3], bounds[4])
 		var/list/xs = overlap[1]
 		var/list/ys = overlap[2]
-		if(xs.len && ys.len)
+		if(length(xs) && length(ys))
 			.[port] = overlap
 
 /datum/controller/subsystem/shuttle/proc/update_hidden_docking_ports(list/remove_turfs, list/add_turfs)
@@ -458,7 +457,7 @@ SUBSYSTEM_DEF(shuttle)
 		for(var/V in add_turfs)
 			var/turf/T = V
 			var/image/I
-			if(remove_images.len)
+			if(length(remove_images))
 				//we can just reuse any images we are about to delete instead of making new ones
 				I = remove_images[1]
 				remove_images.Cut(1, 2)
@@ -504,19 +503,38 @@ SUBSYSTEM_DEF(shuttle)
 
 #undef CRYOPOD_POINTS
 
-// Allow admins to fix shuttles ports list.
-/client/proc/reregister_docks()
-	set category = "Debug"
-	set name = "Re-register Docking Ports"
-
-	if(!check_rights(R_DEBUG|R_ADMIN))
+/datum/controller/subsystem/shuttle/proc/block_recall(lockout_timer)
+	if(isnull(lockout_timer))
+		CRASH("Emergency shuttle block was called, but missing a value for the lockout duration")
+	if(admin_emergency_no_recall)
+		GLOB.major_announcement.announce(
+			message = "Обнаружены помехи в канале связи эвакуационного шаттла. Вызов шаттла отключен до завершения перезагрузки системы. Примерное время восстановления: [DisplayTimeText(lockout_timer, round_seconds_to = 60)].",
+			new_title = "Канал связи эвакуационного шаттла.",
+			new_subtitle = "Обнаружены помехи.",
+			new_sound = 'sound/misc/announce_dig.ogg',
+		)
+		addtimer(CALLBACK(src, PROC_REF(unblock_recall)), lockout_timer)
 		return
+	emergency_no_recall = TRUE
+	addtimer(CALLBACK(src, PROC_REF(unblock_recall)), lockout_timer)
 
+/datum/controller/subsystem/shuttle/proc/unblock_recall()
+	if(admin_emergency_no_recall)
+		GLOB.major_announcement.announce(
+			message = "Канал связи эвакуационного шаттла восстановлен.",
+			new_title = "Канал связи эвакуационного шаттла.",
+			new_subtitle = "Связь восстановлена.",
+			new_sound = 'sound/misc/announce_dig.ogg',
+		)
+		return
+	emergency_no_recall = FALSE
+
+ADMIN_VERB(reregister_docks, R_DEBUG|R_ADMIN, "Re-register Docking Ports", "Allow admins to fix shuttles ports list.", ADMIN_CATEGORY_DEBUG)
 	SSshuttle.initial_load()
 
-	log_and_message_admins(span_notice("[key_name(usr)] re-registered docking ports for SSshuttle."))
+	log_admin("[key_name(user)] re-registered docking ports for SSshuttle.")
+	message_admins(span_adminnotice("[key_name_admin(user)] re-registered docking ports for SSshuttle."))
 	BLACKBOX_LOG_ADMIN_VERB("Re-register Docking Ports")
-
 
 #undef CALL_SHUTTLE_REASON_LENGTH
 #undef MAX_TRANSIT_REQUEST_RETRIES

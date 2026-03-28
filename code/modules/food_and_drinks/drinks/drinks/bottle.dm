@@ -9,6 +9,7 @@
 	volume = 100
 	throwforce = 15
 	item_state = "broken_beer" //Generic held-item sprite until unique ones are made.
+	custom_price = PAYCHECK_LOWER
 	var/const/duration = 13 //Directly relates to the 'weaken' duration. Lowered by armor (i.e. helmets)
 	var/isGlass = 1 //Whether the 'bottle' is made of glass or not so that milk cartons dont shatter when someone gets hit by it
 
@@ -41,7 +42,6 @@
 	transfer_fingerprints_to(B)
 
 	qdel(src)
-
 
 /obj/item/reagent_containers/food/drinks/bottle/attack(mob/living/target, mob/living/user, params, def_zone, skip_attack_anim = FALSE)
 	if(user.a_intent != INTENT_HARM || !isGlass)
@@ -105,13 +105,13 @@
 	//Display an attack message.
 	if(target != user)
 		target.visible_message(
-			span_danger("[user] ударил[genderize_ru(user.gender,"","а","о","и")] [target][head_attack_message] [declent_ru(INSTRUMENTAL)]!"),
-			span_userdanger("[user] ударил[genderize_ru(user.gender,"","а","о","и")] [target][head_attack_message] [declent_ru(INSTRUMENTAL)]!"),
+			span_danger("[user] ударил[GEND_A_O_I(user)] [target][head_attack_message] [declent_ru(INSTRUMENTAL)]!"),
+			span_userdanger("[user] ударил[GEND_A_O_I(user)] [target][head_attack_message] [declent_ru(INSTRUMENTAL)]!"),
 		)
 	else
 		user.visible_message(
-			span_danger("[target] ударил[genderize_ru(target.gender,"","а","о","и")] себя [declent_ru(INSTRUMENTAL)][head_attack_message]!"),
-			span_userdanger("[target] ударил[genderize_ru(target.gender,"","а","о","и")] себя [declent_ru(INSTRUMENTAL)][head_attack_message]!"),
+			span_danger("[target] ударил[GEND_A_O_I(target)] себя [declent_ru(INSTRUMENTAL)][head_attack_message]!"),
+			span_userdanger("[target] ударил[GEND_A_O_I(target)] себя [declent_ru(INSTRUMENTAL)][head_attack_message]!"),
 		)
 
 	//Attack logs
@@ -123,10 +123,9 @@
 	//Finally, smash the bottle. This kills (qdel) the bottle.
 	smash(target, user)
 
-
 /obj/item/reagent_containers/food/drinks/bottle/proc/SplashReagents(mob/M)
-	if(reagents && reagents.total_volume)
-		M.visible_message(span_danger("Содержимое [src.declent_ru(GENITIVE)] разбрызгивается по [M.declent_ru(PREPOSITIONAL)]!"))
+	if(reagents?.total_volume)
+		M.visible_message(span_danger("Содержимое [declent_ru(GENITIVE)] разбрызгивается по [M.declent_ru(PREPOSITIONAL)]!"))
 		reagents.reaction(M, REAGENT_TOUCH)
 		reagents.clear_reagents()
 
@@ -163,7 +162,7 @@
 		DATIVE = "разбитой бутылке",
 		ACCUSATIVE = "разбитую бутылку",
 		INSTRUMENTAL = "разбитой бутылкой",
-		PREPOSITIONAL = "разбитой бутылке"
+		PREPOSITIONAL = "разбитой бутылке",
 	)
 
 /obj/item/broken_bottle/decompile_act(obj/item/matter_decompiler/C, mob/user)
@@ -184,7 +183,7 @@
 		DATIVE = "джину \"Гриффитер\"",
 		ACCUSATIVE = "джина \"Гриффитер\"",
 		INSTRUMENTAL = "джином \"Гриффитер\"",
-		PREPOSITIONAL = "джине \"Гриффитер\""
+		PREPOSITIONAL = "джине \"Гриффитер\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/whiskey
@@ -200,7 +199,7 @@
 		DATIVE = "виски \"Особые Запасы Дяди Гита\"",
 		ACCUSATIVE = "виски \"Особые Запасы Дяди Гита\"",
 		INSTRUMENTAL = "виски \"Особые Запасы Дяди Гита\"",
-		PREPOSITIONAL = "виски \"Особые Запасы Дяди Гита\""
+		PREPOSITIONAL = "виски \"Особые Запасы Дяди Гита\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/vodka
@@ -216,7 +215,7 @@
 		DATIVE = "водке \"Тунгуска Тройной Перегонки\"",
 		ACCUSATIVE = "водку \"Тунгуска Тройной Перегонки\"",
 		INSTRUMENTAL = "водкой \"Тунгуска Тройной Перегонки\"",
-		PREPOSITIONAL = "водке \"Тунгуска Тройной Перегонки\""
+		PREPOSITIONAL = "водке \"Тунгуска Тройной Перегонки\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/vodka/badminka
@@ -232,7 +231,7 @@
 		DATIVE = "водке \"Бадминка\"",
 		ACCUSATIVE = "водку \"Бадминка\"",
 		INSTRUMENTAL = "водкой \"Бадминка\"",
-		PREPOSITIONAL = "водке \"Бадминка\""
+		PREPOSITIONAL = "водке \"Бадминка\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/tequila
@@ -248,7 +247,7 @@
 		DATIVE = "текиле \"Гарантированно Качественная Каккаво\"",
 		ACCUSATIVE = "текилу \"Гарантированно Качественная Каккаво\"",
 		INSTRUMENTAL = "текилой \"Гарантированно Качественная Каккаво\"",
-		PREPOSITIONAL = "текиле \"Гарантированно Качественная Каккаво\""
+		PREPOSITIONAL = "текиле \"Гарантированно Качественная Каккаво\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/bottleofnothing
@@ -264,7 +263,7 @@
 		DATIVE = "бутылке \"Ничего\"",
 		ACCUSATIVE = "бутылку \"Ничего\"",
 		INSTRUMENTAL = "бутылкой \"Ничего\"",
-		PREPOSITIONAL = "бутылке \"Ничего\""
+		PREPOSITIONAL = "бутылке \"Ничего\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/bottleofbanana
@@ -280,7 +279,7 @@
 		DATIVE = "кувшину бананового сока",
 		ACCUSATIVE = "кувшин бананового сока",
 		INSTRUMENTAL = "кувшином бананового сока",
-		PREPOSITIONAL = "кувшине бананового сока"
+		PREPOSITIONAL = "кувшине бананового сока",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/patron
@@ -296,7 +295,7 @@
 		DATIVE = "текиле \"Рока Патрон Сильвер\"",
 		ACCUSATIVE = "текилу \"Рока Патрон Сильвер\"",
 		INSTRUMENTAL = "текилой \"Рока Патрон Сильвер\"",
-		PREPOSITIONAL = "текиле \"Рока Патрон Сильвер\""
+		PREPOSITIONAL = "текиле \"Рока Патрон Сильвер\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/rum
@@ -312,7 +311,7 @@
 		DATIVE = "рому \"Кубинский Пряный Капитана Пита\"",
 		ACCUSATIVE = "ром \"Кубинский Пряный Капитана Пита\"",
 		INSTRUMENTAL = "ромом \"Кубинский Пряный Капитана Пита\"",
-		PREPOSITIONAL = "роме \"Кубинский Пряный Капитана Пита\""
+		PREPOSITIONAL = "роме \"Кубинский Пряный Капитана Пита\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/holywater
@@ -328,7 +327,7 @@
 		DATIVE = "кувшину святой воды",
 		ACCUSATIVE = "кувшин святой воды",
 		INSTRUMENTAL = "кувшином святой воды",
-		PREPOSITIONAL = "кувшине святой воды"
+		PREPOSITIONAL = "кувшине святой воды",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/holywater/hell
@@ -348,7 +347,7 @@
 		DATIVE = "вермуту \"Золотой Глаз\"",
 		ACCUSATIVE = "вермут \"Золотой Глаз\"",
 		INSTRUMENTAL = "вермутом \"Золотой Глаз\"",
-		PREPOSITIONAL = "вермуте \"Золотой Глаз\""
+		PREPOSITIONAL = "вермуте \"Золотой Глаз\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/kahlua
@@ -364,7 +363,7 @@
 		DATIVE = "ликёру \"Роберт Робаст\"",
 		ACCUSATIVE = "ликёр \"Роберт Робаст\"",
 		INSTRUMENTAL = "ликёром \"Роберт Робаст\"",
-		PREPOSITIONAL = "ликёре \"Роберт Робаст\""
+		PREPOSITIONAL = "ликёре \"Роберт Робаст\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/goldschlager
@@ -380,7 +379,7 @@
 		DATIVE = "шнапсу \"Голдшлягер Студенческий\"",
 		ACCUSATIVE = "шнапс \"Голдшлягер Студенческий\"",
 		INSTRUMENTAL = "шнапсом \"Голдшлягер Студенческий\"",
-		PREPOSITIONAL = "шнапсе \"Голдшлягер Студенческий\""
+		PREPOSITIONAL = "шнапсе \"Голдшлягер Студенческий\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/cognac
@@ -396,7 +395,7 @@
 		DATIVE = "коньяку \"Шато Дэ Батон\"",
 		ACCUSATIVE = "коньяк \"Шато Дэ Батон\"",
 		INSTRUMENTAL = "коньяком \"Шато Дэ Батон\"",
-		PREPOSITIONAL = "коньяке \"Шато Дэ Батон\""
+		PREPOSITIONAL = "коньяке \"Шато Дэ Батон\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/wine
@@ -405,7 +404,6 @@
 	icon_state = "winebottle"
 	list_reagents = list("wine" = 100)
 
-
 /obj/item/reagent_containers/food/drinks/bottle/wine/get_ru_names()
 	return list(
 		NOMINATIVE = "вино \"Особое Двухбородое\"",
@@ -413,7 +411,7 @@
 		DATIVE = "вину \"Особое Двухбородое\"",
 		ACCUSATIVE = "вино \"Особое Двухбородое\"",
 		INSTRUMENTAL = "вином \"Особое Двухбородое\"",
-		PREPOSITIONAL = "вине \"Особое Двухбородое\""
+		PREPOSITIONAL = "вине \"Особое Двухбородое\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/absinthe
@@ -429,7 +427,7 @@
 		DATIVE = "абсенту \"Жёлтый Шахтёр\"",
 		ACCUSATIVE = "абсент \"Жёлтый Шахтёр\"",
 		INSTRUMENTAL = "абсентом \"Жёлтый Шахтёр\"",
-		PREPOSITIONAL = "абсенте \"Жёлтый Шахтёр\""
+		PREPOSITIONAL = "абсенте \"Жёлтый Шахтёр\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/absinthe/premium
@@ -444,7 +442,7 @@
 		DATIVE = "абсенту \"Премиальный от Гвена\"",
 		ACCUSATIVE = "абсент \"Премиальный от Гвена\"",
 		INSTRUMENTAL = "абсентом \"Премиальный от Гвена\"",
-		PREPOSITIONAL = "абсенте \"Премиальный от Гвена\""
+		PREPOSITIONAL = "абсенте \"Премиальный от Гвена\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/hcider
@@ -461,7 +459,7 @@
 		DATIVE = "сидру \"Цзянь Крепкий\"",
 		ACCUSATIVE = "сидр \"Цзянь Крепкий\"",
 		INSTRUMENTAL = "сидром \"Цзянь Крепкий\"",
-		PREPOSITIONAL = "сидре \"Цзянь Крепкий\""
+		PREPOSITIONAL = "сидре \"Цзянь Крепкий\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/fernet
@@ -477,7 +475,7 @@
 		DATIVE = "фернету \"Фернет Бронка\"",
 		ACCUSATIVE = "фернет \"Фернет Бронка\"",
 		INSTRUMENTAL = "фернетом \"Фернет Бронка\"",
-		PREPOSITIONAL = "фернете \"Фернет Бронка\""
+		PREPOSITIONAL = "фернете \"Фернет Бронка\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/champagne
@@ -493,7 +491,7 @@
 		DATIVE = "шампанскому \"Сверкающее Солнце\"",
 		ACCUSATIVE = "шампанское \"Сверкающее Солнце\"",
 		INSTRUMENTAL = "шампанским \"Сверкающее Солнце\"",
-		PREPOSITIONAL = "шампанском \"Сверкающее Солнце\""
+		PREPOSITIONAL = "шампанском \"Сверкающее Солнце\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/aperol
@@ -509,7 +507,7 @@
 		DATIVE = "аперолю \"Джунгли Аперитив\"",
 		ACCUSATIVE = "апероль \"Джунгли Аперитив\"",
 		INSTRUMENTAL = "аперолем \"Джунгли Аперитив\"",
-		PREPOSITIONAL = "апероле \"Джунгли Аперитив\""
+		PREPOSITIONAL = "апероле \"Джунгли Аперитив\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/jagermeister
@@ -525,7 +523,7 @@
 		DATIVE = "ягермейстеру \"Космически Настоенный\"",
 		ACCUSATIVE = "ягермейстер \"Космически Настоенный\"",
 		INSTRUMENTAL = "ягермейстером \"Космически Настоенный\"",
-		PREPOSITIONAL = "ягермастере \"Космически Настоенный\""
+		PREPOSITIONAL = "ягермастере \"Космически Настоенный\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/schnaps
@@ -541,7 +539,7 @@
 		DATIVE = "шнапсу \"Мятный Зерновой\"",
 		ACCUSATIVE = "шнапс \"Мятный Зерновой\"",
 		INSTRUMENTAL = "шнапсом \"Мятный Зерновой\"",
-		PREPOSITIONAL = "шнапсе \"Мятный Зерновой\""
+		PREPOSITIONAL = "шнапсе \"Мятный Зерновой\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/sheridan
@@ -557,7 +555,7 @@
 		DATIVE = "ликёру \"Шериданс Кофейный\"",
 		ACCUSATIVE = "ликёр \"Шериданс Кофейный\"",
 		INSTRUMENTAL = "ликёром \"Шериданс Кофейный\"",
-		PREPOSITIONAL = "ликёре \"Шериданс Кофейный\""
+		PREPOSITIONAL = "ликёре \"Шериданс Кофейный\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/bitter
@@ -573,12 +571,12 @@
 		DATIVE = "битеру \"Вакуумный Вишнёвый\"",
 		ACCUSATIVE = "битер \"Вакуумный Вишнёвый\"",
 		INSTRUMENTAL = "битером \"Вакуумный Вишнёвый\"",
-		PREPOSITIONAL = "битере \"Вакуумный Вишнёвый\""
+		PREPOSITIONAL = "битере \"Вакуумный Вишнёвый\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/bluecuracao
 	name = "Grenadier Blue Curacao"
-	desc = "Взрыв - это искусство, но синий взрыв намного лучше."
+	desc = "Взрыв — это искусство, но синий взрыв намного лучше."
 	icon_state = "bluecuracao"
 	list_reagents = list("bluecuracao" = 100)
 
@@ -589,7 +587,7 @@
 		DATIVE = "кюрасао \"Гренадёрский Синий\"",
 		ACCUSATIVE = "кюрасао \"Гренадёрский Синий\"",
 		INSTRUMENTAL = "кюрасао \"Гренадёрский Синий\"",
-		PREPOSITIONAL = "кюрасао \"Гренадёрский Синий\""
+		PREPOSITIONAL = "кюрасао \"Гренадёрский Синий\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/sambuka
@@ -605,7 +603,7 @@
 		DATIVE = "самбуке \"Безголовый Всадник\"",
 		ACCUSATIVE = "самбуку \"Безголовый Всадник\"",
 		INSTRUMENTAL = "самбукой \"Безголовый Всадник\"",
-		PREPOSITIONAL = "самбуке \"Безголовый Всадник\""
+		PREPOSITIONAL = "самбуке \"Безголовый Всадник\"",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/arrogant_green_rat
@@ -621,7 +619,7 @@
 		DATIVE = "вину \"Высокомерная Зелёная Крыса\"",
 		ACCUSATIVE = "вино \"Высокомерная Зелёная Крыса\"",
 		INSTRUMENTAL = "вином \"Высокомерная Зелёная Крыса\"",
-		PREPOSITIONAL = "вине \"Высокомерная Зелёная Крыса\""
+		PREPOSITIONAL = "вине \"Высокомерная Зелёная Крыса\"",
 	)
 
 //////////////////////////JUICES AND STUFF ///////////////////////
@@ -642,7 +640,7 @@
 		DATIVE = "пачке апельсинового сока",
 		ACCUSATIVE = "пачку апельсинового сока",
 		INSTRUMENTAL = "пачкой апельсинового сока",
-		PREPOSITIONAL = "пачке апельсинового сока"
+		PREPOSITIONAL = "пачке апельсинового сока",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/cream
@@ -661,7 +659,7 @@
 		DATIVE = "пачке сливок",
 		ACCUSATIVE = "пачку сливок",
 		INSTRUMENTAL = "пачкой сливок",
-		PREPOSITIONAL = "пачке сливок"
+		PREPOSITIONAL = "пачке сливок",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/tomatojuice
@@ -680,7 +678,7 @@
 		DATIVE = "пачке томатного сока",
 		ACCUSATIVE = "пачку томатного сока",
 		INSTRUMENTAL = "пачкой томатного сока",
-		PREPOSITIONAL = "пачке томатного сока"
+		PREPOSITIONAL = "пачке томатного сока",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/limejuice
@@ -699,7 +697,7 @@
 		DATIVE = "пачке лаймового сока",
 		ACCUSATIVE = "пачку лаймового сока",
 		INSTRUMENTAL = "пачкой лаймового сока",
-		PREPOSITIONAL = "пачке лаймового сока"
+		PREPOSITIONAL = "пачке лаймового сока",
 	)
 
 /obj/item/reagent_containers/food/drinks/bottle/milk
@@ -718,7 +716,7 @@
 		DATIVE = "пачке молока",
 		ACCUSATIVE = "пачку молока",
 		INSTRUMENTAL = "пачкой молока",
-		PREPOSITIONAL = "пачке молока"
+		PREPOSITIONAL = "пачке молока",
 	)
 
 ////////////////////////// MOLOTOV ///////////////////////
@@ -746,9 +744,8 @@
 		DATIVE = "коктейлю Молотова",
 		ACCUSATIVE = "коктейль Молотова",
 		INSTRUMENTAL = "коктейлем Молотова",
-		PREPOSITIONAL = "коктейле Молотова"
+		PREPOSITIONAL = "коктейле Молотова",
 	)
-
 
 /obj/item/reagent_containers/food/drinks/bottle/molotov/update_desc(updates = ALL)
 	. = ..()
@@ -756,18 +753,15 @@
 	if(!isGlass)
 		desc += " Вы не уверены, что сделать это из коробки было самой удачной идеей."
 
-
 /obj/item/reagent_containers/food/drinks/bottle/molotov/update_icon_state()
 	var/obj/item/reagent_containers/food/drinks/bottle/bottle = locate() in contents
 	if(bottle)
 		icon_state = bottle.icon_state
 
-
 /obj/item/reagent_containers/food/drinks/bottle/molotov/update_overlays()
 	. = ..()
 	if(active)
 		. += GLOB.fire_overlay
-
 
 /obj/item/reagent_containers/food/drinks/bottle/molotov/CheckParts(list/parts_list)
 	..()
@@ -777,7 +771,6 @@
 		if(!bottle.isGlass)
 			isGlass = FALSE
 		update_appearance(UPDATE_DESC|UPDATE_ICON)
-
 
 /obj/item/reagent_containers/food/drinks/bottle/molotov/throw_impact(atom/target, datum/thrownthing/throwingdatum)
 	var/firestarter = 0
@@ -789,9 +782,10 @@
 	SplashReagents(target)
 	if(firestarter && active)
 		target.fire_act()
-		new /obj/effect/hotspot(get_turf(target))
+		var/obj/effect/hotspot/hotspot = new /obj/effect/hotspot/fake(target)
+		hotspot.temperature = 1000
+		hotspot.recolor()
 	..()
-
 
 /obj/item/reagent_containers/food/drinks/bottle/molotov/attackby(obj/item/I, mob/user, params)
 	. = ..()
@@ -801,7 +795,7 @@
 
 	add_fingerprint(user)
 	if(active)
-		to_chat(user, span_warning("[capitalize(declent_ru(NOMINATIVE))] уже горит."))
+		to_chat(user, span_warning("[DECLENT_RU_CAP(src, NOMINATIVE)] уже горит."))
 		return .
 	. |= ATTACK_CHAIN_SUCCESS
 	active = TRUE
@@ -809,13 +803,12 @@
 	message_admins("[ADMIN_LOOKUP(user)] has primed a [name] for detonation at [ADMIN_COORDJMP(bombturf)].")
 	add_game_logs("has primed a [name] for detonation at [AREACOORD(bombturf)].", user)
 	user.visible_message(
-		span_danger("[user] поджигает [src.declent_ru(ACCUSATIVE)]!"),
-		span_notice("Вы поджигаете [src.declent_ru(ACCUSATIVE)]."),
+		span_danger("[user] поджигает [declent_ru(ACCUSATIVE)]!"),
+		span_notice("Вы поджигаете [declent_ru(ACCUSATIVE)]."),
 	)
 	add_overlay(GLOB.fire_overlay)
 	if(!isGlass)
 		addtimer(CALLBACK(src, PROC_REF(splash_reagents), 5 SECONDS))
-
 
 /obj/item/reagent_containers/food/drinks/bottle/molotov/proc/splash_reagents()
 	if(!active)
@@ -831,12 +824,11 @@
 		target.fire_act()
 	qdel(src)
 
-
 /obj/item/reagent_containers/food/drinks/bottle/molotov/attack_self(mob/user)
 	if(active)
 		if(!isGlass)
 			to_chat(user, span_danger("Пламя распространилось уже слишком далеко!"))
 			return
-		to_chat(user, span_notice("Вы гасите пламя у [src.declent_ru(GENITIVE)]."))
+		to_chat(user, span_notice("Вы гасите пламя у [declent_ru(GENITIVE)]."))
 		active = FALSE
 		update_icon(UPDATE_OVERLAYS)

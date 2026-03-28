@@ -43,6 +43,7 @@
 	src.time_per_tile = time_per_tile
 
 	next_step = 0
+
 	rift_z = pick(levels_by_trait(STATION_LEVEL))
 
 	check_z()
@@ -131,7 +132,7 @@
 		var/rand_y = rand(min_y, max_y)
 
 		var/turf/rand_turf = locate(rand_x, rand_y, rift_z)
-		if(istype(rand_turf.loc, /area/space))
+		if(isspacearea(rand_turf.loc))
 			continue
 
 		return rand_turf

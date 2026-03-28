@@ -2,9 +2,7 @@
 	name = "plasma fire grenade"
 	desc = "A compressed plasma grenade, used to start horrific plasma fires."
 	origin_tech = "materials=3;magnets=4;syndicate=3"
-	icon = 'icons/obj/weapons/grenade.dmi'
 	icon_state = "syndicate"
-	item_state = "flashbang"
 	var/spawn_contents = LINDA_SPAWN_HEAT | LINDA_SPAWN_TOXINS
 	var/spawn_amount = 100
 
@@ -12,8 +10,13 @@
 	. = ..()
 	var/turf/simulated/target_turf = get_turf(src)
 	if(istype(target_turf))
-		target_turf.atmos_spawn_air(spawn_contents, spawn_amount)
-		target_turf.air_update_turf()
+		release_air(target_turf)
+
+/obj/item/grenade/gas/proc/release_air(turf/simulated/target_turf)
+	// Any proc that wants MILLA to be synchronous should not sleep.
+	SHOULD_NOT_SLEEP(TRUE)
+
+	target_turf.atmos_spawn_air(spawn_contents, spawn_amount)
 	qdel(src)
 
 /obj/item/grenade/gas/plasma
@@ -33,24 +36,22 @@
 	spawn_amount = 500
 
 /obj/item/grenade/gluon
-	desc = "An advanced grenade that releases a harmful stream of gluons inducing radiation in those nearby. These gluon streams will also make victims feel exhausted, and induce shivering. This extreme coldness will also wet any nearby floors."
 	name = "gluon grenade"
-	icon = 'icons/obj/weapons/grenade.dmi'
+	desc = "An advanced grenade that releases a harmful stream of gluons inducing radiation in those nearby. These gluon streams will also make victims feel exhausted, and induce shivering. This extreme coldness will also wet any nearby floors."
 	icon_state = "gluon"
-	item_state = "flashbang"
-	var/range = 4
-	var/rad_damage = 60
+	var/freeze_range = 4
+	var/rad_range = 4
+	var/rad_threshold = RAD_EXTREME_INSULATION
 	var/stamina_damage = 30
+	var/temp_adjust = -230
 
 /obj/item/grenade/gluon/prime()
 	update_mob()
 	playsound(loc, 'sound/effects/empulse.ogg', 50, TRUE)
-	for(var/turf/T in view(range, loc))
-		if(isfloorturf(T))
-			var/turf/simulated/F = T
-			F.MakeSlippery(TURF_WET_PERMAFROST, 120 SECONDS)
-			for(var/mob/living/carbon/L in T)
-				L.apply_damage(stamina_damage, STAMINA)
-				L.apply_effect(rad_damage, IRRADIATE)
-				L.adjust_bodytemperature(-230)
+	radiation_pulse(src, max_range = rad_range, threshold = rad_threshold, chance = 100)
+	for(var/turf/simulated/floor/floor_turf in view(freeze_range, loc))
+		floor_turf.MakeSlippery(TURF_WET_PERMAFROST, 2 MINUTES)
+		for(var/mob/living/carbon/victim in floor_turf)
+			victim.adjustStaminaLoss(stamina_damage)
+			victim.adjust_bodytemperature(temp_adjust)
 	qdel(src)

@@ -3,7 +3,7 @@
 SUBSYSTEM_DEF(processing)
 	name = "Processing"
 	priority = FIRE_PRIORITY_PROCESS
-	flags = SS_BACKGROUND|SS_POST_FIRE_TIMING|SS_NO_INIT
+	flags = SS_BACKGROUND|SS_POST_FIRE_TIMING|SS_NO_INIT|SS_HIBERNATE
 	wait = 10
 	ss_id = "processing"
 
@@ -12,10 +12,21 @@ SUBSYSTEM_DEF(processing)
 	var/list/currentrun = list()
 	offline_implications = "Objects using the default processor will no longer process. Shuttle call recommended."
 
+/datum/controller/subsystem/processing/PreInit()
+	. = ..()
+	hibernate_checks = list(
+		NAMEOF(src, processing),
+		NAMEOF(src, currentrun),
+	)
 
 /datum/controller/subsystem/processing/get_stat_details()
 	return "[stat_tag]:[length(processing)]"
 
+/datum/controller/subsystem/processing/get_metrics()
+	. = ..()
+	var/list/custom_data = list()
+	custom_data["processing"] = length(processing)
+	.["custom"] = custom_data
 
 /datum/controller/subsystem/processing/fire(resumed = 0)
 	if(!resumed)
@@ -23,8 +34,8 @@ SUBSYSTEM_DEF(processing)
 	//cache for sanic speed (lists are references anyways)
 	var/list/current_run = currentrun
 
-	while(current_run.len)
-		var/datum/thing = current_run[current_run.len]
+	while(length(current_run))
+		var/datum/thing = current_run[length(current_run)]
 		current_run.len--
 		if(QDELETED(thing))
 			processing -= thing
@@ -33,8 +44,6 @@ SUBSYSTEM_DEF(processing)
 			STOP_PROCESSING(src, thing)
 		if(MC_TICK_CHECK)
 			return
-
-/datum/var/isprocessing = FALSE
 
 /datum/proc/process(seconds_per_tick)
 	set waitfor = 0

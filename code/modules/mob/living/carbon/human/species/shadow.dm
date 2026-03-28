@@ -31,7 +31,7 @@
 	)
 	dies_at_threshold = TRUE
 
-	reagent_tag = PROCESS_ORG
+	reagent_tag = ORGANIC
 	suicide_messages = list(
 		"пытается откусить себе язык!",
 		"выдавливает большими пальцами себе глазницы!",
@@ -45,7 +45,6 @@
 /datum/action/innate/shadow/darkvision //Darkvision toggle so shadowpeople can actually see where darkness is
 	name = "Переключить ночное зрение"
 	check_flags = AB_CHECK_CONSCIOUS
-	background_icon_state = "bg_default"
 	button_icon_state = "blind"
 
 /datum/action/innate/shadow/darkvision/Activate()

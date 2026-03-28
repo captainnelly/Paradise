@@ -10,43 +10,44 @@
 
 /**
  * Creates text that will float from the atom upwards to the viewer.
- * When you add new balloons, make sure to use less text, as possible, starting with small letter
+ * When you add new balloons, make sure to use as little text as possible, starting with a small letter
  *
- *
- * Russian is preferable in all new balloons, but..
- * In order not to make bad translation like classical "вы slip на banana peel"
- * avoid using balloons, where any [variables] are used
- *
- *
- * Args:
- * * mob/viewer: The mob the text will be shown to. Nullable (But only in the form of it won't runtime).
- * * text: The text to be shown to viewer. Must not be null.
+ * Arguments:
+ * * viewer - The mob the text will be shown to. Nullable (But only in the form of it won't runtime).
+ * * text - The text to be shown to viewer. Must not be null.
  */
-
 /atom/proc/balloon_alert(mob/viewer, text)
 	SHOULD_NOT_SLEEP(TRUE)
 
 	INVOKE_ASYNC(src, PROC_REF(balloon_alert_perform), viewer, text)
 
-/// Create balloon alerts (text that floats up) to everything within range.
-/// Will only display to people who can see.
-
-/atom/proc/balloon_alert_to_viewers(message, self_message, vision_distance = world.view, list/ignored_mobs)
+/**
+ * Create balloon alerts (text that floats up) to everything within range.
+ * Will only display to people who can see.
+ *
+ * Arguments:
+ * * message - The message to show to other viewers
+ * * self_message - The message to show to the user themselves
+ * * vision_distance - The distance within which viewers can see the alert (default: DEFAULT_MESSAGE_RANGE)
+ * * ignored_mobs - List of mobs to exclude from seeing the alert
+ */
+/atom/proc/balloon_alert_to_viewers(message, self_message, vision_distance = DEFAULT_MESSAGE_RANGE, list/ignored_mobs)
 	SHOULD_NOT_SLEEP(TRUE)
 
-	var/list/hearers = get_mobs_in_view(vision_distance, src)
+	var/list/hearers = get_hearers_in_view(vision_distance, src)
 	hearers -= ignored_mobs
 
 	for(var/mob/hearer in hearers)
-		if(hearer.can_hear())
+		if(!hearer.has_vision())
 			continue
-
 		balloon_alert(hearer, (hearer == src && self_message) || message)
 
-// Do not use.
-// MeasureText blocks. I have no idea for how long.
-// I would've made the maptext_height update on its own, but I don't know
-// if this would look bad on laggy clients.
+/**
+ * Do not use.
+ * MeasureText blocks. I have no idea for how long.
+ * I would've made the maptext_height update on its own, but I don't know
+ * if this would look bad on laggy clients.
+ */
 /atom/proc/balloon_alert_perform(mob/viewer, text)
 
 	var/client/viewer_client = viewer?.client
@@ -59,6 +60,8 @@
 		bound_width = movable_source.bound_width
 
 	var/image/balloon_alert = image(loc = isturf(src) ? src : get_atom_on_turf(src), layer = ABOVE_MOB_LAYER)
+
+
 	SET_PLANE_EXPLICIT(balloon_alert, BALLOON_CHAT_PLANE, src)
 	balloon_alert.alpha = 0
 	balloon_alert.appearance_flags = RESET_ALPHA|RESET_COLOR|RESET_TRANSFORM
@@ -67,19 +70,23 @@
 	WXH_TO_HEIGHT(viewer_client?.MeasureText(text, null, BALLOON_TEXT_WIDTH), balloon_alert.maptext_height)
 	balloon_alert.maptext_width = BALLOON_TEXT_WIDTH
 
+	if(QDELETED(balloon_alert.loc))
+		return
+
 	viewer_client?.images += balloon_alert
 
-	for(var/mob/dead/observer/observe in viewer.inventory_observers)
+	var/list/inventory_observers = viewer.inventory_observers
+
+	for(var/mob/dead/observer/observe in inventory_observers)
 		if(!observe.client)
-			LAZYREMOVE(viewer, observe)
+			LAZYREMOVE(inventory_observers, observe)
 			continue
 		observe.client.images += balloon_alert
 
 	var/length_mult = 1 + max(0, length(strip_html_properly(text)) - BALLOON_TEXT_CHAR_LIFETIME_INCREASE_MIN) * BALLOON_TEXT_CHAR_LIFETIME_INCREASE_MULT
-
 	animate(
 		balloon_alert,
-		pixel_y = ICON_SIZE_Y * 1.2,
+		pixel_z = ICON_SIZE_Y * 1.2,
 		time = BALLOON_TEXT_TOTAL_LIFETIME(length_mult),
 		easing = SINE_EASING | EASE_OUT,
 	)

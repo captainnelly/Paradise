@@ -198,7 +198,6 @@
 					head_organ = owner.get_organ(BODY_ZONE_HEAD) //Update the head with the new information.
 					cut_and_generate_data()
 
-
 /datum/ui_module/appearance_changer/ui_interact(mob/user, datum/tgui/ui = null)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)
@@ -323,10 +322,10 @@
 
 /datum/ui_module/appearance_changer/proc/can_change_head_accessory()
 	if(!head_organ)
-		log_runtime(EXCEPTION("Missing head!"), owner)
+		stack_trace("[owner] Missing head!")
 		return FALSE
 	if(!head_organ.dna)
-		log_runtime(EXCEPTION("Missing head DNA!"), owner)
+		stack_trace("[owner] Missing head DNA!")
 		return FALSE
 	return owner && (flags & APPEARANCE_HEAD_ACCESSORY) && (head_organ.dna.species.bodyflags & HAS_HEAD_ACCESSORY)
 
@@ -359,11 +358,11 @@
 	var/obj/item/organ/external/tail/bodypart_tail = owner.get_organ(BODY_ZONE_TAIL)
 	var/obj/item/organ/external/wing/bodypart_wing = owner.get_organ(BODY_ZONE_WING)
 	if(bodypart_tail)
-		return owner && (flags & APPEARANCE_BODY_ACCESSORY) && bodypart_tail && HAS_BODY_ACCESSORY && check_rights(R_ADMIN, 0, owner)
+		return owner && (flags & APPEARANCE_BODY_ACCESSORY) && bodypart_tail && HAS_BODY_ACCESSORY && check_rights(R_ADMIN, FALSE, owner)
 	if(bodypart_wing)
-		return owner && (flags & APPEARANCE_BODY_ACCESSORY) && bodypart_wing && HAS_BODY_ACCESSORY && check_rights(R_ADMIN, 0, owner)
+		return owner && (flags & APPEARANCE_BODY_ACCESSORY) && bodypart_wing && HAS_BODY_ACCESSORY && check_rights(R_ADMIN, FALSE, owner)
 	else
-		return owner && (flags & APPEARANCE_BODY_ACCESSORY) && HAS_BODY_ACCESSORY && check_rights(R_ADMIN, 0, owner)
+		return owner && (flags & APPEARANCE_BODY_ACCESSORY) && HAS_BODY_ACCESSORY && check_rights(R_ADMIN, FALSE, owner)
 
 /datum/ui_module/appearance_changer/proc/can_change_alt_head()
 	if(!head_organ)

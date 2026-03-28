@@ -7,22 +7,21 @@
 	item_state = "armor"
 	blood_overlay_type = "armor"
 	origin_tech = "magnets=7;biotech=4;powerstorage=4;abductor=4"
-	armor = list(MELEE = 15, BULLET = 15, LASER = 15, ENERGY = 15, BOMB = 15, BIO = 15, RAD = 15, FIRE = 70, ACID = 70)
+	armor = list(MELEE = 15, BULLET = 15, LASER = 15, ENERGY = 15, BOMB = 15, BIO = 15, FIRE = 70, ACID = 70)
 	actions_types = list(/datum/action/item_action/hands_free/activate)
 	allowed = list(/obj/item/abductor, /obj/item/melee/baton, /obj/item/gun/energy, /obj/item/restraints/handcuffs)
 	var/mode = VEST_STEALTH
 	var/stealth_active = 0
 	var/combat_cooldown = 10
 	var/datum/icon_snapshot/disguise
-	var/stealth_armor = list(MELEE = 15, BULLET = 15, LASER = 15, ENERGY = 15, BOMB = 15, BIO = 15, RAD = 15, FIRE = 70, ACID = 70)
-	var/combat_armor = list(MELEE = 50, BULLET = 50, LASER = 50, ENERGY = 50, BOMB = 50, BIO = 50, RAD = 50, FIRE = 90, ACID = 90)
+	var/stealth_armor = list(MELEE = 15, BULLET = 15, LASER = 15, ENERGY = 15, BOMB = 15, BIO = 15, FIRE = 70, ACID = 70)
+	var/combat_armor = list(MELEE = 50, BULLET = 50, LASER = 50, ENERGY = 50, BOMB = 50, BIO = 50, FIRE = 90, ACID = 90)
 	sprite_sheets = null
 
 /obj/item/clothing/suit/armor/abductor/vest/Initialize(mapload)
 	. = ..()
 	stealth_armor = getArmor(arglist(stealth_armor))
 	combat_armor = getArmor(arglist(combat_armor))
-
 
 /obj/item/clothing/suit/armor/abductor/vest/proc/toggle_nodrop()
 	var/prev_has = HAS_TRAIT_FROM(src, TRAIT_NODROP, ABDUCTOR_VEST_TRAIT)
@@ -33,14 +32,12 @@
 	if(ismob(loc))
 		to_chat(loc, span_notice("Your vest is now [prev_has ? "unlocked" : "locked"]."))
 
-
 /obj/item/clothing/suit/armor/abductor/vest/update_icon_state()
 	switch(mode)
 		if(VEST_STEALTH)
 			icon_state = "vest_stealth"
 		if(VEST_COMBAT)
 			icon_state = "vest_combat"
-
 
 /obj/item/clothing/suit/armor/abductor/vest/proc/flip_mode()
 	switch(mode)
@@ -54,7 +51,7 @@
 	update_icon(UPDATE_ICON_STATE)
 	if(ishuman(loc))
 		var/mob/living/carbon/human/H = loc
-		H.update_inv_wear_suit()
+		H.update_worn_oversuit()
 	for(var/X in actions)
 		var/datum/action/A = X
 		A.UpdateButtonIcon()
@@ -78,7 +75,7 @@
 		M.icon_state = disguise.icon_state
 		M.cut_overlays()
 		M.add_overlay(disguise.overlays)
-		M.update_inv_hands()
+		M.update_held_items()
 
 /obj/item/clothing/suit/armor/abductor/vest/proc/DeactivateStealth()
 	if(!stealth_active)
@@ -136,6 +133,7 @@
 
 /obj/item/abductor
 	icon = 'icons/obj/abductor.dmi'
+	abstract_type = /obj/item/abductor
 
 /obj/item/proc/AbductorCheck(user)
 	if(isabductor(user))
@@ -164,14 +162,12 @@
 	var/mob/living/marked = null
 	var/obj/machinery/abductor/console/console
 
-
 /obj/item/abductor/gizmo/update_icon_state()
 	switch(mode)
 		if(GIZMO_SCAN)
 			icon_state = "gizmo_scan"
 		if(GIZMO_MARK)
 			icon_state = "gizmo_mark"
-
 
 /obj/item/abductor/gizmo/attack_self(mob/user)
 	if(!ScientistCheck(user))
@@ -187,7 +183,6 @@
 	update_icon(UPDATE_ICON_STATE)
 	to_chat(user, span_notice("You switch the device to [mode==GIZMO_SCAN? "SCAN": "MARK"] MODE"))
 
-
 /obj/item/abductor/gizmo/attack(mob/living/target, mob/living/user, params, def_zone, skip_attack_anim = FALSE)
 	if(!ScientistCheck(user))
 		return ATTACK_CHAIN_PROCEED|ATTACK_CHAIN_NO_AFTERATTACK
@@ -202,7 +197,6 @@
 			scan(target, user)
 		if(GIZMO_MARK)
 			mark(target, user)
-
 
 /obj/item/abductor/gizmo/afterattack(atom/target, mob/living/user, flag, params)
 	if(flag)
@@ -251,7 +245,6 @@
 		console.gizmo = null
 	return ..()
 
-
 /obj/item/abductor/silencer
 	name = "abductor silencer"
 	desc = "A compact device used to shut down communications equipment."
@@ -259,13 +252,11 @@
 	item_state = "silencer"
 	origin_tech = "materials=4;programming=7;abductor=3"
 
-
 /obj/item/abductor/silencer/attack(mob/living/target, mob/living/user, params, def_zone, skip_attack_anim = FALSE)
 	if(!isgrey(user) && !AbductorCheck(user))
 		return ATTACK_CHAIN_PROCEED|ATTACK_CHAIN_NO_AFTERATTACK
 	. = ATTACK_CHAIN_PROCEED_SUCCESS
 	radio_off(target, user)
-
 
 /obj/item/abductor/silencer/afterattack(atom/target, mob/living/user, flag, params)
 	if(flag)
@@ -288,13 +279,11 @@
 		radio_off_mob(M)
 
 /obj/item/abductor/silencer/proc/radio_off_mob(mob/living/carbon/human/M)
-	var/list/all_items = M.GetAllContents()
+	var/list/all_items = M.get_all_contents()
 
-	for(var/obj/I in all_items)
-		if(isradio(I))
-			var/obj/item/radio/R = I
-			R.listening = 0 // Prevents the radio from buzzing due to the EMP, preserving possible stealthiness.
-			R.emp_act(1)
+	for(var/obj/item/radio/radio in all_items)
+		radio.set_listening(FALSE) // Prevents the radio from buzzing due to the EMP, preserving possible stealthiness.
+		radio.emp_act(1)
 
 /obj/item/abductor/mind_device
 	name = "mental interface device"
@@ -303,14 +292,12 @@
 	item_state = "silencer"
 	var/mode = MIND_DEVICE_MESSAGE
 
-
 /obj/item/abductor/mind_device/update_icon_state()
 	switch(mode)
 		if(MIND_DEVICE_MESSAGE)
 			icon_state = "mind_device_message"
 		if(MIND_DEVICE_CONTROL)
 			icon_state = "mind_device_control"
-
 
 /obj/item/abductor/mind_device/attack_self(mob/user)
 	if(!ScientistCheck(user))
@@ -381,7 +368,7 @@
 	name = "alien pistol"
 	desc = "A complicated gun that fires bursts of high-intensity radiation."
 	ammo_type = list(/obj/item/ammo_casing/energy/declone)
-	restricted_species = list(/datum/species/abductor)
+	restricted_species = list(/datum/species/abductor, /datum/species/grey)
 	icon_state = "alienpistol"
 	item_state = "alienpistol"
 	origin_tech = "combat=4;magnets=7;powerstorage=3;abductor=3"
@@ -419,7 +406,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 /obj/item/paper/abductor/click_alt()
 	return NONE
 
-
 #define BATON_STUN 0
 #define BATON_SLEEP 1
 #define BATON_CUFF 2
@@ -432,7 +418,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	icon = 'icons/obj/abductor.dmi'
 	icon_state = "wonderprodStun"
 	item_state = "wonderprod"
-	slot_flags = ITEM_SLOT_BELT
 	origin_tech = "materials=4;combat=4;biotech=7;abductor=4"
 	force = 7
 	affect_cyborgs = TRUE
@@ -445,22 +430,18 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	actions_types = list(/datum/action/item_action/toggle_mode)
 	var/mode = BATON_STUN
 
-
 /obj/item/melee/baton/abductor/get_stun_description(mob/living/target, mob/living/user)
 	return // chat messages are handled in their own procs.
 
-
 /obj/item/melee/baton/abductor/get_cyborg_stun_description(mob/living/target, mob/living/user)
 	return // same as above.
-
 
 /obj/item/melee/baton/abductor/attack_self(mob/living/user)
 	. = ..()
 	toggle(user)
 
-
 /obj/item/melee/baton/abductor/proc/toggle(mob/living/user = usr)
-	if(!AbductorCheck(user))
+	if(!isgrey(user) && !AbductorCheck(user))
 		return
 	mode = (mode + 1) % BATON_MODES
 	var/txt
@@ -487,7 +468,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	to_chat(user, span_notice("You switch the baton to [txt] mode."))
 	update_icon(UPDATE_ICON_STATE)
 
-
 /obj/item/melee/baton/abductor/update_icon_state()
 	switch(mode)
 		if(BATON_STUN)
@@ -504,10 +484,9 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 			item_state = "wonderprodProbe"
 	update_equipped_item(update_speedmods = FALSE)
 
-
 /obj/item/melee/baton/abductor/examine(mob/user)
 	. = ..()
-	if(!AbductorCheck(user))
+	if(!isgrey(user) && !AbductorCheck(user))
 		return .
 	switch(mode)
 		if(BATON_STUN)
@@ -519,12 +498,10 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		if(BATON_PROBE)
 			. += span_warning("The baton is in probing mode.")
 
-
 /obj/item/melee/baton/abductor/baton_attack(mob/target, mob/living/user)
-	if(!AbductorCheck(user))
+	if(!isgrey(user) && !AbductorCheck(user))
 		return BATON_ATTACK_DONE
 	return ..()
-
 
 /obj/item/melee/baton/abductor/baton_effect(mob/living/carbon/target, mob/living/user, stun_override)
 	switch(mode)
@@ -536,7 +513,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 			CuffAttack(target,user)
 		if(BATON_PROBE)
 			ProbeAttack(target,user)
-
 
 /obj/item/melee/baton/abductor/proc/StunAttack(mob/living/carbon/target, mob/living/user)
 	target.visible_message(
@@ -550,7 +526,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	if(iscarbon(target))
 		target.shock_internal_organs(33)
 	target.Weaken(knockdown_time)
-
 
 /obj/item/melee/baton/abductor/proc/SleepAttack(mob/living/target, mob/living/user)
 	if(target.incapacitated(INC_IGNORE_RESTRAINED|INC_IGNORE_GRABBED))
@@ -568,7 +543,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 			span_danger("[user] tried to induce sleep in [target] with [src]!"),
 			span_userdanger("You suddenly feel drowsy!"),
 		)
-
 
 /obj/item/melee/baton/abductor/proc/CuffAttack(mob/living/carbon/target, mob/living/user)
 	if(!iscarbon(target))
@@ -592,7 +566,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		add_attack_logs(user, target, "handcuffed ([src])")
 	else
 		to_chat(user, span_warning("You fail to restrain [target]!"))
-
 
 /obj/item/melee/baton/abductor/proc/ProbeAttack(mob/living/carbon/human/target, mob/living/user)
 	target.visible_message(
@@ -624,7 +597,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 #undef BATON_PROBE
 #undef BATON_MODES
 
-
 /obj/item/restraints/handcuffs/energy
 	name = "hard-light energy field"
 	desc = "A hard-light field restraining the hands."
@@ -642,7 +614,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 							span_userdanger("[src] restraining [user] breaks in a discharge of energy!"))
 	do_sparks(4, FALSE, user.loc)
 	. = ..()
-
 
 /obj/item/radio/headset/abductor
 	name = "alien headset"
@@ -742,7 +713,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	desc = "This looks similar to contraptions from earth. Could aliens be stealing our technology?"
 	icon = 'icons/obj/abductor.dmi'
 	buildstacktype = /obj/item/stack/sheet/mineral/abductor
-	icon_state = "bed"
 
 /obj/structure/table_frame/abductor
 	name = "alien table frame"
@@ -751,7 +721,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	framestack = /obj/item/stack/sheet/mineral/abductor
 	framestackamount = 1
 	density = TRUE
-
 
 /obj/structure/table_frame/abductor/attackby(obj/item/I, mob/user, params)
 	if(user.a_intent == INTENT_HARM)
@@ -780,7 +749,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 
 	return ..()
 
-
 /obj/structure/table/abductor
 	name = "alien table"
 	desc = "Advanced flat surface technology at work!"
@@ -789,13 +757,11 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	can_be_flipped = FALSE
 	buildstack = /obj/item/stack/sheet/mineral/abductor
 	framestack = /obj/item/stack/sheet/mineral/abductor
-	buildstackamount = 1
 	framestackamount = 1
 	base_icon_state = "alien_table"
 	smoothing_groups = SMOOTH_GROUP_ABDUCTOR_TABLES
 	canSmoothWith = SMOOTH_GROUP_ABDUCTOR_TABLES
 	frame = /obj/structure/table_frame/abductor
-
 
 /obj/machinery/optable/abductor
 	name = "alien operating table"
@@ -840,7 +806,7 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетному авто-мендеру",
 		ACCUSATIVE = "инопланетный авто-мендер",
 		INSTRUMENTAL = "инопланетным авто-мендером",
-		PREPOSITIONAL = "инопланетном авто-мендере"
+		PREPOSITIONAL = "инопланетном авто-мендере",
 	)
 
 /obj/item/reagent_containers/applicator/abductor/update_icon_state()
@@ -851,12 +817,11 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		if(1 to 50)
 			icon_state = "[base_icon][applying ? "_active" : ""]"
 		if(0)
-			icon_state = "alien_mender_empty"
+			icon_state = "[base_icon][applying ? "_empty" : ""]"
 
 /obj/item/reagent_containers/applicator/abductor/brute
 	name = "alien brute mender"
-	desc = "Небольшое электронное устройство, предназначенное для местного применения лекарственных препаратов. Эта версия - для заживления механических повреждений. Выполнено из прочного инопланетного материала."
-	base_icon = "alien_mender_brute"
+	desc = "Небольшое электронное устройство, предназначенное для местного применения лекарственных препаратов. Эта версия — для заживления механических повреждений. Выполнено из прочного инопланетного материала."
 	list_reagents = list("styptic_powder" = 200)
 
 /obj/item/reagent_containers/applicator/abductor/brute/get_ru_names()
@@ -866,12 +831,12 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетному авто-мендеру (Мех. Повреждения)",
 		ACCUSATIVE = "инопланетный авто-мендер (Мех. Повреждения)",
 		INSTRUMENTAL = "инопланетным авто-мендером (Мех. Повреждения)",
-		PREPOSITIONAL = "инопланетном авто-мендере (Мех. Повреждения)"
+		PREPOSITIONAL = "инопланетном авто-мендере (Мех. Повреждения)",
 	)
 
 /obj/item/reagent_containers/applicator/abductor/burn
 	name = "alien burn mender"
-	desc = "Небольшое электронное устройство, предназначенное для местного применения лекарственных препаратов. Эта версия - для заживления термических повреждений. Выполнено из прочного инопланетного материала."
+	desc = "Небольшое электронное устройство, предназначенное для местного применения лекарственных препаратов. Эта версия — для заживления термических повреждений. Выполнено из прочного инопланетного материала."
 	base_icon = "alien_mender_burn"
 	list_reagents = list("silver_sulfadiazine" = 200)
 
@@ -882,7 +847,29 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетному авто-мендеру (Терм. Повреждения)",
 		ACCUSATIVE = "инопланетный авто-мендер (Терм. Повреждения)",
 		INSTRUMENTAL = "инопланетным авто-мендером (Терм. Повреждения)",
-		PREPOSITIONAL = "инопланетном авто-мендере (Терм. Повреждения)"
+		PREPOSITIONAL = "инопланетном авто-мендере (Терм. Повреждения)",
+	)
+
+/obj/item/reagent_containers/applicator/abductor/industrial //пока виталя не отрефакторил менднеры будет находиться в абдукторсих итемах ибо тут код по лучше
+	name = "industrial auto-mender" 
+	desc = "Прототип улучшенного авто-мендера, созданного компанией \"Вита-пром\" как альтернатива стандартным мендерам \"Нанотрейзен\". \
+	Обладает увеличенным объёмом хранилища веществ и возможностью пробивать плотные материалы. Не попал в серийное производство из-за сложности и дороговизны, но всё ещё встречается на рынке в качестве единичных экземплеров."
+	volume = 500
+	list_reagents = list("synthflesh" = 500)
+	icon_state = "mender2_empty"
+	item_state = "mender2"
+	base_icon = "mender2"
+	
+	emagged = FALSE
+
+/obj/item/reagent_containers/applicator/abductor/industrial/get_ru_names()
+	return list(
+		NOMINATIVE = "продвинутый авто-мендер",
+		GENITIVE = "продвинутого авто-мендера",
+		DATIVE = "продвинутому авто-мендеру",
+		ACCUSATIVE = "продвинутый авто-мендер",
+		INSTRUMENTAL = "продвинутым авто-мендером",
+		PREPOSITIONAL = "продвинутом авто-мендере",
 	)
 
 /obj/item/reagent_containers/glass/bottle/abductor
@@ -901,7 +888,7 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетной бутылке",
 		ACCUSATIVE = "инопланетную бутылку",
 		INSTRUMENTAL = "инопланетной бутылкой",
-		PREPOSITIONAL = "инопланетной бутылке"
+		PREPOSITIONAL = "инопланетной бутылке",
 	)
 
 /obj/item/reagent_containers/glass/bottle/abductor/rezadone
@@ -915,7 +902,7 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетной бутылке (Резадон)",
 		ACCUSATIVE = "инопланетную бутылку (Резадон)",
 		INSTRUMENTAL = "инопланетной бутылкой (Резадон)",
-		PREPOSITIONAL = "инопланетной бутылке (Резадон)"
+		PREPOSITIONAL = "инопланетной бутылке (Резадон)",
 	)
 
 /obj/item/reagent_containers/glass/bottle/abductor/epinephrine
@@ -929,7 +916,7 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетной бутылке (Эпинефрин)",
 		ACCUSATIVE = "инопланетную бутылку (Эпинефрин)",
 		INSTRUMENTAL = "инопланетной бутылкой (Эпинефрин)",
-		PREPOSITIONAL = "инопланетной бутылке (Эпинефрин)"
+		PREPOSITIONAL = "инопланетной бутылке (Эпинефрин)",
 	)
 
 /obj/item/reagent_containers/glass/bottle/abductor/salgu
@@ -943,7 +930,7 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетной бутылке (Физиологический раствор)",
 		ACCUSATIVE = "инопланетную бутылку (Физиологический раствор)",
 		INSTRUMENTAL = "инопланетной бутылкой (Физиологический раствор)",
-		PREPOSITIONAL = "инопланетной бутылке (Физиологический раствор)"
+		PREPOSITIONAL = "инопланетной бутылке (Физиологический раствор)",
 	)
 
 /obj/item/reagent_containers/glass/bottle/abductor/oculine
@@ -957,7 +944,7 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетной бутылке (Окулин)",
 		ACCUSATIVE = "инопланетную бутылку (Окулин)",
 		INSTRUMENTAL = "инопланетной бутылкой (Окулин)",
-		PREPOSITIONAL = "инопланетной бутылке (Окулин)"
+		PREPOSITIONAL = "инопланетной бутылке (Окулин)",
 	)
 
 /obj/item/reagent_containers/glass/bottle/abductor/pen_acid
@@ -971,7 +958,7 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетной бутылке (Пентетовая кислота)",
 		ACCUSATIVE = "инопланетную бутылку (Пентетовая кислота)",
 		INSTRUMENTAL = "инопланетной бутылкой (Пентетовая кислота)",
-		PREPOSITIONAL = "инопланетной бутылке (Пентетовая кислота)"
+		PREPOSITIONAL = "инопланетной бутылке (Пентетовая кислота)",
 	)
 
 /obj/item/healthanalyzer/abductor
@@ -991,7 +978,7 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 		DATIVE = "инопланетному анализатору здоровья",
 		ACCUSATIVE = "инопланетный анализатор здоровья",
 		INSTRUMENTAL = "инопланетным анализатором здоровья",
-		PREPOSITIONAL = "инопланетном анализаторе здоровья"
+		PREPOSITIONAL = "инопланетном анализаторе здоровья",
 	)
 
 /obj/item/storage/firstaid_abductor
@@ -1000,7 +987,6 @@ Congratulations! You are now trained for invasive xenobiology research!"}
 	icon = 'icons/obj/abductor.dmi'
 	icon_state = "alien_medkit"
 	item_state = "alien_medkit"
-	throw_speed = 2
 	throw_range = 8
 
 /obj/item/storage/firstaid_abductor/populate_contents()

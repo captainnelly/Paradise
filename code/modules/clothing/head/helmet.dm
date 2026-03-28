@@ -6,7 +6,8 @@
 	item_flags = BANGPROTECT_MINOR
 	flags_cover = HEADCOVERSEYES
 	item_state = "helmetmaterials"
-	armor = list(MELEE = 35, BULLET = 30, LASER = 30,ENERGY = 10, BOMB = 25, BIO = 0, RAD = 0, FIRE = 50, ACID = 50)
+	armor = list(MELEE = 35, BULLET = 30, LASER = 30,ENERGY = 10, BOMB = 25, BIO = 0, FIRE = 50, ACID = 50)
+	clothing_flags = parent_type::clothing_flags|STACKABLE_HELMET_EXEMPT
 	flags_inv = HIDEHEADSETS|HIDEGLASSES
 	cold_protection = HEAD
 	min_cold_protection_temperature = HELMET_MIN_TEMP_PROTECT
@@ -26,14 +27,13 @@
 		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi',
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi'
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
 	)
-
 
 /obj/item/clothing/head/helmet/adjust_headgear(mob/user)
 	. = ..()
 	if(.)
-		clothing_flags ^= visor_clothing_flags
+		clothing_flags ^= visor_flags
 		flags_inv ^= visor_flags_inv
 		flags_inv_transparent ^= visor_flags_inv_transparent
 
@@ -53,7 +53,7 @@
 		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi',
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi'
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
 	)
 
 /obj/item/clothing/head/helmet/visor
@@ -72,12 +72,20 @@
 	name = "meson visor helmet"
 	desc = "A helmet with a built-in meson scanning visor."
 	icon_state = "helmetmesons"
-	vision_flags = SEE_TURFS
+
+/obj/item/clothing/head/helmet/meson/equipped(mob/user, slot, initial)
+	. = ..()
+	if(slot == ITEM_SLOT_HEAD)
+		ADD_TRAIT(user, TRAIT_MESON_VISION, UNIQUE_TRAIT_SOURCE(src))
+
+/obj/item/clothing/head/helmet/meson/dropped(mob/user)
+	. = ..()
+	if(user)
+		REMOVE_TRAIT(user, TRAIT_MESON_VISION, UNIQUE_TRAIT_SOURCE(src))
 
 /obj/item/clothing/head/helmet/material
 	name = "material visor helmet"
 	desc = "A helmet with a built-in material scanning visor."
-	icon_state = "helmetmaterials"
 	vision_flags = SEE_OBJS
 
 /obj/item/clothing/head/helmet/night
@@ -92,7 +100,7 @@
 	desc = "A bulletproof helmet that excels in protecting the wearer against traditional projectile weaponry and explosives to a minor extent."
 	icon_state = "bullethelmet"
 	item_state = "bullethelmet"
-	armor = list(MELEE = 15, BULLET = 60, LASER = 10, ENERGY = 10, BOMB = 40, BIO = 0, RAD = 0, FIRE = 50, ACID = 50)
+	armor = list(MELEE = 15, BULLET = 45, LASER = 10, ENERGY = 10, BOMB = 40, BIO = 0, FIRE = 50, ACID = 50)
 	dog_fashion = null
 	flags_inv = parent_type::flags_inv|HIDEMASK|HIDEHAIR
 	flags_cover = HEADCOVERSEYES|HEADCOVERSMOUTH
@@ -111,15 +119,15 @@
 		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/helmet.dmi',
 		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/helmet.dmi',
 		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/helmet.dmi',
-		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/helmet.dmi'
-		)
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/helmet.dmi',
+	)
 
 /obj/item/clothing/head/helmet/riot
 	name = "riot helmet"
 	desc = "It's a helmet specifically designed to protect against close range attacks."
 	icon_state = "riot"
 	item_state = "helmet"
-	armor = list(MELEE = 50, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 0, BIO = 0, RAD = 0, FIRE = 80, ACID = 80)
+	armor = list(MELEE = 50, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 0, BIO = 0, FIRE = 80, ACID = 80)
 	flags_inv = HIDEHEADSETS
 	flags_cover = HEADCOVERSEYES|HEADCOVERSMOUTH
 	strip_delay = 80
@@ -127,7 +135,7 @@
 	sprite_sheets = list(
 		SPECIES_VOX = 'icons/mob/clothing/species/vox/helmet.dmi',
 		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi',
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi'
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
 	)
 
 /obj/item/clothing/head/helmet/riot/knight
@@ -139,8 +147,8 @@
 	flags_inv = parent_type::flags_inv|HIDEMASK|HIDEHAIR|HIDENAME
 	dog_fashion = null
 	sprite_sheets = list(
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi'
-		)
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
+	)
 
 /obj/item/clothing/head/helmet/justice
 	name = "helmet of justice"
@@ -162,17 +170,14 @@
 	toggle_on_message = "You turn off the light on"
 	toggle_off_message = "You turn on the light on"
 
-
 /obj/item/clothing/head/helmet/swat
 	name = "SWAT helmet"
 	desc = "They're often used by highly trained Swat Members."
 	icon_state = "swat"
 	item_state = "swat"
-	armor = list(MELEE = 40, BULLET = 30, LASER = 30,ENERGY = 30, BOMB = 50, BIO = 90, RAD = 20, FIRE = 50, ACID = 50)
+	armor = list(MELEE = 40, BULLET = 30, LASER = 30,ENERGY = 30, BOMB = 50, BIO = 90, FIRE = 50, ACID = 50)
 	item_flags = NONE
-	cold_protection = HEAD
 	min_cold_protection_temperature = SPACE_HELM_MIN_TEMP_PROTECT
-	heat_protection = HEAD
 	max_heat_protection_temperature = SPACE_HELM_MAX_TEMP_PROTECT
 	strip_delay = 80
 	dog_fashion = null
@@ -183,8 +188,8 @@
 		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/head.dmi',
-		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi'
-		)
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi',
+	)
 
 /obj/item/clothing/head/helmet/swat/syndicate
 	name = "blood-red helmet"
@@ -197,11 +202,9 @@
 	desc = "<i>'Let the battle commence!'</i>"
 	icon_state = "thunderdome"
 	item_state = "thunderdome"
-	armor = list(MELEE = 80, BULLET = 80, LASER = 50, ENERGY = 50, BOMB = 100, BIO = 100, RAD = 100, FIRE = 90, ACID = 90)
+	armor = list(MELEE = 80, BULLET = 80, LASER = 50, ENERGY = 50, BOMB = 100, BIO = 100, FIRE = 90, ACID = 90)
 	item_flags = NONE
-	cold_protection = HEAD
 	min_cold_protection_temperature = SPACE_HELM_MIN_TEMP_PROTECT
-	heat_protection = HEAD
 	max_heat_protection_temperature = SPACE_HELM_MAX_TEMP_PROTECT
 	strip_delay = 80
 	dog_fashion = null
@@ -209,7 +212,7 @@
 /obj/item/clothing/head/helmet/roman
 	name = "roman helmet"
 	desc = "An ancient helmet made of bronze and leather."
-	armor = list(MELEE = 25, BULLET = 0, LASER = 25, ENERGY = 10, BOMB = 10, BIO = 0, RAD = 0, FIRE = 100, ACID = 50)
+	armor = list(MELEE = 25, BULLET = 0, LASER = 25, ENERGY = 10, BOMB = 10, BIO = 0, FIRE = 100, ACID = 50)
 	item_flags = NONE
 	resistance_flags = FIRE_PROOF
 	icon_state = "roman"
@@ -219,7 +222,7 @@
 
 /obj/item/clothing/head/helmet/roman/fake
 	desc = "An ancient helmet made of plastic and leather."
-	armor = list(melee = 0, bullet = 0, laser = 0, energy = 0, bomb = 0, bio = 0, rad = 0, fire = 0, acid = 0)
+	armor = list(melee = 0, bullet = 0, laser = 0, energy = 0, bomb = 0, bio = 0, fire = 0, acid = 0)
 
 /obj/item/clothing/head/helmet/roman/legionaire
 	name = "roman legionaire helmet"
@@ -229,7 +232,7 @@
 
 /obj/item/clothing/head/helmet/roman/legionaire/fake
 	desc = "An ancient helmet made of plastic and leather. Has a red crest on top of it."
-	armor = list(melee = 0, bullet = 0, laser = 0, energy = 0, bomb = 0, bio = 0, rad = 0, fire = 0, acid = 0)
+	armor = list(melee = 0, bullet = 0, laser = 0, energy = 0, bomb = 0, bio = 0, fire = 0, acid = 0)
 
 /obj/item/clothing/head/helmet/gladiator
 	name = "gladiator helmet"
@@ -251,7 +254,7 @@
 	desc = "They have chosen their own end."
 	icon_state = "redtaghelm"
 	item_state = "redtaghelm"
-	armor = list(MELEE = 15, BULLET = 10, LASER = 20,ENERGY = 10, BOMB = 20, BIO = 0, RAD = 0, FIRE = 0, ACID = 50)
+	armor = list(MELEE = 15, BULLET = 10, LASER = 20,ENERGY = 10, BOMB = 20, BIO = 0, FIRE = 0, ACID = 50)
 	item_flags = NONE
 	// Offer about the same protection as a hardhat.
 	dog_fashion = null
@@ -261,7 +264,7 @@
 	desc = "They'll need more men."
 	icon_state = "bluetaghelm"
 	item_state = "bluetaghelm"
-	armor = list(MELEE = 15, BULLET = 10, LASER = 20,ENERGY = 10, BOMB = 20, BIO = 0, RAD = 0, FIRE = 0, ACID = 50)
+	armor = list(MELEE = 15, BULLET = 10, LASER = 20,ENERGY = 10, BOMB = 20, BIO = 0, FIRE = 0, ACID = 50)
 	item_flags = NONE
 	// Offer about the same protection as a hardhat.
 	dog_fashion = null
@@ -280,7 +283,7 @@
 		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/head.dmi',
-		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi'
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi',
 	)
 
 /obj/item/clothing/head/helmet/riot/knight/blue
@@ -288,49 +291,48 @@
 	item_state = "knight_blue"
 	sprite_sheets = list(
 		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
-		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi'
-		)
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi',
+	)
 
 /obj/item/clothing/head/helmet/riot/knight/yellow
 	icon_state = "knight_yellow"
 	item_state = "knight_yellow"
 	sprite_sheets = list(
 		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
-		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi'
-		)
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi',
+	)
 
 /obj/item/clothing/head/helmet/riot/knight/red
 	icon_state = "knight_red"
 	item_state = "knight_red"
 	sprite_sheets = list(
 		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
-		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi'
-		)
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi',
+	)
 
 /obj/item/clothing/head/helmet/riot/knight/templar
 	name = "crusader helmet"
 	desc = "Deus Vult."
 	icon_state = "knight_templar"
 	item_state = "knight_templar"
-	armor = list(melee = 20, bullet = 7, laser = 2, energy = 2, bomb = 2, bio = 2, rad = 0, fire = 80, acid = 80)
+	armor = list(melee = 20, bullet = 7, laser = 2, energy = 2, bomb = 2, bio = 2, fire = 80, acid = 80)
 	sprite_sheets = list(
 		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
-		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi'
-		)
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi',
+	)
 
 /obj/item/clothing/head/helmet/skull
 	name = "skull helmet"
 	desc = "Этот шлем, который выглядит устрашающе и походит на племенной, кажется не очень удобным."
 	flags_inv = parent_type::flags_inv|HIDEMASK|HIDENAME
-	flags_cover = HEADCOVERSEYES
-	armor = list(MELEE = 45, BULLET = 30, LASER = 30, ENERGY = 20, BOMB = 40, BIO = 0, RAD = 0, FIRE = 50, ACID = 50)
+	armor = list(MELEE = 45, BULLET = 30, LASER = 30, ENERGY = 20, BOMB = 40, BIO = 0, FIRE = 50, ACID = 50)
 	icon_state = "skull"
 	item_state = "skull"
 	strip_delay = 100
 	sprite_sheets = list(
-			SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
-			SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi'
-		)
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi',
+	)
 
 /obj/item/clothing/head/helmet/skull/get_ru_names()
 	return list(
@@ -339,31 +341,27 @@
 		DATIVE = "костяному шлему",
 		ACCUSATIVE = "костяной шлем",
 		INSTRUMENTAL = "костяным шлемом",
-		PREPOSITIONAL = "костяном шлеме"
+		PREPOSITIONAL = "костяном шлеме",
 	)
 
 /obj/item/clothing/head/helmet/skull/Yorick
 	name = "Йорик"
 	desc = "Бедный Йорик..."
 	sprite_sheets = list(
-			SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
-			SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi'
-		)
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/helmet.dmi',
+	)
 
 /obj/item/clothing/head/helmet/durathread
 	name = "durathread helmet"
 	desc = "A helmet made from durathread and leather."
 	icon_state = "durathread"
 	item_state = "durathread"
-	resistance_flags = FLAMMABLE
-	armor = list(MELEE = 20, BULLET = 10, LASER = 30, ENERGY = 5, BOMB = 15, BIO = 0, RAD = 0, FIRE = 40, ACID = 50)
-	strip_delay = 60
-
+	armor = list(MELEE = 20, BULLET = 10, LASER = 30, ENERGY = 5, BOMB = 15, BIO = 0, FIRE = 40, ACID = 50)
 
 /obj/item/clothing/head/helmet/ert
 	item_flags = NONE
 	flags_inv = parent_type::flags_inv|HIDEHAIR
-
 
 //Commander
 /obj/item/clothing/head/helmet/ert/command
@@ -371,7 +369,7 @@
 	desc = "An in-atmosphere helmet worn by the commander of a Nanotrasen Emergency Response Team. Has blue highlights."
 	icon_state = "erthelmet_cmd"
 	sprite_sheets = list(
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi'
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi',
 	)
 
 //Security
@@ -380,7 +378,7 @@
 	desc = "An in-atmosphere helmet worn by security members of the Nanotrasen Emergency Response Team. Has red highlights."
 	icon_state = "erthelmet_sec"
 	sprite_sheets = list(
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi'
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi',
 	)
 
 /obj/item/clothing/head/helmet/ert/security/paranormal
@@ -389,8 +387,8 @@
 	icon_state = "knight_templar"
 	item_state = "knight_templar"
 	sprite_sheets = list(
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi'
-		)
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/helmet.dmi',
+	)
 
 //Engineer
 /obj/item/clothing/head/helmet/ert/engineer
@@ -398,7 +396,7 @@
 	desc = "An in-atmosphere helmet worn by engineering members of the Nanotrasen Emergency Response Team. Has orange highlights."
 	icon_state = "erthelmet_eng"
 	sprite_sheets = list(
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi'
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi',
 	)
 
 //Medical
@@ -407,7 +405,7 @@
 	desc = "A set of armor worn by medical members of the Nanotrasen Emergency Response Team. Has red and white highlights."
 	icon_state = "erthelmet_med"
 	sprite_sheets = list(
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi'
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi',
 	)
 
 //Janitorial
@@ -416,7 +414,7 @@
 	desc = "A set of armor worn by janitorial members of the Nanotrasen Emergency Response Team. Has red and white highlights."
 	icon_state = "erthelmet_jan"
 	sprite_sheets = list(
-		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi'
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi',
 	)
 
 /obj/item/clothing/head/helmet/buckhelm
@@ -426,7 +424,7 @@
 	item_state = "buckhelm"
 	flags_inv = HIDEHEADSETS
 	resistance_flags = FIRE_PROOF
-	armor = list(MELEE = 8, BULLET = 5, LASER = 5, ENERGY = 30, BOMB = 0, BIO = 0, RAD = 0, FIRE = 0, ACID = 0)
+	armor = list(MELEE = 8, BULLET = 5, LASER = 5, ENERGY = 30, BOMB = 0, BIO = 0, FIRE = 0, ACID = 0)
 	strip_delay = 7 SECONDS
 	sprite_sheets = list(
 		SPECIES_VOX = 'icons/mob/clothing/species/vox/helmet.dmi',
@@ -446,7 +444,7 @@
 		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/head.dmi',
-		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi'
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi',
 	)
 
 //Dredd
@@ -464,15 +462,13 @@
 		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/head.dmi',
-		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi'
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi',
 	)
 
 /obj/item/clothing/head/helmet/lightweighthelmet
 	name = "lightweight helmet"
-	desc = "Standard Security gear. Protects the head from impacts."
 	icon_state = "lightweighthelmet"
 	item_state = "lightweighthelmet"
-	strip_delay = 60
 	flags_inv = HIDEHEADSETS|HIDEHAIR
 	item_flags = NONE
 	flags_cover = NONE
@@ -485,13 +481,13 @@
 		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/head.dmi',
 		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/head.dmi',
-		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi'
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi',
 	)
 
 /obj/item/clothing/head/helmet/biker
 	name = "Motorcycle helmet"
 	desc = "Самый обычный мотоциклетный шлем."
-	armor = list(MELEE = 35, BULLET = 10, LASER = 10, ENERGY = 30, BOMB = 10, BIO = 0, RAD = 0, FIRE = 30, ACID = 0)
+	armor = list(MELEE = 35, BULLET = 10, LASER = 10, ENERGY = 30, BOMB = 10, BIO = 0, FIRE = 30, ACID = 0)
 	icon_state = "biker"
 	item_state = "biker"
 	flash_protect = FLASH_PROTECTION_FLASH
@@ -499,7 +495,7 @@
 	flags_cover = HEADCOVERSEYES|HEADCOVERSMOUTH
 	color = "#161515"
 	sprite_sheets = list(
-		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/head.dmi'
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/head.dmi',
 	)
 	species_restricted = list(SPECIES_HUMAN, SPECIES_SLIMEPERSON, SPECIES_SKELETON, SPECIES_NUCLEATION, SPECIES_MACNINEPERSON, SPECIES_DIONA, SPECIES_SHADOW_BASIC, SPECIES_MONKEY)
 
@@ -523,5 +519,5 @@
 		DATIVE = "мотоциклетному шлему",
 		ACCUSATIVE = "мотоциклетный шлем",
 		INSTRUMENTAL = "мотоциклетным шлемом",
-		PREPOSITIONAL = "мотоциклетном шлеме"
+		PREPOSITIONAL = "мотоциклетном шлеме",
 	)

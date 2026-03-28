@@ -5,7 +5,7 @@
 	item_state = "bl_suit"
 	item_color = "syndicate"
 	has_sensor = 0
-	armor = list(MELEE = 10, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 40)
+	armor = list(MELEE = 10, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, FIRE = 50, ACID = 40)
 	dying_key = DYE_REGISTRY_UNDER
 
 /obj/item/clothing/under/syndicate/get_ru_names()
@@ -15,7 +15,7 @@
 		DATIVE = "тактической водолазке",
 		ACCUSATIVE = "тактическую водолазку",
 		INSTRUMENTAL = "тактической водолазкой",
-		PREPOSITIONAL = "тактической водолазке"
+		PREPOSITIONAL = "тактической водолазке",
 	)
 
 /obj/item/clothing/under/syndicate/combat
@@ -28,16 +28,16 @@
 		DATIVE = "боевой водолазке",
 		ACCUSATIVE = "боевую водолазку",
 		INSTRUMENTAL = "боевой водолазкой",
-		PREPOSITIONAL = "боевой водолазке"
+		PREPOSITIONAL = "боевой водолазке",
 	)
 
 /obj/item/clothing/under/syndicate/tacticool
 	name = "tacticool turtleneck"
 	desc = "Увидев это, хочется приобрести карабин СКС, уйти в лес и \"оперировать\""
 	icon_state = "tactifool"
-	item_state = "bl_suit"
 	item_color = "tactifool"
-	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 40)
+	has_sensor = TRUE
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, FIRE = 50, ACID = 40)
 
 /obj/item/clothing/under/syndicate/tacticool/get_ru_names()
 	return list(
@@ -46,14 +46,12 @@
 		DATIVE = "тактикульной водолазке",
 		ACCUSATIVE = "тактикульную водолазку",
 		INSTRUMENTAL = "тактикульной водолазкой",
-		PREPOSITIONAL = "тактикульной водолазке"
+		PREPOSITIONAL = "тактикульной водолазке",
 	)
 
 /obj/item/clothing/under/syndicate/tacticool/skirt
 	name = "tacticool skirt"
-	desc = "Увидев это, хочется приобрести карабин СКС, уйти в лес и \"оперировать\""
 	icon_state = "tactifoolf"
-	item_state = "bl_suit"
 	item_color = "tactifoolf"
 
 /obj/item/clothing/under/syndicate/tacticool/skirt/get_ru_names()
@@ -63,14 +61,13 @@
 		DATIVE = "тактикульной юбке",
 		ACCUSATIVE = "тактикульную юбку",
 		INSTRUMENTAL = "тактикульной юбкой",
-		PREPOSITIONAL = "тактикульной юбке"
+		PREPOSITIONAL = "тактикульной юбке",
 	)
 
 /obj/item/clothing/under/syndicate/sniper
 	name = "Tactical turtleneck suit"
 	desc = "Тактическая водолазка с двойным швом, замаскированная под гражданский шелковый костюм. Предназначена для самых требовательных оперативников. Воротник очень острый."
 	icon_state = "really_black_suit"
-	item_state = "bl_suit"
 	item_color = "black_suit"
 
 /obj/item/clothing/under/syndicate/sniper/get_ru_names()
@@ -80,16 +77,15 @@
 		DATIVE = "тактическому формальному костюму",
 		ACCUSATIVE = "тактический формальный костюм",
 		INSTRUMENTAL = "тактическим формальным костюмом",
-		PREPOSITIONAL = "тактическом формальном костюме"
+		PREPOSITIONAL = "тактическом формальном костюме",
 	)
 
 /obj/item/clothing/under/syndicate/sniper_civ
 	name = "Executive tacticool suit"
 	desc = "Модель тактической водолазки предназначена для ведения переговоров, а не для участия в боевых действиях."
 	icon_state = "black_suit"
-	item_state = "bl_suit"
 	item_color = "black_suit"
-	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 0, ACID = 0)
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, FIRE = 0, ACID = 0)
 
 /obj/item/clothing/under/syndicate/sniper_civ/get_ru_names()
 	return list(
@@ -98,7 +94,7 @@
 		DATIVE = "тактикульному формальному костюму",
 		ACCUSATIVE = "тактикульный формальный костюм",
 		INSTRUMENTAL = "тактикульным формальным костюмом",
-		PREPOSITIONAL = "тактикульном формальном костюме"
+		PREPOSITIONAL = "тактикульном формальном костюме",
 	)
 
 /obj/item/clothing/under/syndicate/blackops
@@ -106,7 +102,7 @@
 	desc = "Прочный комбинезон, созданный для тайных операций в тылу врага. Благодаря кевларовым вставкам, он обеспечивает лёгкую защиту."
 	icon_state = "blackops"
 	item_state = "blackops"
-	armor = list(MELEE = 15, BULLET = 15, LASER = 15,ENERGY = 0, BOMB = 10, BIO = 0, RAD = 0, FIRE = 10, ACID = 0)
+	armor = list(MELEE = 15, BULLET = 15, LASER = 15,ENERGY = 0, BOMB = 10, BIO = 0, FIRE = 10, ACID = 0)
 
 /obj/item/clothing/under/syndicate/blackops/get_ru_names()
 	return list(
@@ -115,7 +111,7 @@
 		DATIVE = "комбинезону для спецопераций",
 		ACCUSATIVE = "комбинезон для спецопераций",
 		INSTRUMENTAL = "комбинезоном для спецопераций",
-		PREPOSITIONAL = "комбинезоне для спецопераций"
+		PREPOSITIONAL = "комбинезоне для спецопераций",
 	)
 
 /obj/item/clothing/under/syndicate/blackops_civ
@@ -123,7 +119,8 @@
 	desc = "Стильный комбинезон, но из дешёвого материала. Не предназначен для активного использования в бою."
 	icon_state = "blackops"
 	item_state = "blackops"
-	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 0, ACID = 0)
+	has_sensor = TRUE
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, FIRE = 0, ACID = 0)
 
 /obj/item/clothing/under/syndicate/blackops_civ/get_ru_names()
 	return list(
@@ -132,7 +129,7 @@
 		DATIVE = "тактикульному комбинезону для спецопераций",
 		ACCUSATIVE = "тактикульный комбинезон для спецопераций",
 		INSTRUMENTAL = "тактикульным комбинезоном для спецопераций",
-		PREPOSITIONAL = "тактикульном комбинезоне для спецопераций"
+		PREPOSITIONAL = "тактикульном комбинезоне для спецопераций",
 	)
 
 /obj/item/clothing/under/plasmaman/syndie
@@ -150,5 +147,5 @@
 		DATIVE = "тактическому защитному костюму плазмолюда",
 		ACCUSATIVE = "тактический защитный костюм плазмолюда",
 		INSTRUMENTAL = "тактическим защитным костюмом плазмолюда",
-		PREPOSITIONAL = "тактическом защитном костюме плазмолюда"
+		PREPOSITIONAL = "тактическом защитном костюме плазмолюда",
 	)

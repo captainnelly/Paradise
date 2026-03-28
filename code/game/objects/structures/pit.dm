@@ -3,10 +3,8 @@
 	desc = "Watch your step, partner."
 	icon = 'icons/obj/pit.dmi'
 	icon_state = "pit1"
-	blend_mode = BLEND_DEFAULT
-	density = FALSE
 	anchored = TRUE
-	armor = list(melee = 50, bullet = 100, laser = 100, energy = 50, bomb = 50, bio = 50, rad = 50, fire = 50, acid = 50)
+	armor = list(melee = 50, bullet = 100, laser = 100, energy = 50, bomb = 50, bio = 50, fire = 50, acid = 50)
 	layer = 2.9
 	var/storage_capacity = 30
 	var/open = TRUE
@@ -17,7 +15,6 @@
 
 /obj/structure/pit/AllowDrop()
 	return TRUE
-
 
 /obj/structure/pit/attackby(obj/item/I, mob/user, params)
 	if(user.a_intent == INTENT_HARM)
@@ -71,10 +68,8 @@
 
 	return ..()
 
-
 /obj/structure/pit/update_icon_state()
 	icon_state = "pit[open][icon_floor_type]"
-
 
 /obj/structure/pit/Initialize(mapload)
 	. = ..()
@@ -113,7 +108,7 @@
 		if(iscarbon(A))
 			var/mob/living/carbon/M = A
 			M.update_tint()
-		if(istype(A, /obj/structure/closet))
+		if(iscloset(A))
 			for(var/mob/living/carbon/M in A.contents)
 				M.update_tint()
 	update_icon(UPDATE_ICON_STATE)
@@ -134,13 +129,10 @@
 			if(iscarbon(A))
 				var/mob/living/carbon/M = A
 				M.overlay_fullscreen("tint", /atom/movable/screen/fullscreen/blind)
-			if(istype(A, /obj/structure/closet))
+			if(iscloset(A))
 				for(var/mob/living/carbon/M in A.contents)
 					M.overlay_fullscreen("tint", /atom/movable/screen/fullscreen/blind)
 	update_icon(UPDATE_ICON_STATE)
-
-/obj/structure/pit/remove_air(amount)
-	return 0
 
 /obj/structure/pit/container_resist(mob/escapee)
 	var/breakout_time = 1.5 //2 minutes by default
@@ -194,7 +186,6 @@
 //spoooky
 /obj/structure/pit/closed/grave
 	name = "grave"
-	icon_state = "pit0"
 
 /obj/structure/pit/closed/grave/Initialize(mapload)
 	. = ..()
@@ -234,14 +225,13 @@
 		nam += " " + pick(GLOB.last_names_female)
 	else
 		nam = pick(GLOB.first_names_male)
-		nam += " " + pick(GLOB.last_names)
+		nam += " " + pick(GLOB.last_names_male)
 	var/cur_year = GLOB.game_year
 	var/born = cur_year - rand(5,150)
 	var/died = max(cur_year - rand(0,70),born)
 
 	message = "Здесь упокоен [nam], [born] - [died]."
 	update_appearance(UPDATE_DESC)
-
 
 /obj/structure/gravemarker/attackby(obj/item/I, mob/user, params)
 	if(user.a_intent == INTENT_HARM)

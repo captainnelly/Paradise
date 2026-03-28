@@ -1,12 +1,11 @@
 /mob/living/simple_animal/hostile/asteroid/marrowweaver
 	name = "marrow weaver"
-	desc = "Большой, злой и ядовитый паук. Обожает костный мозг. И его любимый источник пищи - это вы."
+	desc = "Большой, злой и ядовитый паук. Обожает костный мозг. И его любимый источник пищи — это вы."
 	icon = 'icons/mob/lavaland/lavaland_monsters.dmi'
 	icon_state = "weaver"
 	icon_living = "weaver"
 	icon_aggro = "weaver"
 	icon_dead = "weaver_dead"
-	throw_message = "отскакивает от"
 	crusher_loot = /obj/item/crusher_trophy/fang
 	butcher_results = list(/obj/item/stack/ore/uranium = 2, /obj/item/stack/sheet/bone = 2, /obj/item/stack/sheet/sinew = 1, /obj/item/stack/sheet/animalhide/weaver_chitin = 3, /obj/item/reagent_containers/food/snacks/monstermeat/spiderleg = 2)
 	loot = list()
@@ -43,7 +42,7 @@
 		DATIVE = "костномозговому ткачу",
 		ACCUSATIVE = "костномозгового ткача",
 		INSTRUMENTAL = "костномозговым ткачом",
-		PREPOSITIONAL = "костномозговом ткаче"
+		PREPOSITIONAL = "костномозговом ткаче",
 	)
 
 /mob/living/simple_animal/hostile/asteroid/marrowweaver/adjustHealth(
@@ -60,7 +59,7 @@
 	if(!buttmad)
 		if(health < maxHealth/3)
 			buttmad = TRUE
-			visible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] яростно стрекочет, оскалив клыки!"))
+			visible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] яростно стрекочет, оскалив клыки!"))
 			melee_damage_lower = melee_damage_lower_angery1
 			melee_damage_upper = melee_damage_upper_angery1
 			move_to_delay = anger_move_to_delay
@@ -70,13 +69,12 @@
 	else
 		if(health > maxHealth/2)
 			buttmad = FALSE
-			visible_message(span_notice("[capitalize(declent_ru(NOMINATIVE))] вроде бы успокоился, но не до конца."))
+			visible_message(span_notice("[DECLENT_RU_CAP(src, NOMINATIVE)] вроде бы успокоился, но не до конца."))
 			melee_damage_lower = melee_damage_lower_angery0
 			melee_damage_upper = melee_damage_upper_angery0
 			poison_type = initial(poison_type)
 			set_varspeed(initial(speed))
 			poison_per_bite = initial(poison_per_bite)
-
 
 /mob/living/simple_animal/hostile/asteroid/marrowweaver/AttackingTarget()
 	. = ..()
@@ -90,7 +88,7 @@
 				var/turf/T = get_turf(H)
 				H.add_splatter_floor(T)	//Visual proc from disembowel(), just for exclude organ dropping (brains), but stay cool.
 				playsound(T, 'sound/effects/splat.ogg', 25, TRUE)	//Sound proc for the same reason.
-				src.visible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] впрыскивает токсичную слизь во внутренности [L]..."),
+				src.visible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] впрыскивает токсичную слизь во внутренности [L]..."),
 					span_danger("...после чего высасывает кашицу из костного мозга и плоти, исцеляясь!"),
 					span_userdanger("Вы разжижаете внутренности [L] своим ядом и высасываете получившуюся массу, восстанавливая силы."))
 				adjustBruteLoss(round(-H.maxHealth/2))
@@ -109,7 +107,7 @@
 	var/foundorgans = 0
 	var/list/organs = snack.get_organs_zone(BODY_ZONE_CHEST)
 	for(var/obj/item/organ/internal/I as anything in organs)
-		if(!istype(I, /obj/item/organ/internal/brain))
+		if(!is_internal_organ_brain(I))
 			foundorgans ++
 			if(!preparing)
 				qdel(I)
@@ -131,7 +129,7 @@
 		DATIVE = "хитину ткача",
 		ACCUSATIVE = "хитин ткача",
 		INSTRUMENTAL = "хитином ткача",
-		PREPOSITIONAL = "хитине ткача"
+		PREPOSITIONAL = "хитине ткача",
 	)
 
 /obj/item/stack/sheet/animalhide/weaver_chitin/five
@@ -142,7 +140,6 @@
 /mob/living/simple_animal/hostile/asteroid/marrowweaver/dangerous
 	health = 320
 	maxHealth = 320
-	vision_range = 8
 	nightvision = 8
 	speed = 5
 	move_to_delay = 14
@@ -168,7 +165,6 @@
 	melee_damage_upper = 13
 
 	poison_type = "frostoil"
-	poison_per_bite = 5
 
 	crusher_loot = /obj/item/crusher_trophy/gland
 
@@ -179,7 +175,7 @@
 		DATIVE = "морозному костномозговому ткачу",
 		ACCUSATIVE = "морозного костномозгового ткача",
 		INSTRUMENTAL = "морозным костномозговым ткачом",
-		PREPOSITIONAL = "морозном костномозговом ткаче"
+		PREPOSITIONAL = "морозном костномозговом ткаче",
 	)
 
 /mob/living/simple_animal/hostile/asteroid/marrowweaver/tendril

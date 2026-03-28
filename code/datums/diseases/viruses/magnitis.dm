@@ -10,7 +10,7 @@
 	infectable_mobtypes = list(/mob/living/carbon/human, /mob/living/silicon/robot, /mob/living/simple_animal/pet/dog/corgi/borgi)
 	ignore_immunity = TRUE
 	permeability_mod = 0.75
-	severity = MEDIUM
+	severity = DISEASE_SEVERITY_MEDIUM
 
 /datum/disease/virus/magnitis/stage_act()
 	if(!..())
@@ -50,7 +50,7 @@
 
 /datum/disease/virus/magnitis/proc/move_mobs(range, iter)
 	for(var/mob/living/L in orange(range, affected_mob))
-		if(istype(L, /mob/living/silicon/robot) || \
+		if(isrobot(L) || \
 			istype(L, /mob/living/simple_animal/pet/dog/corgi/borgi) || \
 			ismachineperson(L))
 
@@ -61,5 +61,4 @@
 //machinepersons cures with nanopaste, applied at any bodypart
 /datum/disease/virus/magnitis/has_cure()
 	return ismachineperson(affected_mob) ? FALSE : ..()
-
 

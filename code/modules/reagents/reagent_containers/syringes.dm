@@ -8,16 +8,20 @@
 	item_state = "syringe_0"
 	icon_state = "0"
 	belt_icon = "syringe"
-	amount_per_transfer_from_this = 5
-	possible_transfer_amounts = null
+	possible_transfer_amounts = list(5, 10, 15)
 	volume = 15
 	sharp = TRUE
 	pass_open_check = TRUE
+	materials = list(MAT_METAL=10, MAT_GLASS=20)
+	container_type = TRANSPARENT
+	custom_price = PAYCHECK_MIN * 0.2
 	var/busy = FALSE
 	var/mode = SYRINGE_DRAW
 	var/projectile_type = /obj/projectile/bullet/dart/syringe
-	materials = list(MAT_METAL=10, MAT_GLASS=20)
-	container_type = TRANSPARENT
+	///If this variable is true, the syringe will work through hardsuits / modsuits / biosuits.
+	var/penetrates_thick = FALSE
+	///If this variable is true, the syringe will work through unathi skin
+	var/ignores_pierceimmune = FALSE
 
 /obj/item/reagent_containers/syringe/get_ru_names()
 	return list(
@@ -26,16 +30,13 @@
 		DATIVE = "шприцу",
 		ACCUSATIVE = "шприц",
 		INSTRUMENTAL = "шприцем",
-		PREPOSITIONAL = "шприце"
+		PREPOSITIONAL = "шприце",
 	)
 
 /obj/item/reagent_containers/syringe/Initialize(mapload)
 	if(list_reagents) //syringe starts in inject mode if its already got something inside
 		mode = SYRINGE_INJECT
 	. = ..()
-
-/obj/item/reagent_containers/syringe/set_APTFT()
-	set hidden = TRUE
 
 /obj/item/reagent_containers/syringe/on_reagent_change()
 	update_icon()
@@ -56,10 +57,8 @@
 	..()
 	update_icon()
 
-
 /obj/item/reagent_containers/syringe/attack(mob/living/target, mob/living/user, params, def_zone, skip_attack_anim = FALSE)
 	return ATTACK_CHAIN_PROCEED
-
 
 /obj/item/reagent_containers/syringe/afterattack(atom/target, mob/user, proximity, params)
 	if(!proximity)
@@ -70,7 +69,7 @@
 	var/mob/living/L
 	if(isliving(target))
 		L = target
-		if(!L.can_inject(user, TRUE))
+		if(!L.can_inject(user, TRUE, penetrate_thick = penetrates_thick, ignore_pierceimmune = ignores_pierceimmune))
 			return
 
 	SEND_SIGNAL(target, COMSIG_LIVING_TRY_SYRINGE, user)
@@ -85,8 +84,8 @@
 			if(L) //living mob
 				var/drawn_amount = reagents.maximum_volume - reagents.total_volume
 				if(target != user)
-					target.visible_message(span_danger("[user] пыта[pluralize_ru(user.gender, "ет", "ют")]ся взять образец крови у [target]!"), \
-											span_userdanger("[user] пыта[pluralize_ru(user.gender, "ет", "ют")]ся взять у вас образец крови!"))
+					target.visible_message(span_danger("[user] пыта[PLUR_ET_YUT(user)]ся взять образец крови у [target]!"), \
+											span_userdanger("[user] пыта[PLUR_ET_YUT(user)]ся взять у вас образец крови!"))
 					busy = TRUE
 					if(!do_after(user, 3 SECONDS, target, NONE))
 						busy = FALSE
@@ -95,8 +94,8 @@
 						return
 				busy = FALSE
 				if(L.transfer_blood_to(src, drawn_amount))
-					L.visible_message(span_danger("[user] взял[genderize_ru(user.gender, "", "а", "о", "и")] образец крови у [L]!"), \
-										span_userdanger("[user] взял[genderize_ru(user.gender, "", "а", "о", "и")] у вас образец крови!"))
+					L.visible_message(span_danger("[user] взял[GEND_A_O_I(user)] образец крови у [L]!"), \
+										span_userdanger("[user] взял[GEND_A_O_I(user)] у вас образец крови!"))
 				else
 					balloon_alert(user, "больше крови не взять!")
 
@@ -111,7 +110,7 @@
 
 				var/trans = target.reagents.trans_to(src, amount_per_transfer_from_this) // transfer from, transfer to - who cares?
 
-				to_chat(user, span_notice("Вы заполняете [declent_ru(ACCUSATIVE)] <b>[trans]</b> единиц[declension_ru(trans, "ей", "ами", "ами")] вещества. Теперь он содержит <b>[reagents.total_volume]</b> единиц[declension_ru(reagents.total_volume, "у", "ы", "")] вещества."))
+				to_chat(user, span_notice("Вы заполняете [declent_ru(ACCUSATIVE)] <b>[trans]</b> единиц[declension_ru(trans, "ей", "ами", "ами")] вещества. Теперь он содержит <b>[reagents.total_volume]</b> единиц[DECL_SEC_MIN(reagents.total_volume)] вещества."))
 			if(reagents.holder_full())
 				mode = !mode
 				update_icon()
@@ -130,26 +129,27 @@
 				return
 
 			if(L) //living mob
-				if(!L.can_inject(user, TRUE))
+				if(!L.can_inject(user, TRUE, penetrate_thick = penetrates_thick, ignore_pierceimmune = ignores_pierceimmune))
 					return
 				if(L != user)
-					L.visible_message(span_danger("[user] пыта[pluralize_ru(user.gender, "ет", "ют")]ся сделать [L] укол [declent_ru(INSTRUMENTAL)]!"), \
-										span_userdanger("[user] пыта[pluralize_ru(user.gender, "ет", "ют")]ся сделать вам укол [declent_ru(INSTRUMENTAL)]!"))
+					L.visible_message(span_danger("[user] пыта[PLUR_ET_YUT(user)]ся сделать [L] укол [declent_ru(INSTRUMENTAL)]!"), \
+										span_userdanger("[user] пыта[PLUR_ET_YUT(user)]ся сделать вам укол [declent_ru(INSTRUMENTAL)]!"))
 					if(!do_after(user, 3 SECONDS, L, NONE))
 						return
 					if(!reagents.total_volume)
 						return
 					if(L.reagents.total_volume >= L.reagents.maximum_volume)
 						return
-					L.visible_message(span_danger("[user] дела[pluralize_ru(user.gender, "ет", "ют")] [L] укол [declent_ru(INSTRUMENTAL)]!"), \
-										span_userdanger("[user] дела[pluralize_ru(user.gender, "ет", "ют")] вам укол [declent_ru(INSTRUMENTAL)]!"))
+					L.visible_message(span_danger("[user] дела[PLUR_ET_YUT(user)] [L] укол [declent_ru(INSTRUMENTAL)]!"), \
+										span_userdanger("[user] дела[PLUR_ET_YUT(user)] вам укол [declent_ru(INSTRUMENTAL)]!"))
 
 			add_attack_logs(user, target, "Injected with [name] containing [reagents.log_list()], transfered [amount_per_transfer_from_this] units", reagents.harmless_helper() ? ATKLOG_ALMOSTALL : null)
 
 			var/fraction = min(amount_per_transfer_from_this / reagents.total_volume, 1)
 			reagents.reaction(L, REAGENT_INGEST, fraction)
 			reagents.trans_to(target, amount_per_transfer_from_this)
-			to_chat(user, span_notice("Вы вкололи <b>[amount_per_transfer_from_this]</b> единиц[declension_ru(amount_per_transfer_from_this, "у", "ы", "")] вещества с помощью [declent_ru(GENITIVE)]. В нём остаётся <b>[reagents.total_volume]</b> единиц[declension_ru(reagents.total_volume, "а", "ы", "")] вещества."))
+			after_transfer(target)
+			to_chat(user, span_notice("Вы вкололи <b>[amount_per_transfer_from_this]</b> единиц[DECL_SEC_MIN(amount_per_transfer_from_this)] вещества с помощью [declent_ru(GENITIVE)]. В нём остаётся <b>[reagents.total_volume]</b> единиц[declension_ru(reagents.total_volume, "а", "ы", "")] вещества."))
 			if(istype(target, /obj/item/reagent_containers/food))
 				var/obj/item/reagent_containers/food/F = target
 				F.log_eating = TRUE
@@ -157,7 +157,6 @@
 			if(reagents.total_volume <= 0 && mode == SYRINGE_INJECT)
 				mode = SYRINGE_DRAW
 				update_icon()
-
 
 /obj/item/reagent_containers/syringe/update_icon_state()
 	var/rounded_vol
@@ -168,11 +167,13 @@
 	icon_state = "[rounded_vol]"
 	item_state = "syringe_[rounded_vol]"
 
+/obj/item/reagent_containers/syringe/get_sound_for_reagent_containers()
+	return SFX_SYRINGEPOUR
 
 /obj/item/reagent_containers/syringe/update_overlays()
 	. = ..()
 	var/rounded_vol
-	if(reagents && reagents.total_volume)
+	if(reagents?.total_volume)
 		rounded_vol = clamp(round((reagents.total_volume / volume * 15), 5), 1, 15)
 		var/image/filling_overlay = mutable_appearance('icons/obj/reagentfillings.dmi', "syringe[rounded_vol]")
 		filling_overlay.icon += mix_color_from_reagents(reagents.reagent_list)
@@ -189,9 +190,8 @@
 
 /obj/item/reagent_containers/syringe/traitor_random/Initialize(mapload)
 	list_reagents = list()
-	list_reagents[pick_list("chemistry_tools.json", "traitor_poison_bottle")] = volume
+	list_reagents[pick_list(CHEMISTRY_TOOLS_FILE, "traitor_poison_bottle")] = volume
 	. = ..()
-
 
 /obj/item/reagent_containers/syringe/antiviral
 	name = "Syringe (spaceacillin)"
@@ -205,7 +205,7 @@
 		DATIVE = "шприцу (Космоциллин)",
 		ACCUSATIVE = "шприц (Космоциллин)",
 		INSTRUMENTAL = "шприцем (Космоциллин)",
-		PREPOSITIONAL = "шприце (Космоциллин)"
+		PREPOSITIONAL = "шприце (Космоциллин)",
 	)
 
 /obj/item/reagent_containers/syringe/charcoal
@@ -220,7 +220,7 @@
 		DATIVE = "шприцу (Активированный уголь)",
 		ACCUSATIVE = "шприц (Активированный уголь)",
 		INSTRUMENTAL = "шприцем (Активированный уголь)",
-		PREPOSITIONAL = "шприце (Активированный уголь)"
+		PREPOSITIONAL = "шприце (Активированный уголь)",
 	)
 
 /obj/item/reagent_containers/syringe/epinephrine
@@ -235,7 +235,7 @@
 		DATIVE = "шприцу (Эпинефрин)",
 		ACCUSATIVE = "шприц (Эпинефрин)",
 		INSTRUMENTAL = "шприцем (Эпинефрин)",
-		PREPOSITIONAL = "шприце (Эпинефрин)"
+		PREPOSITIONAL = "шприце (Эпинефрин)",
 	)
 
 /obj/item/reagent_containers/syringe/insulin
@@ -250,7 +250,7 @@
 		DATIVE = "шприцу (Инсулин)",
 		ACCUSATIVE = "шприц (Инсулин)",
 		INSTRUMENTAL = "шприцем (Инсулин)",
-		PREPOSITIONAL = "шприце (Инсулин)"
+		PREPOSITIONAL = "шприце (Инсулин)",
 	)
 
 /obj/item/reagent_containers/syringe/calomel
@@ -265,7 +265,7 @@
 		DATIVE = "шприцу (Каломель)",
 		ACCUSATIVE = "шприц (Каломель)",
 		INSTRUMENTAL = "шприцем (Каломель)",
-		PREPOSITIONAL = "шприце (Каломель)"
+		PREPOSITIONAL = "шприце (Каломель)",
 	)
 
 /obj/item/reagent_containers/syringe/heparin
@@ -280,7 +280,7 @@
 		DATIVE = "шприцу (Гепарин)",
 		ACCUSATIVE = "шприц (Гепарин)",
 		INSTRUMENTAL = "шприцем (Гепарин)",
-		PREPOSITIONAL = "шприце (Гепарин)"
+		PREPOSITIONAL = "шприце (Гепарин)",
 	)
 
 /obj/item/reagent_containers/syringe/bioterror
@@ -295,7 +295,7 @@
 		DATIVE = "шприцу (Нейротоксины)",
 		ACCUSATIVE = "шприц (Нейротоксины)",
 		INSTRUMENTAL = "шприцем (Нейротоксины)",
-		PREPOSITIONAL = "шприце (Нейротоксины)"
+		PREPOSITIONAL = "шприце (Нейротоксины)",
 	)
 
 /obj/item/reagent_containers/syringe/gluttony
@@ -312,7 +312,7 @@
 		DATIVE = "шприцу (Благословение Чревоугодия)",
 		ACCUSATIVE = "шприц (Благословение Чревоугодия)",
 		INSTRUMENTAL = "шприцем (Благословение Чревоугодия)",
-		PREPOSITIONAL = "шприце (Благословение Чревоугодия)"
+		PREPOSITIONAL = "шприце (Благословение Чревоугодия)",
 	)
 
 /obj/item/reagent_containers/syringe/capulettium_plus
@@ -327,7 +327,7 @@
 		DATIVE = "шприцу (Капулеттий+)",
 		ACCUSATIVE = "шприц (Капулеттий+)",
 		INSTRUMENTAL = "шприцем (Капулеттий+)",
-		PREPOSITIONAL = "шприце (Капулеттий+)"
+		PREPOSITIONAL = "шприце (Капулеттий+)",
 	)
 
 /obj/item/reagent_containers/syringe/sarin
@@ -342,7 +342,7 @@
 		DATIVE = "шприцу (Зарин)",
 		ACCUSATIVE = "шприц (Зарин)",
 		INSTRUMENTAL = "шприцем (Зарин)",
-		PREPOSITIONAL = "шприце (Зарин)"
+		PREPOSITIONAL = "шприце (Зарин)",
 	)
 
 /obj/item/reagent_containers/syringe/pancuronium
@@ -357,7 +357,7 @@
 		DATIVE = "шприцу (Панкуроний+)",
 		ACCUSATIVE = "шприц (Панкуроний+)",
 		INSTRUMENTAL = "шприцем (Панкуроний+)",
-		PREPOSITIONAL = "шприце (Панкуроний+)"
+		PREPOSITIONAL = "шприце (Панкуроний+)",
 	)
 
 /obj/item/reagent_containers/syringe/lethal
@@ -374,7 +374,7 @@
 		DATIVE = "шприцу (Смертельная инъекция)",
 		ACCUSATIVE = "шприц (Смертельная инъекция)",
 		INSTRUMENTAL = "шприцем (Смертельная инъекция)",
-		PREPOSITIONAL = "шприце (Смертельная инъекция)"
+		PREPOSITIONAL = "шприце (Смертельная инъекция)",
 	)
 
 /obj/item/reagent_containers/syringe/steroids
@@ -389,7 +389,7 @@
 		DATIVE = "шприцу (Стероиды)",
 		ACCUSATIVE = "шприц (Стероиды)",
 		INSTRUMENTAL = "шприцем (Стероиды)",
-		PREPOSITIONAL = "шприце (Стероиды)"
+		PREPOSITIONAL = "шприце (Стероиды)",
 	)
 
 #undef SYRINGE_DRAW

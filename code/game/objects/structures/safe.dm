@@ -19,9 +19,8 @@ GLOBAL_LIST_EMPTY(safes)
  */
 /obj/structure/safe
 	name = "safe"
-	desc = "Огромный кусок металла со встроенным в него циферблатом. Мелким шрифтом на циферблате написано: \"Сейф от \"Скарборо Армс\" надёжно защитит ваши ценные вещи от любых посягательств, включая любопытных ассистентов\"."
+	desc = "Огромный кусок металла со встроенным в него циферблатом. Мелким шрифтом на циферблате написано: \"Сейф от концерна \"Скарборо\" надёжно защитит ваши ценные вещи от любых посягательств, включая любопытных ассистентов\"."
 	gender = MALE
-	icon = 'icons/obj/structures.dmi'
 	icon_state = "safe"
 	anchored = TRUE
 	density = TRUE
@@ -73,7 +72,7 @@ GLOBAL_LIST_EMPTY(safes)
 		DATIVE = "сейфу",
 		ACCUSATIVE = "сейф",
 		INSTRUMENTAL = "сейфом",
-		PREPOSITIONAL = "сейфе"
+		PREPOSITIONAL = "сейфе",
 	)
 
 /obj/structure/safe/Initialize(mapload)
@@ -82,13 +81,19 @@ GLOBAL_LIST_EMPTY(safes)
 	// Combination generation
 	for(var/i in 1 to number_of_tumblers)
 		tumblers.Add(rand(0, 99))
+	if(mapload)
+		END_OF_TICK(CALLBACK(src, PROC_REF(take_contents)))
+
+/obj/structure/safe/proc/take_contents()
 	// Put as many items on our turf inside as possible
-	for(var/obj/item/I in loc)
+	for(var/obj/item/item in loc)
+		if(item.density || item.anchored)
+			continue
 		if(space >= maxspace)
-			return
-		if(I.w_class + space <= maxspace)
-			space += I.w_class
-			I.forceMove(src)
+			break
+		if(item.w_class + space <= maxspace)
+			space += item.w_class
+			item.forceMove(src)
 
 /obj/structure/safe/Destroy()
 	GLOB.safes -= src
@@ -128,7 +133,6 @@ GLOBAL_LIST_EMPTY(safes)
 /obj/structure/safe/examine_status(mob/user)
 	return
 
-
 /obj/structure/safe/update_icon_state()
 	if(open)
 		if(broken)
@@ -141,15 +145,15 @@ GLOBAL_LIST_EMPTY(safes)
 		else
 			icon_state = initial(icon_state)
 
-
 /obj/structure/safe/update_overlays()
 	. = ..()
 	if(istype(drill, /obj/item/thermal_drill))
 		var/drill_icon = istype(drill, /obj/item/thermal_drill/diamond_drill) ? "d" : "h"
 		var/state = "[initial(icon_state)]_[drill_icon]-drill-[drill_timer ? "on" : "off"]"
-		drill_overlay = image(icon = 'icons/effects/drill.dmi', icon_state = state, pixel_x = drill_x_offset, pixel_y = drill_y_offset)
+		drill_overlay = image(icon = 'icons/effects/drill.dmi', icon_state = state)
+		drill_overlay.pixel_w = drill_x_offset
+		drill_overlay.pixel_z = drill_y_offset
 		. += drill_overlay
-
 
 /obj/structure/safe/attack_ghost(mob/user)
 	if(..() || drill)
@@ -192,7 +196,6 @@ GLOBAL_LIST_EMPTY(safes)
 		remove_drill(user)
 	else
 		ui_interact(user)
-
 
 /obj/structure/safe/attackby(obj/item/item, mob/user, params)
 	if(user.a_intent == INTENT_HARM)
@@ -245,7 +248,6 @@ GLOBAL_LIST_EMPTY(safes)
 
 	user.balloon_alert(user,"сейф закрыт!")
 	return ATTACK_CHAIN_PROCEED
-
 
 /obj/structure/safe/ui_state(mob/user)
 	return GLOB.physical_state
@@ -380,7 +382,7 @@ GLOBAL_LIST_EMPTY(safes)
 	driller_human.apply_status_effect(STATUS_EFFECT_DRILL_PAYBACK, src)
 	drill.song.start_playing(driller_human)
 	drill.atom_say("Security spotted. Nanites deployed. Give them <b>hell.</b>")
-	notify_ghosts("Security assault in progress in [get_area(src)]!", enter_link = "<a href=?src=[UID()];follow=1>(Click to jump to!)</a>", source = src, action = NOTIFY_FOLLOW)
+	notify_ghosts("Security assault in progress in [get_area(src)]!", enter_link = "<a href=byond://?src=[UID()];follow=1>(Click to jump to!)</a>", source = src, action = NOTIFY_FOLLOW)
 	for(var/mob/dead/observer/O in GLOB.player_list)
 		O.overlay_fullscreen("payback", /atom/movable/screen/fullscreen/payback, 0)
 	addtimer(CALLBACK(src, PROC_REF(ghost_payback_phase_2)), 2.7 SECONDS)
@@ -452,7 +454,7 @@ GLOBAL_LIST_EMPTY(safes)
  */
 /obj/structure/safe/floor
 	name = "floor safe"
-	desc = "Огромный металлический люк со встроенным в него цифербалтом. Мелким шрифтом на циферблате написано: \"Напольный сейф от \"Скарборо Армс\" надёжно защитит ваши ценные вещи от любых посягательств, включая любопытных ассистентов\"."
+	desc = "Огромный металлический люк со встроенным в него цифербалтом. Мелким шрифтом на циферблате написано: \"Напольный сейф от концерна \"Скарборо\" надёжно защитит ваши ценные вещи от любых посягательств, включая любопытных ассистентов\"."
 	icon_state = "floorsafe"
 	density = FALSE
 	level = 1 //Under the floor
@@ -468,7 +470,7 @@ GLOBAL_LIST_EMPTY(safes)
 		DATIVE = "напольному сейфу",
 		ACCUSATIVE = "напольный сейф",
 		INSTRUMENTAL = "напольным сейфом",
-		PREPOSITIONAL = "напольном сейфе"
+		PREPOSITIONAL = "напольном сейфе",
 	)
 
 /obj/structure/safe/floor/Initialize(mapload)
@@ -487,7 +489,7 @@ GLOBAL_LIST_EMPTY(safes)
  */
 /obj/item/safe_internals
 	name = "safe internals"
-	desc = "Механизм и запирающие ригели для тумблерного сейфа \"Скарборо Армс - 2\"."
+	desc = "Механизм и запирающие ригели для тумблерного сейфа \"Скарборо Армс – \"."
 	icon_state = "safe_internals"
 
 /obj/item/safe_internals/get_ru_names()
@@ -497,7 +499,7 @@ GLOBAL_LIST_EMPTY(safes)
 		DATIVE = "внутренностям сейфа",
 		ACCUSATIVE = "внутренности сейфа",
 		INSTRUMENTAL = "внутренностями сейфа",
-		PREPOSITIONAL = "внутренностях сейфа"
+		PREPOSITIONAL = "внутренностях сейфа",
 	)
 
 /**
@@ -518,11 +520,11 @@ GLOBAL_LIST_EMPTY(safes)
 		DATIVE = "кодам от сейфа",
 		ACCUSATIVE = "коды от сейфа",
 		INSTRUMENTAL = "кодами от сейфа",
-		PREPOSITIONAL = "кодах от сейфа"
+		PREPOSITIONAL = "кодах от сейфа",
 	)
 
 /obj/item/paper/safe_code/Initialize(mapload)
-	..()
+	. = ..()
 	return INITIALIZE_HINT_LATELOAD
 
 /obj/item/paper/safe_code/LateInitialize(mapload)

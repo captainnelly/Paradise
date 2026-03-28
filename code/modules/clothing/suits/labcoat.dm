@@ -7,8 +7,40 @@
 	permeability_coefficient = 0.5
 	blood_overlay_type = "coat"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|ARMS
-	allowed = list(/obj/item/analyzer,/obj/item/stack/medical,/obj/item/dnainjector,/obj/item/reagent_containers/dropper,/obj/item/reagent_containers/syringe,/obj/item/reagent_containers/hypospray,/obj/item/reagent_containers/applicator,/obj/item/healthanalyzer,/obj/item/flashlight/pen,/obj/item/reagent_containers/glass/bottle,/obj/item/reagent_containers/glass/beaker,/obj/item/reagent_containers/food/pill,/obj/item/storage/pill_bottle,/obj/item/paper,/obj/item/rad_laser)
-	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 50, RAD = 0, FIRE = 50, ACID = 50)
+	allowed = list(
+		/obj/item/analyzer,
+		/obj/item/autopsy_scanner,
+		/obj/item/bodyanalyzer,
+		/obj/item/dnainjector,
+		/obj/item/dna_notepad,
+		/obj/item/flashlight/pen,
+		/obj/item/gun/syringe,
+		/obj/item/handheld_defibrillator,
+		/obj/item/healthanalyzer,
+		/obj/item/paper,
+		/obj/item/pinpointer/crew,
+		/obj/item/rad_laser,
+		/obj/item/reagent_containers/applicator,
+		/obj/item/reagent_containers/dropper,
+		/obj/item/reagent_containers/food/pill,
+		/obj/item/reagent_containers/glass/beaker,
+		/obj/item/reagent_containers/glass/bottle,
+		/obj/item/reagent_containers/hypospray,
+		/obj/item/reagent_containers/iv_bag,
+		/obj/item/reagent_containers/spray/cleaner,
+		/obj/item/reagent_containers/syringe,
+		/obj/item/reagent_scanner,
+		/obj/item/roller/holo,
+		/obj/item/sensor_device,
+		/obj/item/soap,
+		/obj/item/stack/medical,
+		/obj/item/storage/bag/bio,
+		/obj/item/storage/bag/chemistry,
+		/obj/item/storage/pill_bottle,
+		/obj/item/tank/internals/emergency_oxygen,
+		/obj/item/tourniquet,
+	)
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 50, FIRE = 50, ACID = 50)
 	sprite_sheets = list(
 		SPECIES_PLASMAMAN = 'icons/mob/clothing/species/plasmaman/suit.dmi',
 		SPECIES_VOX = 'icons/mob/clothing/species/vox/suit.dmi',
@@ -17,8 +49,8 @@
 		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/suit.dmi',
 		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/suit.dmi',
 		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/suit.dmi',
-		SPECIES_STOK = 'icons/mob/clothing/species/monkey/suit.dmi'
-		)
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/suit.dmi',
+	)
 	actions_types = list(/datum/action/item_action/button)
 	adjust_flavour = "unbutton"
 
@@ -29,7 +61,7 @@
 		DATIVE = "лабораторному халату",
 		ACCUSATIVE = "лабораторный халат",
 		INSTRUMENTAL = "лабораторным халатом",
-		PREPOSITIONAL = "лабораторном халате"
+		PREPOSITIONAL = "лабораторном халате",
 	)
 
 /obj/item/clothing/suit/storage/labcoat/cmo
@@ -45,7 +77,7 @@
 		DATIVE = "лабораторному халату главного врача",
 		ACCUSATIVE = "лабораторный халат главного врача",
 		INSTRUMENTAL = "лабораторным халатом главного врача",
-		PREPOSITIONAL = "лабораторном халате главного врача"
+		PREPOSITIONAL = "лабораторном халате главного врача",
 	)
 
 /obj/item/clothing/suit/storage/labcoat/mad
@@ -61,7 +93,7 @@
 		DATIVE = "лабораторному халату безумного учёного",
 		ACCUSATIVE = "лабораторный халат безумного учёного",
 		INSTRUMENTAL = "лабораторным халатом безумного учёного",
-		PREPOSITIONAL = "лабораторном халате безумного учёного"
+		PREPOSITIONAL = "лабораторном халате безумного учёного",
 	)
 
 /obj/item/clothing/suit/storage/labcoat/genetics
@@ -77,7 +109,7 @@
 		DATIVE = "лабораторному халату генетика",
 		ACCUSATIVE = "лабораторный халат генетика",
 		INSTRUMENTAL = "лабораторным халатом генетика",
-		PREPOSITIONAL = "лабораторном халате генетика"
+		PREPOSITIONAL = "лабораторном халате генетика",
 	)
 
 /obj/item/clothing/suit/storage/labcoat/chemist
@@ -93,7 +125,7 @@
 		DATIVE = "лабораторному халату химика",
 		ACCUSATIVE = "лабораторный халат химика",
 		INSTRUMENTAL = "лабораторным халатом химика",
-		PREPOSITIONAL = "лабораторном халате химика"
+		PREPOSITIONAL = "лабораторном халате химика",
 	)
 
 /obj/item/clothing/suit/storage/labcoat/virologist
@@ -108,7 +140,7 @@
 		DATIVE = "лабораторному халату вирусолога",
 		ACCUSATIVE = "лабораторный халат вирусолога",
 		INSTRUMENTAL = "лабораторным халатом вирусолога",
-		PREPOSITIONAL = "лабораторном халате вирусолога"
+		PREPOSITIONAL = "лабораторном халате вирусолога",
 	)
 
 /obj/item/clothing/suit/storage/labcoat/science
@@ -124,7 +156,7 @@
 		DATIVE = "лабораторному халату учёного",
 		ACCUSATIVE = "лабораторный халат учёного",
 		INSTRUMENTAL = "лабораторным халатом учёного",
-		PREPOSITIONAL = "лабораторном халате учёного"
+		PREPOSITIONAL = "лабораторном халате учёного",
 	)
 
 /obj/item/clothing/suit/storage/labcoat/mortician
@@ -140,7 +172,7 @@
 		DATIVE = "лабораторному халату патологоанатома",
 		ACCUSATIVE = "лабораторный халат патологоанатома",
 		INSTRUMENTAL = "лабораторным халатом патологоанатома",
-		PREPOSITIONAL = "лабораторном халате патологоанатома"
+		PREPOSITIONAL = "лабораторном халате патологоанатома",
 	)
 
 /obj/item/clothing/suit/storage/labcoat/emt
@@ -156,7 +188,7 @@
 		DATIVE = "лабораторному халату парамедика",
 		ACCUSATIVE = "лабораторный халат парамедика",
 		INSTRUMENTAL = "лабораторным халатом парамедика",
-		PREPOSITIONAL = "лабораторном халате парамедика"
+		PREPOSITIONAL = "лабораторном халате парамедика",
 	)
 
 /obj/item/clothing/suit/storage/labcoat/mining_medic
@@ -172,5 +204,5 @@
 		DATIVE = "лабораторному халату шахтёрского врача",
 		ACCUSATIVE = "лабораторный халат шахтёрского врача",
 		INSTRUMENTAL = "лабораторным халатом шахтёрского врача",
-		PREPOSITIONAL = "лабораторном халате шахтёрского врача"
+		PREPOSITIONAL = "лабораторном халате шахтёрского врача",
 	)

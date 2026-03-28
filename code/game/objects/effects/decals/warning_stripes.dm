@@ -2,6 +2,10 @@
 	icon = 'icons/effects/warning_stripes.dmi'
 	layer = TURF_LAYER
 
+// IT'S MUST BE turf_decal
+/obj/effect/decal/warning_stripes/never_should_have_come_here(turf/here_turf)
+	return FALSE
+
 /obj/effect/decal/warning_stripes/north
 	icon_state = "N"
 
@@ -70,7 +74,6 @@
 /obj/effect/decal/warning_stripes/yellow/hollow
 	icon_state = "6"
 
-
 /obj/effect/decal/warning_stripes/red
 	icon_state = "8"
 
@@ -79,7 +82,6 @@
 
 /obj/effect/decal/warning_stripes/red/hollow
 	icon_state = "9"
-
 
 /obj/effect/decal/warning_stripes/green
 	icon_state = "11"
@@ -90,7 +92,6 @@
 /obj/effect/decal/warning_stripes/green/hollow
 	icon_state = "12"
 
-
 /obj/effect/decal/warning_stripes/white
 	icon_state = "14"
 
@@ -99,7 +100,6 @@
 
 /obj/effect/decal/warning_stripes/white/hollow
 	icon_state = "15"
-
 
 /obj/effect/decal/warning_stripes/blue
 	icon_state = "17"

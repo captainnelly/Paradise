@@ -2,12 +2,8 @@
 /mob/living/simple_animal/bot/medbot
 	name = "Medibot"
 	desc = "Маленький медицинский робот. Выглядит несколько подавленным."
-	icon = 'icons/obj/aibots.dmi'
 	icon_state = "medibot0"
 	density = FALSE
-	anchored = FALSE
-	health = 20
-	maxHealth = 20
 	pass_flags = PASSMOB|PASSFLAPS
 
 	radio_channel = MED_FREQ_NAME
@@ -100,7 +96,6 @@
 	treatment_oxy = "perfluorodecalin"
 	treatment_brute = "bicaridine"
 	treatment_fire = "kelotane"
-	treatment_tox = "charcoal"
 
 /mob/living/simple_animal/bot/medbot/mysterious/get_ru_names()
 	return list(
@@ -120,7 +115,6 @@
 	treatment_oxy = "perfluorodecalin"
 	treatment_brute = "bicaridine"
 	treatment_fire = "kelotane"
-	treatment_tox = "charcoal"
 	syndicate_aligned = TRUE
 	bot_core_type = /obj/machinery/bot_core/medbot/syndicate
 	control_freq = BOT_FREQ + 1000 // make it not show up on lists
@@ -141,12 +135,10 @@
 	. = ..()
 	Radio.syndiekey = new /obj/item/encryptionkey/syndicate
 
-
 /mob/living/simple_animal/bot/medbot/syndicate/emagged
 	emagged = 2
 	declare_crit = FALSE
 	drops_parts = FALSE
-
 
 /mob/living/simple_animal/bot/medbot/update_icon_state()
 	if(!on)
@@ -160,27 +152,24 @@
 	else
 		icon_state = "medibot1"
 
-
 /mob/living/simple_animal/bot/medbot/update_overlays()
 	. = ..()
 	if(skin)
 		. += "medskin_[skin]"
 
-
 /mob/living/simple_animal/bot/medbot/Initialize(mapload, new_skin)
 	. = ..()
-	var/datum/job/doctor/J = new /datum/job/doctor
+	var/datum/job/medical/doctor/J = new /datum/job/medical/doctor
 	access_card.access += J.get_access()
 	prev_access = access_card.access
 	qdel(J)
 
 	var/datum/atom_hud/medsensor = GLOB.huds[DATA_HUD_MEDICAL_ADVANCED]
-	medsensor.add_hud_to(src)
+	medsensor.show_to(src)
 
 	if(new_skin)
 		skin = new_skin
 	update_icon()
-
 
 /mob/living/simple_animal/bot/medbot/bot_reset()
 	..()
@@ -191,7 +180,6 @@
 	declare_cooldown = FALSE
 	update_icon()
 
-
 /mob/living/simple_animal/bot/medbot/proc/soft_reset() //Allows the medibot to still actively perform its medical duties without being completely halted as a hard reset does.
 	path = list()
 	patient = null
@@ -199,12 +187,10 @@
 	last_found = world.time
 	update_icon()
 
-
 /mob/living/simple_animal/bot/medbot/set_custom_texts()
 	text_hack = "Вы взломали микросхемы синтезатора реагентов [declent_ru(GENITIVE)]."
 	text_dehack = "Вы восстановили микросхемы синтезатора реагентов [declent_ru(GENITIVE)]."
-	text_dehack_fail = "[capitalize(declent_ru(NOMINATIVE))] выглядит повреждённым и не может быть перепрограммирован!"
-
+	text_dehack_fail = "[DECLENT_RU_CAP(src, NOMINATIVE)] выглядит повреждённым и не может быть перепрограммирован!"
 
 /mob/living/simple_animal/bot/medbot/get_controls(mob/user)
 	var/dat
@@ -244,7 +230,6 @@
 		dat += "Стационарный режим: <a href='byond://?src=[UID()];stationary=1'>[stationary_mode ? "Да" : "Нет"]</a><br>"
 
 	return dat
-
 
 /mob/living/simple_animal/bot/medbot/Topic(href, href_list)
 	if(..())
@@ -293,7 +278,6 @@
 
 	update_controls()
 
-
 /mob/living/simple_animal/bot/medbot/attackby(obj/item/I, mob/user, params)
 	var/current_health = health
 	if(user.a_intent == INTENT_HARM)
@@ -304,7 +288,7 @@
 		step_to(src, (get_step_away(src, user)))	//if medbot took some damage
 		return .
 
-	if(istype(I, /obj/item/reagent_containers/glass))
+	if(isglassreagentcontainer(I))
 		add_fingerprint(user)
 		if(locked)
 			balloon_alert(user, "техпанель заблокирована!")
@@ -325,18 +309,16 @@
 		return .
 	step_to(src, (get_step_away(src, user)))	//if medbot took some damage
 
-
 /mob/living/simple_animal/bot/medbot/emag_act(mob/user)
 	..()
 	if(emagged == 2)
 		declare_crit = FALSE
 		if(user)
 			to_chat(user, span_notice("Вы замыкаете микросхемы синтеза реагентов [declent_ru(GENITIVE)]."))
-		audible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] странно жужжит."))
+		audible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] странно жужжит."))
 		flick("medibot_spark", src)
 		if(user)
 			oldpatient = user
-
 
 /mob/living/simple_animal/bot/medbot/process_scan(mob/living/carbon/human/H)
 	if(buckled)
@@ -363,7 +345,6 @@
 			playsound(loc, messagevoice[message], 50, FALSE)
 			last_newpatient_speak = world.time
 		return H
-
 
 /mob/living/simple_animal/bot/medbot/handle_automated_action()
 	if(!..())
@@ -431,14 +412,12 @@
 		if(mode == BOT_PATROL)
 			bot_patrol()
 
-
 /mob/living/simple_animal/bot/medbot/proc/assess_beaker_injection(mob/living/carbon/C)
 	//If we have and are using a medicine beaker, return any reagent the patient is missing
 	if(use_beaker && reagent_glass?.reagents.total_volume)
 		for(var/datum/reagent/R in reagent_glass.reagents.reagent_list)
 			if(!C.reagents.has_reagent(R.id))
 				return R.id
-
 
 /mob/living/simple_animal/bot/medbot/proc/assess_viruses(mob/living/carbon/C)
 	. = FALSE
@@ -447,9 +426,8 @@
 		return
 
 	for(var/datum/disease/D as anything in C.diseases)
-		if(!(D.visibility_flags & HIDDEN_HUD) && D.discovered && D.severity != NONTHREAT)
+		if(!(D.visibility_flags & HIDDEN_HUD) && D.discovered && D.severity != DISEASE_SEVERITY_POSITIVE)
 			return TRUE //Medbots see viruses if they displayed on HUD, ignoring safe viruses
-
 
 /mob/living/simple_animal/bot/medbot/proc/select_medication(mob/living/carbon/C, beaker_injection)
 	var/treatable_virus = assess_viruses(C)
@@ -475,7 +453,6 @@
 	if(treatable_tox && !C.reagents.has_reagent(treatment_tox))
 		return treatment_tox
 
-
 /mob/living/simple_animal/bot/medbot/proc/assess_patient(mob/living/carbon/C)
 	//Time to see if they need medical help!
 	if(C.stat == DEAD)
@@ -487,7 +464,7 @@
 	// is secretly a silicon
 	if(ishuman(C))
 		var/mob/living/carbon/human/H = C
-		if(H.dna.species && H.dna.species.reagent_tag == PROCESS_SYN)
+		if(H.dna.species && H.dna.species.reagent_tag == SYNTHETIC)
 			return FALSE
 
 	if(emagged == 2 || hijacked) //Everyone needs our medicine. (Our medicine is toxins)
@@ -502,7 +479,6 @@
 	if(!isnull(select_medication(C, assess_beaker_injection(C))))
 		return TRUE //If a valid medicine option for the patient exists, they require treatment
 
-
 /mob/living/simple_animal/bot/medbot/OnUnarmedAttack(atom/A)
 	if(iscarbon(A))
 		var/mob/living/carbon/C = A
@@ -514,13 +490,10 @@
 	else
 		..()
 
-
 /mob/living/simple_animal/bot/medbot/examinate(atom/A as mob|obj|turf in view(client.maxview(), client.eye))
 	..()
 	if(has_vision(information_only = TRUE))
 		chemscan(src, A)
-
-
 
 /mob/living/simple_animal/bot/medbot/proc/medicate_patient(mob/living/carbon/C)
 	if(!on)
@@ -564,11 +537,10 @@
 		if(!emagged && !hijacked && check_overdose(patient, reagent_id, injection_amount))
 			soft_reset()
 			return
-		C.visible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] пытается сделать укол [patient]!"),
-									span_userdanger("[capitalize(declent_ru(NOMINATIVE))] пытается сделать вам укол!"))
+		C.visible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] пытается сделать укол [patient]!"),
+									span_userdanger("[DECLENT_RU_CAP(src, NOMINATIVE)] пытается сделать вам укол!"))
 
 		addtimer(CALLBACK(src, PROC_REF(do_inject), C, !isnull(beaker_injection), reagent_id), 3 SECONDS)
-
 
 /mob/living/simple_animal/bot/medbot/proc/do_inject(mob/living/carbon/C, inject_beaker, reagent_id)
 	if(QDELETED(src) || QDELETED(C))
@@ -582,14 +554,13 @@
 		else
 			patient.reagents.add_reagent(reagent_id, injection_amount)
 
-		C.visible_message(span_danger("[capitalize(declent_ru(NOMINATIVE))] сделал укол [patient] своим шприцем!"),
-						span_userdanger("[capitalize(declent_ru(NOMINATIVE))] сделал вам укол своим шприцем!"))
+		C.visible_message(span_danger("[DECLENT_RU_CAP(src, NOMINATIVE)] сделал укол [patient] своим шприцем!"),
+						span_userdanger("[DECLENT_RU_CAP(src, NOMINATIVE)] сделал вам укол своим шприцем!"))
 	else
-		visible_message("[capitalize(declent_ru(NOMINATIVE))] убирает свой шприц.")
+		visible_message("[DECLENT_RU_CAP(src, NOMINATIVE)] убирает свой шприц.")
 
 	update_icon()
 	soft_reset()
-
 
 /mob/living/simple_animal/bot/medbot/proc/check_overdose(mob/living/carbon/patient, reagent_id, injection_amount)
 	var/datum/reagent/R  = GLOB.chemical_reagents_list[reagent_id]
@@ -600,10 +571,9 @@
 		return TRUE
 	return FALSE
 
-
 /mob/living/simple_animal/bot/medbot/explode()
 	on = FALSE
-	visible_message(span_userdanger("[capitalize(declent_ru(NOMINATIVE))] разлетается на части!"))
+	visible_message(span_userdanger("[DECLENT_RU_CAP(src, NOMINATIVE)] разлетается на части!"))
 	var/turf/Tsec = get_turf(src)
 
 	if(drops_parts)
@@ -647,7 +617,6 @@
 	do_sparks(3, TRUE, src)
 	return ..()
 
-
 /mob/living/simple_animal/bot/medbot/proc/declare(crit_patient)
 	if(declare_cooldown)
 		return
@@ -659,10 +628,8 @@
 	spawn(200) //Twenty seconds
 		declare_cooldown = FALSE
 
-
 /obj/machinery/bot_core/medbot
 	req_access = list(ACCESS_MEDICAL, ACCESS_ROBOTICS)
-
 
 /obj/machinery/bot_core/medbot/syndicate
 	req_access = list(ACCESS_SYNDICATE)

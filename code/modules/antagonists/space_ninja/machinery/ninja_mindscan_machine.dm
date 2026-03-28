@@ -3,7 +3,7 @@
  * Поиск + похищение и в конце концов изучение разума жертвы
  * Изначально ниндзя не знает кто жертва, но знает примерные отделы где она работает
  * Он должен похищать людей на свой шаттл и привозить к устройству
- * Устройство их сканирует и если человек тот - цель выполнена
+ * Устройство их сканирует и если человек тот — цель выполнена
  * Если не тот. Цель не выполнена и мы вписываем человека в список просканированных
  * В конечном итоге либо ниндзя найдет цель, либо цель станет выполнена после сканирования n-ого кол-ва жертв
  *
@@ -83,7 +83,7 @@
 		return
 	if(user.loc==null) // just in case someone manages to get a closet into the blue light dimension, as unlikely as that seems
 		return
-	if(!istype(user.loc, /turf) || !istype(dropped.loc, /turf)) // are you in a container/closet/pod/etc?
+	if(!isturf(user.loc) || !isturf(dropped.loc)) // are you in a container/closet/pod/etc?
 		return
 	if(occupant)
 		to_chat(user, span_boldnotice("The [src] is already occupied!"))
@@ -119,7 +119,6 @@
 	else
 		to_chat(user, span_notice("You stop putting [dropped_mob] into the [src]."))
 
-
 /obj/machinery/ninja_mindscan_machine/proc/scan_occupant()
 	if(!occupant)
 		return
@@ -140,9 +139,9 @@
 	sleep(50)
 	atom_say("[rand(51, 99)]%")
 	sleep(30)
-	atom_say("Сканирование разума - Задача завершена!")
+	atom_say("Сканирование разума — Задача завершена!")
 	objective.scanned_occupants.Add("[occupant.mind]")
-	if(objective.target == occupant.mind || objective.scanned_occupants.len >= objective.scans_to_win)
+	if(objective.target == occupant.mind || length(objective.scanned_occupants) >= objective.scans_to_win)
 		objective.completed = TRUE
 		atom_say("Пациенту известна ценная информация! Данные переданы клану! Отличная работа, [ninja]!")
 	else
@@ -217,7 +216,7 @@
 	data["occupant_name"] = occupant ? occupant.real_name : "none"
 	data["occupant_health"] = occupant ? occupant.health : "none"
 
-	for(var/temp_occupant as anything in objective.scanned_occupants)
+	for(var/temp_occupant in objective.scanned_occupants)
 		scanned_occupants_info += list(list("scanned_occupant" = temp_occupant))
 
 	data["scanned_occupants"] = scanned_occupants_info

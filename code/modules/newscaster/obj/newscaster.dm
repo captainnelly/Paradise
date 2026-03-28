@@ -16,13 +16,11 @@
  */
 /obj/machinery/newscaster
 	name = "newscaster"
-	desc = "Устройство, позволяющее получить доступ к самым свежим новостям со всей Галактики. Лицензировано НаноТрейзен для использования на коммерческих объектах."
+	desc = "Устройство, позволяющее получить доступ к самым свежим новостям со всей Галактики. Лицензировано \"Нанотрейзен\" для использования на коммерческих объектах."
 	icon = 'icons/obj/machines/terminals.dmi'
 	icon_state = "newscaster"
-	armor = list(MELEE = 50, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 30)
-	max_integrity = 200
+	armor = list(MELEE = 50, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, FIRE = 50, ACID = 30)
 	integrity_failure = 50
-	light_range = 0
 	anchored = TRUE
 	/// The current screen index in the UI.
 	var/screen = NEWSCASTER_HEADLINES
@@ -58,12 +56,12 @@
 			DATIVE = "новостнику",
 			ACCUSATIVE = "новостник",
 			INSTRUMENTAL = "новостником",
-			PREPOSITIONAL = "новостнике"
+			PREPOSITIONAL = "новостнике",
 	)
 
 /obj/machinery/newscaster/security_unit
 	name = "security newscaster"
-	desc = "Устройство, позволяющее получить доступ к самым свежим новостям со всей Галактики. Лицензировано НаноТрейзен для использования на коммерческих объектах. \
+	desc = "Устройство, позволяющее получить доступ к самым свежим новостям со всей Галактики. Лицензировано \"Нанотрейзен\" для использования на коммерческих объектах. \
 			Эта модель оснащена расширенным функционалом, специально для службы безопасности."
 	is_security = TRUE
 
@@ -74,7 +72,7 @@
 			DATIVE = "новостнику службы безопасности",
 			ACCUSATIVE = "новостник службы безопасности",
 			INSTRUMENTAL = "новостником службы безопасности",
-			PREPOSITIONAL = "новостнике службы безопасности"
+			PREPOSITIONAL = "новостнике службы безопасности",
 	)
 
 /obj/machinery/newscaster/Initialize(mapload)
@@ -90,13 +88,9 @@
 			/datum/job/ai,
 			/datum/job/cyborg,
 			/datum/job/captain,
-			/datum/job/judge,
+			/datum/job/head_of_staff/judge,
 			/datum/job/blueshield,
-			/datum/job/nanotrasenrep,
-			/datum/job/pilot,
-			/datum/job/brigdoc,
-			/datum/job/mechanic,
-			/datum/job/chaplain,
+			/datum/job/head_of_staff/nanotrasenrep,
 			/datum/job/ntnavyofficer,
 			/datum/job/ntnavyofficer/field,
 			/datum/job/ntspecops/supreme,
@@ -104,7 +98,7 @@
 			/datum/job/ntspecops/solgovspecops,
 			/datum/job/civilian,
 			/datum/job/civilian/prisoner,
-			/datum/job/syndicateofficer
+			/datum/job/syndicateofficer,
 		)
 
 /obj/machinery/newscaster/Destroy()
@@ -112,7 +106,6 @@
 	viewing_channel = null
 	QDEL_NULL(photo)
 	return ..()
-
 
 /obj/machinery/newscaster/update_overlays()
 	. = ..()
@@ -140,18 +133,15 @@
 		if(51 to 75)
 			. += "crack1"
 
-
 /obj/machinery/newscaster/power_change(forced = FALSE)
 	. = ..()
 	if(.)
 		update_icon(UPDATE_OVERLAYS)
 
-
 /obj/machinery/newscaster/take_damage(damage_amount, damage_type = BRUTE, damage_flag = 0, sound_effect = TRUE, attack_dir, armour_penetration = 0)
 	. = ..()
 	if(.)
 		update_icon(UPDATE_OVERLAYS)
-
 
 /obj/machinery/newscaster/wrench_act(mob/user, obj/item/I)
 	. = TRUE
@@ -214,7 +204,7 @@
 		scanned_user = get_scanned_user(user)["name"]
 	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)
-		ui = new(user, src, "Newscaster", capitalize(declent_ru(NOMINATIVE)))
+		ui = new(user, src, "Newscaster", DECLENT_RU_CAP(src, NOMINATIVE))
 		ui.open()
 		ui.set_autoupdate(FALSE)
 
@@ -281,9 +271,9 @@
 				if(job.type in jobblacklist)
 					continue
 				if(job.is_position_available())
-					var/list/opening_data = list("title" = job.title)
+					var/list/opening_data = list("title" = get_job_title_ru(job.title))
 					// Is the job a command job?
-					if(job.title in GLOB.command_positions)
+					if(job_title_ru_to_en(job.title) in GLOB.command_positions)
 						opening_data["is_command"] = TRUE
 					// Add the job opening to the corresponding categories
 					// Ugly!
@@ -395,7 +385,7 @@
 				var/obj/item/photo/P = usr.get_active_hand()
 				if(istype(P) && usr.drop_transfer_item_to_loc(P, src))
 					photo = P
-					usr.visible_message(span_notice("[usr] вставля[pluralize_ru(usr.gender, "ет", "ют")] [P.declent_ru(ACCUSATIVE)] в слот [declent_ru(GENITIVE)] для фотографий."), \
+					usr.visible_message(span_notice("[usr] вставля[PLUR_ET_YUT(usr)] [P.declent_ru(ACCUSATIVE)] в слот [declent_ru(GENITIVE)] для фотографий."), \
 					span_notice("Вы вставляете [P.declent_ru(ACCUSATIVE)] в слот [declent_ru(GENITIVE)] для фотографий."))
 					playsound(loc, 'sound/machines/terminal_insert_disc.ogg', 30, TRUE)
 			else if(issilicon(usr))
@@ -407,7 +397,7 @@
 				P.construct(selection)
 				P.forceMove(src)
 				photo = P
-				visible_message(span_notice("[capitalize(declent_ru(NOMINATIVE))] тихо жужжит, после чего из слота для фотографий выпадает [P.declent_ru(NOMINATIVE)]."))
+				visible_message(span_notice("[DECLENT_RU_CAP(src, NOMINATIVE)] тихо жужжит, после чего из слота для фотографий выпадает [P.declent_ru(NOMINATIVE)]."))
 				playsound(loc, 'sound/goonstation/machines/printer_thermal.ogg', 15, TRUE)
 		if("eject_photo")
 			eject_photo(usr)
@@ -528,7 +518,7 @@
 						// Redirect
 						screen = NEWSCASTER_CHANNEL
 						viewing_channel = FC
-					else if (id == "manage_channel") // Channel management
+					else if(id == "manage_channel") // Channel management
 						FC = locateUID(arguments["uid"])
 						if(!FC || !FC.can_modify(usr, get_scanned_user(usr)["name"]))
 							return
@@ -621,9 +611,9 @@
 	photo = null
 	P.forceMove(loc)
 	if(ishuman(user) && user.put_in_active_hand(P, ignore_anim = FALSE))
-		visible_message(span_notice("[capitalize(declent_ru(NOMINATIVE))] выплёвывает [P.declent_ru(ACCUSATIVE)] из слота для фотографий прямо в руку [user]."))
+		visible_message(span_notice("[DECLENT_RU_CAP(src, NOMINATIVE)] выплёвывает [P.declent_ru(ACCUSATIVE)] из слота для фотографий прямо в руку [user]."))
 	else
-		visible_message(span_notice("[capitalize(declent_ru(NOMINATIVE))] выплёвывает [P.declent_ru(ACCUSATIVE)] из слота для фотографий."))
+		visible_message(span_notice("[DECLENT_RU_CAP(src, NOMINATIVE)] выплёвывает [P.declent_ru(ACCUSATIVE)] из слота для фотографий."))
 	playsound(loc, 'sound/machines/terminal_insert_disc.ogg', 30, TRUE)
 	SStgui.update_uis(src)
 
@@ -682,7 +672,7 @@
 	// Print it
 	is_printing = TRUE
 	playsound(loc, 'sound/goonstation/machines/printer_dotmatrix.ogg', 50, TRUE)
-	visible_message(span_notice("[capitalize(declent_ru(NOMINATIVE))] тихо жужжит, печатая газету."))
+	visible_message(span_notice("[DECLENT_RU_CAP(src, NOMINATIVE)] тихо жужжит, печатая газету."))
 	addtimer(CALLBACK(src, PROC_REF(print_newspaper_finish)), 5 SECONDS)
 
 /**

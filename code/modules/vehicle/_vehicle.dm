@@ -6,9 +6,10 @@
 	max_integrity = 300
 	layer = VEHICLE_LAYER
 	density = TRUE
-	anchored = FALSE
 	blocks_emissive = EMISSIVE_BLOCK_GENERIC
 	pass_flags_self = PASSVEHICLE
+	abstract_type = /obj/vehicle
+
 	COOLDOWN_DECLARE(cooldown_vehicle_move)
 	var/list/mob/occupants //mob = bitflags of their control level.
 	///Maximum amount of passengers plus drivers
@@ -55,7 +56,6 @@
 /obj/vehicle/examine(mob/user)
 	. = ..()
 	. += generate_integrity_message()
-
 
 /obj/vehicle/zap_act(power, zap_flags)
 	zap_buckle_check(power)
@@ -138,6 +138,7 @@
 	return TRUE
 
 /obj/vehicle/proc/after_remove_occupant(mob/M)
+	return
 
 /obj/vehicle/relaymove(mob/living/user, direction)
 	if(!canmove)

@@ -104,7 +104,7 @@
 				components_of_type = existing
 			if(i_type == our_type)	//exact match, take priority
 				var/inserted = FALSE
-				for(var/index in 1 to components_of_type.len)
+				for(var/index in 1 to length(components_of_type))
 					var/datum/component/check_component = components_of_type[index]
 					if(check_component.type != our_type) //but not over other exact matches
 						components_of_type.Insert(index, i_type)
@@ -131,7 +131,7 @@
 		if(length(components_of_type))
 			var/list/subtracted = components_of_type - src
 
-			if(subtracted.len == 1) //only 1 guy left
+			if(length(subtracted) == 1) //only 1 guy left
 				parents_components[i_type] = subtracted[1] //make him special
 			else
 				parents_components[i_type] = subtracted
@@ -139,7 +139,7 @@
 		else //just us
 			parents_components -= i_type
 
-	if(!parents_components.len)
+	if(!length(parents_components))
 		parent.datum_components = null
 
 	UnregisterFromParent()
@@ -169,7 +169,7 @@
  * Register to listen for a signal from the passed in target
  *
  * This sets up a listening relationship such that when the target object emits a signal
- * the source datum this proc is called upon, will recieve a callback to the given proctype
+ * the source datum this proc is called upon, will receive a callback to the given proctype
  * Return values from procs registered must be a bitfield
  *
  * Arguments:
@@ -262,7 +262,6 @@
 /datum/component/proc/InheritComponent(datum/component/C, i_am_original)
 	return
 
-
 /**
  * Called on a component when a component of the same type was added to the same parent with [COMPONENT_DUPE_SELECTIVE]
  *
@@ -274,7 +273,6 @@
  */
 /datum/component/proc/CheckDupeComponent(datum/component/C, ...)
 	return
-
 
 /**
  * Callback Just before this component is transferred
@@ -330,7 +328,6 @@
 	for(var/i in 1 to length(queued_calls) step 2)
 		. |= call(queued_calls[i], queued_calls[i + 1])(arglist(arguments))
 
-
 // The type arg is casted so initial works, you shouldn't be passing a real instance into this
 /**
  * Return any component assigned to this datum of the given type
@@ -344,7 +341,10 @@
 	RETURN_TYPE(c_type)
 	if(initial(c_type.dupe_mode) == COMPONENT_DUPE_ALLOWED || initial(c_type.dupe_mode) == COMPONENT_DUPE_SELECTIVE)
 		stack_trace("GetComponent was called to get a component of which multiple copies could be on an object. This can easily break and should be changed. Type: \[[c_type]\]")
-	. = datum_components?[c_type]
+	var/list/datum_component = datum_components
+	if(!datum_component)
+		return null
+	. = datum_component[c_type]
 	if(length(.))
 		return .[1]
 
@@ -359,14 +359,17 @@
  */
 /datum/proc/GetExactComponent(datum/component/c_type)
 	RETURN_TYPE(c_type)
-	if(initial(c_type.dupe_mode) == COMPONENT_DUPE_ALLOWED || initial(c_type.dupe_mode) == COMPONENT_DUPE_SELECTIVE)
+	var/initial_type_mode = initial(c_type.dupe_mode)
+	if(initial_type_mode == COMPONENT_DUPE_ALLOWED || initial_type_mode == COMPONENT_DUPE_SELECTIVE)
 		stack_trace("GetComponent was called to get a component of which multiple copies could be on an object. This can easily break and should be changed. Type: \[[c_type]\]")
-	var/datum/component/component_or_list = datum_components?[c_type]
-	if(component_or_list)
-		if(length(component_or_list))
-			component_or_list = component_or_list[1]
-		if(component_or_list.type == c_type)
-			return component_or_list
+	var/list/all_components = datum_components
+	if(!all_components)
+		return null
+	var/datum/component/potential_component
+	if(length(all_components))
+		potential_component = all_components[c_type]
+	if(potential_component?.type == c_type)
+		return potential_component
 	return null
 
 /**
@@ -496,6 +499,13 @@
 	_RemoveFromParent()
 	parent = null
 	SEND_SIGNAL(old_parent, COMSIG_COMPONENT_REMOVING, src)
+
+/**
+ * Deletes the component and removes it from parent.
+ */
+/datum/component/proc/RemoveComponent() // This really is just a wrapper to pretend that we're using sane procs to fully remove a component
+	if(!QDELETED(src))
+		qdel(src)
 
 /**
  * Transfer this component to another parent
