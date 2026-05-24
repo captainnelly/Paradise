@@ -56,7 +56,7 @@
 	///How many shots can the weapon shoot in burst? Anything less than 2 and you cannot toggle burst.
 	var/burst_amount = 1
 	///The delay in between shots. Lower = less delay = faster.
-	var/burst_delay = 0.1 SECONDS
+	var/burst_delay = 0.15 SECONDS
 	///When burst-firing, this number is extra time before the weapon can fire again. Depends on number of rounds fired.
 	var/extra_delay = 0
 	///when autobursting, this is the total amount of time before the weapon fires again. If no amount is specified, defaults to fire_delay + extra_delay
@@ -373,7 +373,23 @@
 	if(user.in_throw_mode)
 		return
 
+	if(!user.loc?.allow_click())
+		return
+
+	if(HAS_TRAIT(src, TRAIT_GIVE_READY))
+		return
+
 	if(object.IsReachableBy(user, reach) && start_attack_chain_check(user, object)) //Dealt with by attack code
+		return
+
+	if(!isgun(user.get_active_hand())) // If the object in our active hand is not a gun, abort
+		return
+
+	if(!user.is_in_active_hand(src) && user.a_intent != INTENT_HARM)
+		return
+
+	if(!HAS_TRAIT(user, TRAIT_BADASS) && weapon_weight == WEAPON_HEAVY && (user.get_inactive_hand() || !user.has_inactive_hand() || (user.pulling && user.pull_hand != PULL_WITHOUT_HANDS)))
+		to_chat(user, span_userdanger("Для стрельбы из [declent_ru(GENITIVE)] нужны две свободные руки!"))
 		return
 
 	if(gun_on_cooldown(user))
@@ -382,14 +398,7 @@
 	if(!can_trigger_gun(user))
 		return
 
-	if(!HAS_TRAIT(user, TRAIT_BADASS) && weapon_weight == WEAPON_HEAVY && (user.get_inactive_hand() || !user.has_inactive_hand() || (user.pulling && user.pull_hand != PULL_WITHOUT_HANDS)))
-		to_chat(user, span_userdanger("Для стрельбы из [declent_ru(GENITIVE)] нужны две свободные руки!"))
-		return
-
-	if(user.hand && !isgun(user.l_hand) || !user.hand && !isgun(user.r_hand)) // If the object in our active hand is not a gun, abort
-		return
-
-	if(user.hand && isgun(user.r_hand) || !user.hand && isgun(user.l_hand)) // If we have a gun in our inactive hand too, both guns get innacuracy maluses
+	if(isgun(user.get_inactive_hand())) // If we have a gun in our inactive hand too, both guns get innacuracy maluses
 		if(user.a_intent == INTENT_HARM)
 			dual_wield = TRUE
 			setup_bullet_accuracy()
@@ -400,12 +409,7 @@
 	set_target(get_turf_on_clickcatcher(object, user, params))
 	src.modifiers = modifiers
 	if(gun_firemode == GUN_FIREMODE_SEMIAUTO)
-		var/fire_return // todo fix: code expecting return values from async
-		ASYNC
-			fire_return = process_fire()
-		if(!fire_return)
-			return
-		reset_fire()
+		INVOKE_ASYNC(src, PROC_REF(do_semiauto_fire))
 		return
 	SEND_SIGNAL(src, COMSIG_GUN_FIRE)
 	update_mouse_pointer()
@@ -477,6 +481,11 @@
 		gun.stop_fire()
 	sound_loop?.stop()
 	SEND_SIGNAL(src, COMSIG_GUN_STOP_FIRE)
+
+/// Single-shot fire path, runs process_fire and resets state on success.
+/obj/item/gun/proc/do_semiauto_fire()
+	if(process_fire())
+		reset_fire()
 
 ///Clean all references
 /obj/item/gun/proc/reset_fire()
@@ -744,7 +753,7 @@
 		return TRUE
 	if(user.a_intent == INTENT_HARM)
 		return TRUE
-	if(isstorage(target))
+	if(isitem(target) || iscloset(target) || istable(target) || is_screen_atom(target) || isdisposalunit(target) || istype(target, /obj/machinery/recharger))
 		return TRUE
 	return FALSE
 
